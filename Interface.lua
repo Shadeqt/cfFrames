@@ -89,24 +89,18 @@ local function initializeCheckboxes()
     end
 end
 
--- Initialize when addon loads
-local frame = CreateFrame("Frame")
-frame:RegisterEvent("ADDON_LOADED")
-frame:SetScript("OnEvent", function(self, event, addonName)
-    if addonName ~= "cfFrames" then return end
-    self:UnregisterEvent("ADDON_LOADED")
-    initializeCheckboxes()
+-- Register interface initialization
+addon:RegisterModuleInit(function()
+    -- Initialize checkboxes when panel is shown (lazy initialization)
+    panel:SetScript("OnShow", initializeCheckboxes)
+
+    -- Register panel with WoW settings API
+    if Settings and Settings.RegisterCanvasLayoutCategory then
+        local category = Settings.RegisterCanvasLayoutCategory(panel, panel.name)
+        category.ID = panel.name
+        Settings.RegisterAddOnCategory(category)
+    end
 end)
-
--- OnShow: Refresh checkboxes from database
-panel:SetScript("OnShow", initializeCheckboxes)
-
--- Register panel with WoW settings API
-if Settings and Settings.RegisterCanvasLayoutCategory then
-    local category = Settings.RegisterCanvasLayoutCategory(panel, panel.name)
-    category.ID = panel.name
-    Settings.RegisterAddOnCategory(category)
-end
 
 -- Slash command: /cfef
 SLASH_CFENHANCEDFRAMES1 = "/cfef"

@@ -65,3 +65,25 @@ for key in pairs(db) do
         db[key] = nil
     end
 end
+
+-- Module initialization callbacks
+local initCallbacks = {}
+
+-- Register a module initialization callback
+function addon:RegisterModuleInit(callback)
+    table.insert(initCallbacks, callback)
+end
+
+-- Initialize modules after ADDON_LOADED (when SavedVariables are available)
+local frame = CreateFrame("Frame")
+frame:RegisterEvent("ADDON_LOADED")
+frame:SetScript("OnEvent", function(self, event, addonName)
+    if addonName ~= "cfFrames" then return end
+    self:UnregisterEvent("ADDON_LOADED")
+
+    -- At this point, SavedVariables have overwritten cfFramesDB
+    -- Now it's safe to initialize modules
+    for _, callback in ipairs(initCallbacks) do
+        callback()
+    end
+end)

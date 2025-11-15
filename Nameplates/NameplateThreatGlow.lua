@@ -18,10 +18,13 @@ function addon.UpdateNameplateThreatGlow(frame, unit)
 
     -- Create glow texture if needed
     if not frame.cfThreatGlow then
-        local parent = frame.healthBar.border or frame.healthBar
+        -- For BetterBlizzPlates compatibility, always parent to health bar
+        -- BBP hides the default border and creates its own, so we attach to the health bar directly
+        local parent = frame.healthBar
+
         frame.cfThreatGlow = parent:CreateTexture(nil, "BACKGROUND")
         frame.cfThreatGlow:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame-Flash")
-        frame.cfThreatGlow:SetPoint("CENTER", parent, "CENTER", 0, 1)
+        frame.cfThreatGlow:SetPoint("CENTER", parent, "CENTER", 9, 1)
         frame.cfThreatGlow:SetSize(144, 28)
         frame.cfThreatGlow:SetTexCoord(0, 144/256, 270/512, 302/512)
     end
@@ -32,14 +35,20 @@ function addon.UpdateNameplateThreatGlow(frame, unit)
     frame.cfThreatGlow:Show()
 end
 
--- Register events for real-time threat updates
-local frame = CreateFrame("Frame")
-frame:RegisterEvent("UNIT_THREAT_LIST_UPDATE")
-frame:SetScript("OnEvent", function(self, event, unitID)
-    if not unitID or not string.match(unitID, "nameplate%d") then return end
+addon:RegisterModuleInit(function()
+    local db = cfFramesDB
+    -- Check if module is enabled
+    if not db[addon.MODULES.NAMEPLATE_THREAT_GLOW] then return end
 
-    local nameplate = C_NamePlate.GetNamePlateForUnit(unitID)
-    if nameplate and nameplate.UnitFrame then
-        addon.UpdateNameplateThreatGlow(nameplate.UnitFrame, unitID)
-    end
+    -- Register events for real-time threat updates
+    local frame = CreateFrame("Frame")
+    frame:RegisterEvent("UNIT_THREAT_LIST_UPDATE")
+    frame:SetScript("OnEvent", function(self, event, unitID)
+        if not unitID or not string.match(unitID, "nameplate%d") then return end
+
+        local nameplate = C_NamePlate.GetNamePlateForUnit(unitID)
+        if nameplate and nameplate.UnitFrame then
+            addon.UpdateNameplateThreatGlow(nameplate.UnitFrame, unitID)
+        end
+    end)
 end)
