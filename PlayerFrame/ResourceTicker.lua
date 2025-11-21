@@ -1,14 +1,10 @@
 local addon = cfFrames
 
 -- State
-local tickFrame
-local spark
 local previousMana = 0
 local timerEndTime = 0
 local isInFSR = false  -- true = FSR countdown, false = tick tracking
 local currentInterval = 2
-local manaBarWidth
-local manaBarHeight
 
 local TICK_INTERVAL = 2
 local FIVE_SEC_RULE = 5
@@ -21,20 +17,23 @@ end
 
 -- Create the tick indicator overlay
 local function SetupTickBar()
-    tickFrame = CreateFrame("Frame", nil, PlayerFrameManaBar)
-    tickFrame:SetAllPoints(PlayerFrameManaBar)
+    local frame = CreateFrame("Frame", nil, PlayerFrameManaBar)
+    frame:SetAllPoints(PlayerFrameManaBar)
 
-    spark = tickFrame:CreateTexture(nil, "OVERLAY")
+    local spark = frame:CreateTexture(nil, "OVERLAY")
     spark:SetTexture("Interface\\CastingBar\\UI-CastingBar-Spark")
     spark:SetWidth(16)
     spark:SetBlendMode("ADD")
     spark:SetVertexColor(1, 1, 1)
 
-    tickFrame:Hide()
+    frame:Hide()
 
-    -- Cache dimensions
-    manaBarWidth = PlayerFrameManaBar:GetWidth()
-    manaBarHeight = PlayerFrameManaBar:GetHeight()
+    -- Attach to frame
+    frame.spark = spark
+    frame.manaBarWidth = PlayerFrameManaBar:GetWidth()
+    frame.manaBarHeight = PlayerFrameManaBar:GetHeight()
+
+    return frame
 end
 
 -- Update spark position
@@ -63,11 +62,11 @@ local function UpdateSparkPosition(self, elapsed)
         and (remaining / currentInterval)  -- FSR: counts down
         or (1 - remaining / currentInterval)  -- Tick: counts up
 
-    local sparkPos = manaBarWidth * progress
+    local sparkPos = self.manaBarWidth * progress
 
-    spark:ClearAllPoints()
-    spark:SetPoint("CENTER", self, "LEFT", sparkPos, 0)
-    spark:SetHeight(manaBarHeight * 3)
+    self.spark:ClearAllPoints()
+    self.spark:SetPoint("CENTER", self, "LEFT", sparkPos, 0)
+    self.spark:SetHeight(self.manaBarHeight * 3)
 end
 
 -- Handle mana changes
@@ -97,7 +96,7 @@ end
 addon:RegisterModuleInit(function()
     if not cfFramesDB[addon.MODULES.RESOURCE_TICKER] then return end
 
-    SetupTickBar()
+    local tickFrame = SetupTickBar()
     tickFrame:RegisterEvent("UNIT_POWER_UPDATE")
     tickFrame:SetScript("OnEvent", OnPowerUpdate)
 
