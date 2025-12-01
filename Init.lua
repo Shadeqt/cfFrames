@@ -9,6 +9,8 @@ local addon = cfFrames
 addon.MODULES = {
     -- Player Frame modules
     POWER_TICKER = "PowerTicker",
+    -- Pet Frame modules
+    PET_LEVEL = "PetLevel",
     -- Target Frame modules
     TARGET_HEALTH = "TargetHealth",
     RARE_ELITE = "RareElite",
@@ -60,6 +62,7 @@ addon.CLASSIFICATIONS = {
 
 local dbDefaults = {
     [addon.MODULES.POWER_TICKER] = true,
+    [addon.MODULES.PET_LEVEL] = true,
     [addon.MODULES.TARGET_HEALTH] = true,
     [addon.MODULES.RARE_ELITE] = true,
     [addon.MODULES.THREAT_GLOW] = true,

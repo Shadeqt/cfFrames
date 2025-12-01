@@ -116,6 +116,9 @@ end
 addon:RegisterModuleInit(function()
     if not cfFramesDB[addon.MODULES.POWER_TICKER] then return end
 
+    local _, class = UnitClass("player")
+    if class == "WARRIOR" then return end
+
     local frame = SetupTickBar()
     frame:RegisterUnitEvent("UNIT_POWER_UPDATE", "player")
     frame:RegisterUnitEvent("UNIT_DISPLAYPOWER", "player")

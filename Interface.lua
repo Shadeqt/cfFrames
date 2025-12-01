@@ -42,9 +42,18 @@ allCheckboxes.powerTicker = createCheckbox(panel, playerHeader, 0, -8, addon.MOD
 
 local playerSeparator = createSeparator(panel, allCheckboxes.powerTicker, 500, -8)
 
+-- Pet Frame header
+local petHeader = panel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+petHeader:SetPoint("TOPLEFT", playerSeparator, "BOTTOMLEFT", 0, -8)
+petHeader:SetText("|cffFFD700Pet Frame:|r")
+
+allCheckboxes.petLevel = createCheckbox(panel, petHeader, 0, -8, addon.MODULES.PET_LEVEL, "Pet Level")
+
+local petSeparator = createSeparator(panel, allCheckboxes.petLevel, 500, -8)
+
 -- Target Frame header
 local targetHeader = panel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-targetHeader:SetPoint("TOPLEFT", playerSeparator, "BOTTOMLEFT", 0, -8)
+targetHeader:SetPoint("TOPLEFT", petSeparator, "BOTTOMLEFT", 0, -8)
 targetHeader:SetText("|cffFFD700Target Frame:|r")
 
 allCheckboxes.targetHealth = createCheckbox(panel, targetHeader, 0, -8, addon.MODULES.TARGET_HEALTH, "Health/Mana Numbers")
@@ -91,6 +100,7 @@ local function initializeCheckboxes()
     -- Copy database to pending state
     pendingState = {
         [addon.MODULES.POWER_TICKER] = cfFramesDB[addon.MODULES.POWER_TICKER],
+        [addon.MODULES.PET_LEVEL] = cfFramesDB[addon.MODULES.PET_LEVEL],
         [addon.MODULES.TARGET_HEALTH] = cfFramesDB[addon.MODULES.TARGET_HEALTH],
         [addon.MODULES.RARE_ELITE] = cfFramesDB[addon.MODULES.RARE_ELITE],
         [addon.MODULES.THREAT_GLOW] = cfFramesDB[addon.MODULES.THREAT_GLOW],

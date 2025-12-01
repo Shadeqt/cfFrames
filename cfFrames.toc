@@ -14,6 +14,9 @@ Interface.lua
 # Player Frame Modules
 PlayerFrame\PowerTicker.lua
 
+# Pet Frame Modules
+PetFrame\Level.lua
+
 # Target Frame Modules
 TargetFrame\Health.lua
 TargetFrame\Classification.lua
@@ -23,3 +26,4 @@ TargetFrame\Threat.lua
 Nameplate\Health.lua
 Nameplate\Classification.lua
 Nameplate\ThreatGlow.lua
+Nameplate\ComboPoints.lua
