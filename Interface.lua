@@ -124,7 +124,8 @@ end
 
 -- Register interface initialization
 addon:RegisterModuleInit(function()
-    -- Initialize checkboxes when panel is shown (lazy initialization)
+    -- Initialize checkboxes immediately and also on subsequent shows
+    initializeCheckboxes()
     panel:SetScript("OnShow", initializeCheckboxes)
 
     -- Register panel with WoW settings API

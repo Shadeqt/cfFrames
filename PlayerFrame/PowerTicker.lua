@@ -122,15 +122,16 @@ addon:RegisterModuleInit(function()
     local frame = SetupTickBar()
     frame:RegisterUnitEvent("UNIT_POWER_UPDATE", "player")
     frame:RegisterUnitEvent("UNIT_DISPLAYPOWER", "player")
+    frame:RegisterEvent("PLAYER_ENTERING_WORLD")
     frame:SetScript("OnEvent", function(self, event, ...)
         if event == "UNIT_POWER_UPDATE" then
             local unit, eventPowerToken = ...
             OnPowerUpdate(self, event, eventPowerToken)
         elseif event == "UNIT_DISPLAYPOWER" then
             OnDisplayPowerChanged(self, event, ...)
+        elseif event == "PLAYER_ENTERING_WORLD" then
+            UpdatePowerType(self)
         end
     end)
     frame:SetScript("OnUpdate", OnUpdate)
-
-    UpdatePowerType(frame)
 end)
