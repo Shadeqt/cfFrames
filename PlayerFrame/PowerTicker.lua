@@ -10,6 +10,7 @@ local fsrEndTime = 0
 local tickEndTime = 0
 local powerType = 0
 local powerToken = "MANA"
+local isFlashing = false
 
 -- Create spark overlay frame for the mana/energy bar
 local function SetupTickBar()
@@ -26,6 +27,19 @@ local function SetupTickBar()
     frame.sparkHeight = PlayerFrameManaBar:GetHeight() * 3
     frame:Hide()
     return frame
+end
+
+-- Flash energy bar purple when pooling energy
+local function UpdateEnergyBarColor(tickProgress)
+    if powerToken ~= "ENERGY" then return end
+
+    local shouldFlash = tickProgress >= 0.5
+        and UnitPower("player", powerType) >= 81
+        and (UnitAffectingCombat("player") or (UnitExists("target") and UnitCanAttack("player", "target")))
+
+    if shouldFlash == isFlashing then return end
+    isFlashing = shouldFlash
+    PlayerFrameManaBar:SetStatusBarColor(shouldFlash and 0.5 or 1, shouldFlash and 0 or 1, shouldFlash and 0.5 or 0)
 end
 
 -- Calculate tick progress with automatic timer reset fallback
@@ -48,6 +62,7 @@ local function OnUpdate(self, elapsed)
     -- Energy users: always show tick progress (even at full energy)
     if powerToken == "ENERGY" then
         sparkProgress = CalculateTickProgress(currentTime)
+        UpdateEnergyBarColor(sparkProgress)
     -- Mana users: handle FSR countdown and tick tracking
     elseif powerToken == "MANA" then
         -- During FSR: show countdown from 5 to 0 seconds
