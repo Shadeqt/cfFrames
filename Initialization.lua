@@ -13,6 +13,8 @@ cfFrames.MODULES = {
 	PET_XP_BAR = "PetXpBar",
 	PET_NAME = "PetName",
 	PET_DEBUFFS = "PetDebuffs",
+	COMBAT_GLOW = "CombatGlow",
+	HIT_INDICATOR = "HitIndicator",
 }
 
 local M = cfFrames.MODULES
@@ -30,6 +32,8 @@ local DEFAULTS = {
 	[M.PET_XP_BAR] = true,
 	[M.PET_NAME] = true,
 	[M.PET_DEBUFFS] = true,
+	[M.COMBAT_GLOW] = true,
+	[M.HIT_INDICATOR] = true,
 }
 
 local frame = CreateFrame("Frame")

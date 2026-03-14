@@ -18,3 +18,4 @@ BetterBlizzFramesIntegration\DarkMode_PetActionBar.lua
 BetterBlizzFramesIntegration\IconZoom_PetStanceBar.lua
 BetterBlizzFramesIntegration\DarkMode_PetXpBarBorder.lua
 BetterBlizzFramesIntegration\Move_PetName.lua
+HideCombatGlow.lua
