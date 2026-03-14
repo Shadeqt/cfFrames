@@ -1,0 +1,20 @@
+## Interface: 11508
+## Title: cfFrames
+## Notes: Improvements and fixes for the native UI
+## Author: Cowfoot
+## Version: 0.1
+## SavedVariablesPerCharacter: cfFramesDB
+
+Initialization.lua
+ExperienceBar.lua
+PetLevel.lua
+PetName.lua
+PetDebuffs.lua
+TargetFrameStatusText.lua
+PowerTicker.lua
+BetterBlizzFramesIntegration\DarkMode_MinimapBorderTop.lua
+BetterBlizzFramesIntegration\DarkMode_PetLevelBorder.lua
+BetterBlizzFramesIntegration\DarkMode_PetActionBar.lua
+BetterBlizzFramesIntegration\IconZoom_PetStanceBar.lua
+BetterBlizzFramesIntegration\DarkMode_PetXpBarBorder.lua
+BetterBlizzFramesIntegration\Move_PetName.lua
