@@ -68,46 +68,44 @@ local function OnUpdate()
 	spark:Show()
 end
 
-local handlers = {}
+local overlayFrame
 
-handlers.ADDON_LOADED = function(self, arg1)
-	if arg1 ~= "cfFrames" then return end
-	self:UnregisterEvent("ADDON_LOADED")
-	if not cfFramesDB[M.POWER_TICKER] then return end
+local frame = CreateFrame("Frame")
+frame:SetScript("OnEvent", function(self, event)
+	if event == "UNIT_DISPLAYPOWER" then
+		currentPowerType = UnitPowerType("player")
+		lastPower = UnitPower("player")
+	elseif event == "UNIT_POWER_UPDATE" then
+		local now = GetTime()
+		local power = UnitPower("player")
+		currentPowerType = UnitPowerType("player")
 
-	local overlayFrame = SetupOverlay()
+		if power > lastPower then
+			tickEndTime = now + TICK_INTERVAL
+		elseif power < lastPower and currentPowerType == POWER.MANA then
+			fsrEndTime = now + FSR_DURATION
+		end
+
+		lastPower = power
+	end
+end)
+
+local function Enable()
+	if not overlayFrame then
+		overlayFrame = SetupOverlay()
+	end
 	overlayFrame:SetScript("OnUpdate", OnUpdate)
-
-	self:RegisterUnitEvent("UNIT_POWER_UPDATE", "player")
-	self:RegisterUnitEvent("UNIT_DISPLAYPOWER", "player")
-	
+	frame:RegisterUnitEvent("UNIT_POWER_UPDATE", "player")
+	frame:RegisterUnitEvent("UNIT_DISPLAYPOWER", "player")
 	currentPowerType = UnitPowerType("player")
 	lastPower = UnitPower("player")
 	tickEndTime = GetTime() + TICK_INTERVAL
 end
 
-handlers.UNIT_DISPLAYPOWER = function()
-	currentPowerType = UnitPowerType("player")
-	lastPower = UnitPower("player")
+local function Disable()
+	frame:UnregisterAllEvents()
+	if overlayFrame then overlayFrame:SetScript("OnUpdate", nil) end
+	if spark then spark:Hide() end
 end
 
-handlers.UNIT_POWER_UPDATE = function()
-	local now = GetTime()
-	local power = UnitPower("player")
-	currentPowerType = UnitPowerType("player")
-
-	if power > lastPower then
-		tickEndTime = now + TICK_INTERVAL
-	elseif power < lastPower and currentPowerType == POWER.MANA then
-		fsrEndTime = now + FSR_DURATION
-	end
-
-	lastPower = power
-end
-
-local frame = CreateFrame("Frame")
-frame:RegisterEvent("ADDON_LOADED")
-
-frame:SetScript("OnEvent", function(self, event, arg1)
-	handlers[event](self, arg1)
-end)
+cfFrames:RegisterModule(M.POWER_TICKER, Enable, Disable)

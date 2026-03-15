@@ -1,4 +1,9 @@
 cfFrames = {}
+cfFrames.modules = {}
+
+function cfFrames:RegisterModule(key, enableFunc, disableFunc)
+	self.modules[key] = { Enable = enableFunc, Disable = disableFunc }
+end
 
 cfFrames.MODULES = {
 	POWER_TICKER = "PowerTicker",
@@ -56,6 +61,13 @@ frame:SetScript("OnEvent", function(self, event, arg1)
 	for key in pairs(cfFramesDB) do
 		if DEFAULTS[key] == nil then
 			cfFramesDB[key] = nil
+		end
+	end
+
+	-- enable active modules
+	for key, module in pairs(cfFrames.modules) do
+		if cfFramesDB[key] then
+			module.Enable()
 		end
 	end
 end)

@@ -83,7 +83,12 @@ function Widgets.CreateCheckbox(anchor, label, dbKey, x, y, tooltip)
 		self:SetChecked(cfFramesDB and cfFramesDB[dbKey])
 	end)
 	checkbox:SetScript("OnClick", function(self)
-		cfFramesDB[dbKey] = self:GetChecked()
+		local enabled = self:GetChecked()
+		cfFramesDB[dbKey] = enabled
+		local module = cfFrames.modules[dbKey]
+		if module then
+			if enabled then module.Enable() else module.Disable() end
+		end
 	end)
 	AddTooltip(checkbox, tooltip)
 	return checkbox

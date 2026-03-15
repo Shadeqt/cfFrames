@@ -8,6 +8,7 @@
 Initialization.lua
 ExperienceBar.lua
 PetLevel.lua
+PetExperienceBar.lua
 PetName.lua
 PetDebuffs.lua
 TargetFrameStatusText.lua

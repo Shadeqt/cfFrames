@@ -47,11 +47,13 @@ local function Update()
 
 	container:Show()
 
-	local buffContainer = _G["cfPetBuffsContainer"]
 	container:ClearAllPoints()
-	if buffContainer then
-		local hasBuffs = buffContainer:GetHeight() > 2
-		container:SetPoint("TOPLEFT", buffContainer, hasBuffs and "BOTTOMLEFT" or "TOPLEFT", 0, hasBuffs and -ICON_SPACING or 0)
+	local firstBuff = _G["PetFrameBuff1"]
+	local hasBuffs = firstBuff and firstBuff:IsShown()
+	if hasBuffs then
+		container:SetPoint("TOPLEFT", firstBuff, "BOTTOMLEFT", 0, -ICON_SPACING)
+	else
+		container:SetPoint("TOPLEFT", firstBuff, "TOPLEFT", 0, 0)
 	end
 
 	local index = 0
@@ -86,21 +88,24 @@ local function Update()
 end
 
 local frame = CreateFrame("Frame")
-frame:RegisterEvent("ADDON_LOADED")
-
 frame:SetScript("OnEvent", function(self, event, arg1)
-	if event == "ADDON_LOADED" then
-		if arg1 ~= "cfFrames" then return end
-		self:UnregisterEvent("ADDON_LOADED")
-		if not cfFramesDB[M.PET_DEBUFFS] then return end
-
-		container = CreateFrame("Frame", "cfPetDebuffsContainer", UIParent)
-
-		self:RegisterEvent("UNIT_AURA")
-		self:RegisterEvent("UNIT_PET")
-		self:RegisterEvent("PLAYER_ENTERING_WORLD")
-	else
-		if event == "UNIT_AURA" and arg1 ~= "pet" then return end
-		Update()
-	end
+	if event == "UNIT_AURA" and arg1 ~= "pet" then return end
+	Update()
 end)
+
+local function Enable()
+	if not container then
+		container = CreateFrame("Frame", "cfPetDebuffsContainer", UIParent)
+	end
+	frame:RegisterEvent("UNIT_AURA")
+	frame:RegisterEvent("UNIT_PET")
+	frame:RegisterEvent("PLAYER_ENTERING_WORLD")
+	Update()
+end
+
+local function Disable()
+	frame:UnregisterAllEvents()
+	if container then container:Hide() end
+end
+
+cfFrames:RegisterModule(M.PET_DEBUFFS, Enable, Disable)

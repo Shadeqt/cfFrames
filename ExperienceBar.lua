@@ -7,22 +7,36 @@ local function UpdateLockShow(bar, value)
 end
 
 local frame = CreateFrame("Frame")
-frame:RegisterEvent("ADDON_LOADED")
+frame:SetScript("OnEvent", function()
+	local bar = MainMenuExpBar
+	if not bar then return end
+	local cvarStatusText = GetCVar(STATUS_TEXT_CVAR)
+	UpdateLockShow(bar, cvarStatusText)
+end)
 
-frame:SetScript("OnEvent", function(self, event, arg1)
-	if arg1 ~= "cfFrames" then return end
-	self:UnregisterEvent("ADDON_LOADED")
-	if not cfFramesDB[M.EXPERIENCE_BAR] then return end
-
+local function Enable()
 	local bar = MainMenuExpBar
 	if not bar then return end
 
 	local cvarStatusText = GetCVar(STATUS_TEXT_CVAR)
 	UpdateLockShow(bar, cvarStatusText)
 
+	frame:RegisterEvent("PLAYER_ENTERING_WORLD")
+
 	hooksecurefunc("SetCVar", function(cvar, value)
+		if not cfFramesDB[M.EXPERIENCE_BAR] then return end
 		if cvar == STATUS_TEXT_CVAR then
 			UpdateLockShow(bar, value)
 		end
 	end)
-end)
+end
+
+local function Disable()
+	frame:UnregisterAllEvents()
+	local bar = MainMenuExpBar
+	if not bar then return end
+	bar.lockShow = 0
+	TextStatusBar_UpdateTextString(bar)
+end
+
+cfFrames:RegisterModule(M.EXPERIENCE_BAR, Enable, Disable)

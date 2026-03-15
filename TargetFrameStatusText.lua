@@ -14,21 +14,30 @@ local function IsHealthKnown(unit)
 	return false
 end
 
+local setupDone = false
+
 local function SetupBar(bar)
 	local parent = TargetFrameTextureFrame
 	local anchors = BarAnchors[bar]
 
-	bar.TextString = parent:CreateFontString(nil, "OVERLAY", "TextStatusBarText")
-	bar.TextString:SetPoint("CENTER", parent, "CENTER", anchors.center, anchors.y)
+	if not bar.TextString then
+		bar.TextString = parent:CreateFontString(nil, "OVERLAY", "TextStatusBarText")
+		bar.TextString:SetPoint("CENTER", parent, "CENTER", anchors.center, anchors.y)
+	end
 
-	bar.LeftText = parent:CreateFontString(nil, "OVERLAY", "TextStatusBarText")
-	bar.LeftText:SetPoint("LEFT", parent, "LEFT", anchors.left, anchors.y)
+	if not bar.LeftText then
+		bar.LeftText = parent:CreateFontString(nil, "OVERLAY", "TextStatusBarText")
+		bar.LeftText:SetPoint("LEFT", parent, "LEFT", anchors.left, anchors.y)
+	end
 
-	bar.RightText = parent:CreateFontString(nil, "OVERLAY", "TextStatusBarText")
-	bar.RightText:SetPoint("RIGHT", parent, "RIGHT", anchors.right, anchors.y)
+	if not bar.RightText then
+		bar.RightText = parent:CreateFontString(nil, "OVERLAY", "TextStatusBarText")
+		bar.RightText:SetPoint("RIGHT", parent, "RIGHT", anchors.right, anchors.y)
+	end
 end
 
 local function OnStatusBarTextUpdate(bar)
+	if not cfFramesDB[M.TARGET_FRAME_STATUS_TEXT] then return end
 	if bar ~= TargetFrameHealthBar then return end
 	if not bar.showPercentage then return end
 	if not IsHealthKnown("target") then return end
@@ -36,17 +45,26 @@ local function OnStatusBarTextUpdate(bar)
 	TextStatusBar_UpdateTextString(bar)
 end
 
-local frame = CreateFrame("Frame")
-frame:RegisterEvent("ADDON_LOADED")
-
-frame:SetScript("OnEvent", function(self, event, addonName)
-	if addonName ~= "cfFrames" then return end
-	self:UnregisterEvent("ADDON_LOADED")
-	if not cfFramesDB[M.TARGET_FRAME_STATUS_TEXT] then return end
-
+local function Enable()
 	for bar in pairs(BarAnchors) do
 		SetupBar(bar)
+		bar.TextString:Show()
+		bar.LeftText:Show()
+		bar.RightText:Show()
+		TextStatusBar_UpdateTextString(bar)
 	end
+	if not setupDone then
+		hooksecurefunc("TextStatusBar_UpdateTextStringWithValues", OnStatusBarTextUpdate)
+		setupDone = true
+	end
+end
 
-	hooksecurefunc("TextStatusBar_UpdateTextStringWithValues", OnStatusBarTextUpdate)
-end)
+local function Disable()
+	for bar in pairs(BarAnchors) do
+		if bar.TextString then bar.TextString:SetText("") end
+		if bar.LeftText then bar.LeftText:SetText("") end
+		if bar.RightText then bar.RightText:SetText("") end
+	end
+end
+
+cfFrames:RegisterModule(M.TARGET_FRAME_STATUS_TEXT, Enable, Disable)
