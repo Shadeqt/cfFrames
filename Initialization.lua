@@ -2,9 +2,7 @@ cfFrames = {}
 
 cfFrames.MODULES = {
 	POWER_TICKER = "PowerTicker",
-	POWER_TICKER_MANA_LOW = "PowerTicker_ManaLow",
 	POWER_TICKER_MANA_FULL = "PowerTicker_ManaFull",
-	POWER_TICKER_ENERGY_LOW = "PowerTicker_EnergyLow",
 	POWER_TICKER_ENERGY_FULL = "PowerTicker_EnergyFull",
 	TARGET_FRAME_STATUS_TEXT = "TargetFrameStatusText",
 	EXPERIENCE_BAR = "ExperienceBar",
@@ -13,17 +11,17 @@ cfFrames.MODULES = {
 	PET_XP_BAR = "PetXpBar",
 	PET_NAME = "PetName",
 	PET_DEBUFFS = "PetDebuffs",
-	COMBAT_GLOW = "CombatGlow",
-	HIT_INDICATOR = "HitIndicator",
+	PLAYER_COMBAT_GLOW = "PlayerCombatGlow",
+	PLAYER_HIT_INDICATOR = "PlayerHitIndicator",
+	PET_COMBAT_GLOW = "PetCombatGlow",
+	PET_HIT_INDICATOR = "PetHitIndicator",
 }
 
 local M = cfFrames.MODULES
 
 local DEFAULTS = {
 	[M.POWER_TICKER] = true,
-	[M.POWER_TICKER_MANA_LOW] = true,
 	[M.POWER_TICKER_MANA_FULL] = true,
-	[M.POWER_TICKER_ENERGY_LOW] = true,
 	[M.POWER_TICKER_ENERGY_FULL] = true,
 	[M.TARGET_FRAME_STATUS_TEXT] = true,
 	[M.EXPERIENCE_BAR] = true,
@@ -32,8 +30,10 @@ local DEFAULTS = {
 	[M.PET_XP_BAR] = true,
 	[M.PET_NAME] = true,
 	[M.PET_DEBUFFS] = true,
-	[M.COMBAT_GLOW] = true,
-	[M.HIT_INDICATOR] = true,
+	[M.PLAYER_COMBAT_GLOW] = true,
+	[M.PLAYER_HIT_INDICATOR] = true,
+	[M.PET_COMBAT_GLOW] = true,
+	[M.PET_HIT_INDICATOR] = true,
 }
 
 local frame = CreateFrame("Frame")

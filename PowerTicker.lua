@@ -29,10 +29,17 @@ local function ShouldShowSpark()
 
 	local fullPower = UnitPower("player") >= UnitPowerMax("player")
 
-	if currentPowerType == POWER.MANA then
-		return cfFramesDB[fullPower and M.POWER_TICKER_MANA_FULL or M.POWER_TICKER_MANA_LOW]
-	elseif currentPowerType == POWER.ENERGY then
-		return cfFramesDB[fullPower and M.POWER_TICKER_ENERGY_FULL or M.POWER_TICKER_ENERGY_LOW]
+	if fullPower then
+		if currentPowerType == POWER.MANA then
+			return cfFramesDB[M.POWER_TICKER_MANA_FULL]
+		elseif currentPowerType == POWER.ENERGY then
+			return cfFramesDB[M.POWER_TICKER_ENERGY_FULL]
+		end
+		return false
+	end
+
+	if currentPowerType == POWER.MANA or currentPowerType == POWER.ENERGY then
+		return true
 	end
 
 	return false
