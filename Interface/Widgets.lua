@@ -90,6 +90,16 @@ function Widgets.CreateCheckbox(anchor, label, dbKey, x, y, tooltip)
 			if enabled then module.Enable() else module.Disable() end
 		end
 	end)
+	function checkbox:SetActive(active)
+		if active then
+			self:Enable()
+			self.Text:SetTextColor(1, 0.82, 0)
+		else
+			self:Disable()
+			self.Text:SetTextColor(0.5, 0.5, 0.5)
+		end
+	end
+
 	AddTooltip(checkbox, tooltip)
 	return checkbox
 end

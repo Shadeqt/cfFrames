@@ -61,6 +61,15 @@ panel:HookScript("OnShow", function()
 	W.FitToContent(petSection)
 end)
 
+local function UpdatePowerTickerDependents()
+	local active = cfFramesDB[M.POWER_TICKER]
+	manaFull:SetActive(active)
+	energyFull:SetActive(active)
+end
+
+powerTicker:HookScript("OnClick", UpdatePowerTickerDependents)
+powerTicker:HookScript("OnShow", UpdatePowerTickerDependents)
+
 local category = Settings.RegisterCanvasLayoutCategory(panel, panel.name, panel.name)
 Settings.RegisterAddOnCategory(category)
 
