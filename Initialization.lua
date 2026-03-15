@@ -2,7 +2,15 @@ cfFrames = {}
 cfFrames.modules = {}
 
 function cfFrames:RegisterModule(key, enableFunc, disableFunc)
-	self.modules[key] = { Enable = enableFunc, Disable = disableFunc }
+	local existing = self.modules[key]
+	if not existing then
+		self.modules[key] = { Enable = enableFunc, Disable = disableFunc }
+	else
+		local prevEnable = existing.Enable
+		local prevDisable = existing.Disable
+		existing.Enable = function() prevEnable(); enableFunc() end
+		existing.Disable = function() prevDisable(); disableFunc() end
+	end
 end
 
 cfFrames.MODULES = {

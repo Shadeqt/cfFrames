@@ -16,23 +16,34 @@ local function ApplyPetXpBarDarkMode()
 	border:SetVertexColor(c, c, c)
 end
 
+local function Enable()
+	ApplyPetXpBarDarkMode()
+	if MinimapBorder then
+		hooksecurefunc(MinimapBorder, "SetVertexColor", function()
+			if not cfFramesDB[M.BBF_INTEGRATION] then return end
+			ApplyPetXpBarDarkMode()
+		end)
+	end
+end
+
+local function Disable()
+	local border = cfFrames.petXpBarBorder
+	if border then
+		border:SetDesaturated(false)
+		border:SetVertexColor(1, 1, 1)
+	end
+end
+
 local frame = CreateFrame("Frame")
 frame:RegisterEvent("ADDON_LOADED")
 
 frame:SetScript("OnEvent", function(self, event, arg1)
 	if arg1 ~= "cfFrames" and arg1 ~= "BetterBlizzFrames" then return end
-
-	if not cfFramesDB or not cfFramesDB[M.BBF_INTEGRATION] then return end
-	if not cfFramesDB[M.PET_XP_BAR] then return end
-	if not BetterBlizzFramesDB then return end
+	if not cfFramesDB or not BetterBlizzFramesDB then return end
 
 	self:UnregisterEvent("ADDON_LOADED")
-	ApplyPetXpBarDarkMode()
-
-	-- Re-apply whenever BBF changes MinimapBorder colors (dark mode toggle)
-	if MinimapBorder then
-		hooksecurefunc(MinimapBorder, "SetVertexColor", function()
-			ApplyPetXpBarDarkMode()
-		end)
+	cfFrames:RegisterModule(M.BBF_INTEGRATION, Enable, Disable)
+	if cfFramesDB[M.BBF_INTEGRATION] then
+		Enable()
 	end
 end)
