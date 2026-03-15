@@ -27,15 +27,16 @@ local function Enable()
 	if BBF and BBF.ActionBarIconZoom then
 		hooksecurefunc(BBF, "ActionBarIconZoom", function()
 			if not cfFramesDB[M.BBF_INTEGRATION] then return end
-			local enabled = BetterBlizzFramesDB.playerFrameOCD and BetterBlizzFramesDB.playerFrameOCDZoom
-			ZoomIcons(enabled)
+			local ocd = BetterBlizzFramesDB.playerFrameOCD and BetterBlizzFramesDB.playerFrameOCDZoom
+			ZoomIcons(ocd or BetterBlizzFramesDB.zoomActionBarIcons)
 		end)
 	end
 
 	if BBF and BBF.ZoomDefaultActionbarIcons then
 		hooksecurefunc(BBF, "ZoomDefaultActionbarIcons", function()
 			if not cfFramesDB[M.BBF_INTEGRATION] then return end
-			ZoomIcons(BetterBlizzFramesDB.zoomActionBarIcons)
+			local ocd = BetterBlizzFramesDB.playerFrameOCD and BetterBlizzFramesDB.playerFrameOCDZoom
+			ZoomIcons(ocd or BetterBlizzFramesDB.zoomActionBarIcons)
 		end)
 	end
 end

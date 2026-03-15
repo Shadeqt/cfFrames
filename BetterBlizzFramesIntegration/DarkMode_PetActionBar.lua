@@ -6,13 +6,11 @@ local function ApplyPetActionBarDarkMode()
 
 	local enabled = bbfDB.darkModeUi and bbfDB.darkModeActionBars
 	local c = enabled and (bbfDB.darkModeColor + 0.15) or 1
-	local sat = enabled and true or false
-
 	for i = 1, 10 do
 		local tex = _G["PetActionButton" .. i .. "NormalTexture2"]
 		if tex then
-			if tex.SetDesaturated then tex:SetDesaturated(sat) end
-			if tex.SetVertexColor then tex:SetVertexColor(c, c, c) end
+			tex:SetDesaturated(enabled)
+			tex:SetVertexColor(c, c, c)
 		end
 	end
 end
