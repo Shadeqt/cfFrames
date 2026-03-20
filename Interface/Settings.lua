@@ -10,14 +10,20 @@ local COL2 = 300
 local SAME_ROW = 0
 local NEW_ROW = -10
 
--- General
+-- Mod Integrations
 local title = W.CreateTitle(panel, "cfFrames", COL1, SAME_ROW)
-local generalHeader = W.CreateHeader(title, "General", COL1, NEW_ROW)
+local modsHeader = W.CreateHeader(title, "Mod Integrations", COL1, NEW_ROW)
+local modsSection = W.CreateSection(modsHeader, COL1, NEW_ROW)
+local bbfIntegration = W.CreateCheckbox(modsSection, "BetterBlizzFrames", M.BBF_INTEGRATION, COL1, NEW_ROW,
+	"Sync dark mode, icon zoom, textures, and pet name centering with BetterBlizzFrames settings")
+local questieIntegration = W.CreateCheckbox(bbfIntegration, "Questie", M.QUESTIE_INTEGRATION, COL2, SAME_ROW,
+	"Show pending quest XP as a yellow overlay on the experience bar using Questie's quest database")
+
+-- General
+local generalHeader = W.CreateHeader(modsSection, "General", COL1, NEW_ROW)
 local generalSection = W.CreateSection(generalHeader, COL1, NEW_ROW)
 local experienceBar = W.CreateCheckbox(generalSection, "Show Experience Bar Text", M.EXPERIENCE_BAR, COL1, NEW_ROW,
 	"Display the status text format chosen in Blizzard's interface options on the experience bar")
-local bbfIntegration = W.CreateCheckbox(experienceBar, "Enable BetterBlizzFrames Integration", M.BBF_INTEGRATION, COL2, SAME_ROW,
-	"Extends BetterBlizzFrames dark mode to minimap border, pet level border, pet XP bar border, and pet action bars. Also applies icon zoom to pet and stance bars, and fixes pet name centering with BBF enabled")
 
 -- Target Frame
 local targetHeader = W.CreateHeader(generalSection, "Target Frame", COL1, NEW_ROW)
@@ -56,6 +62,7 @@ local petHit = W.CreateCheckbox(petGlow, "Hide Hit Indicator", M.PET_HIT_INDICAT
 	"Hide the damage numbers that flash on the pet portrait")
 
 panel:HookScript("OnShow", function()
+	W.FitToContent(modsSection)
 	W.FitToContent(generalSection)
 	W.FitToContent(targetSection)
 	W.FitToContent(playerSection)
