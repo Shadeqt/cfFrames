@@ -1,5 +1,6 @@
 local panel = CreateFrame("Frame", "cfFramesSettingsPanel")
 panel.name = "cfFrames"
+panel:Hide()
 
 local W = cfFrames.Widgets
 local M = cfFrames.MODULES
