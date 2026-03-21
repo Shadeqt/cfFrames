@@ -17,7 +17,7 @@ local function SetupOverlay()
 
 	spark = overlayFrame:CreateTexture(nil, "OVERLAY")
 	spark:SetTexture("Interface\\CastingBar\\UI-CastingBar-Spark")
-	spark:SetSize(16, 32)
+	spark:SetSize(32, 32)
 	spark:SetBlendMode("ADD")
 	spark:Hide()
 
