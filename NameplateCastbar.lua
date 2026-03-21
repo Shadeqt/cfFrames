@@ -34,16 +34,16 @@ local function GetCastBar(nameplate, unit)
 	bar.Icon:SetPoint("LEFT", bar, "RIGHT", 8, 0)
 	bar.Icon:SetSize(14, 14)
 
+	bar.Text:SetPoint("CENTER")
+
 	nameplate.cfCastBar = bar
 	return bar
 end
 
 local frame = CreateFrame("Frame")
-frame:RegisterEvent("NAME_PLATE_UNIT_ADDED")
-frame:RegisterEvent("NAME_PLATE_UNIT_REMOVED")
 frame:SetScript("OnEvent", function(_, event, unit)
 	if not cfFramesDB[M.NAMEPLATE_CASTBAR] then return end
-	local nameplate = C_NamePlate.GetNamePlateForUnit(unit, issecure())
+	local nameplate = C_NamePlate.GetNamePlateForUnit(unit)
 	if not nameplate then return end
 
 	if event == "NAME_PLATE_UNIT_ADDED" then
