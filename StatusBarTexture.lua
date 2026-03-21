@@ -37,6 +37,7 @@ local function SetAllTextures(texture)
 	if ReputationWatchBar and ReputationWatchBar.StatusBar then
 		SetBarTexture(ReputationWatchBar.StatusBar, texture)
 	end
+	if PetPaperDollFrameExpBar then SetBarTexture(PetPaperDollFrameExpBar, texture) end
 	if CastingBarFrame then SetBarTexture(CastingBarFrame, texture) end
 	if TargetFrameSpellBar then SetBarTexture(TargetFrameSpellBar, texture) end
 	if PetSpellBar then SetBarTexture(PetSpellBar, texture) end
