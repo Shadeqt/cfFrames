@@ -58,6 +58,20 @@ hooksecurefunc("DefaultCompactUnitFrameSetup", function(frame)
 	if frame.powerBar then SetBarTexture(frame.powerBar, TEXTURE) end
 end)
 
+hooksecurefunc("ReputationFrame_Update", function()
+	if not cfFramesDB[M.STATUS_BAR_TEXTURE] then return end
+	for i = 1, NUM_FACTIONS_DISPLAYED do
+		local bar = _G["ReputationBar" .. i]
+		if bar then SetBarTexture(bar, TEXTURE) end
+	end
+end)
+
+hooksecurefunc("SkillFrame_SetStatusBar", function(statusBarID)
+	if not cfFramesDB[M.STATUS_BAR_TEXTURE] then return end
+	local bar = _G["SkillRankFrame" .. statusBarID .. "Bar"]
+	if bar then bar:SetTexture(TEXTURE) end
+end)
+
 hooksecurefunc("UnitFrameHealthBar_Update", function(bar)
 	if not cfFramesDB[M.STATUS_BAR_TEXTURE] then return end
 	SetBarTexture(bar, TEXTURE)
