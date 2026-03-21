@@ -1,54 +1,37 @@
 local Widgets = {}
 cfFrames.Widgets = Widgets
 
-function Widgets.CreateTitle(anchor, text, x, y)
+local TOOLTIPS = {}
+Widgets.TOOLTIPS = TOOLTIPS
+
+function Widgets.CreateTitle(anchor, text)
 	local fontString = anchor:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
-	fontString:SetPoint("TOPLEFT", anchor, "TOPLEFT", x, y)
+	fontString:SetPoint("TOPLEFT", anchor, "TOPLEFT", 0, 0)
 	fontString:SetText(text)
-	local separator = Widgets.CreateSeparator(fontString, 0, -4)
+	local separator = Widgets.CreateSeparator(fontString)
 	return separator
 end
 
-function Widgets.CreateHeader(anchor, text, x, y)
+function Widgets.CreateHeader(anchor, text)
 	local anchorFrame = anchor.section or anchor
 	local parent = anchorFrame:GetParent() or anchorFrame
 	local fontString = parent:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-	fontString:SetPoint("TOPLEFT", anchorFrame, "BOTTOMLEFT", x, y)
+	fontString:SetPoint("TOPLEFT", anchorFrame, "BOTTOMLEFT", 0, -10)
 	fontString:SetText(text)
 	return fontString
 end
 
-function Widgets.CreateSeparator(anchor, x, y)
+function Widgets.CreateSeparator(anchor)
 	local parent = anchor:GetParent() or anchor
 	local separator = parent:CreateTexture(nil, "ARTWORK")
 	separator:SetHeight(1)
 	separator:SetColorTexture(0.5, 0.5, 0.5, 0.5)
-	separator:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", x, y)
+	separator:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -4)
 	separator:SetPoint("RIGHT", parent, "RIGHT", -16, 0)
 	return separator
 end
 
-function Widgets.CreateSection(anchor, x, y)
-	local parent = anchor:GetParent() or anchor
-	local section = CreateFrame("Frame", nil, parent, "BackdropTemplate")
-	section:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", x, y)
-	section:SetPoint("RIGHT", parent, "RIGHT", -16, 0)
-	section:SetBackdrop({
-		edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-		edgeSize = 12,
-		insets = { left = 4, right = 4, top = 4, bottom = 4 },
-	})
-	section:SetBackdropBorderColor(0.5, 0.5, 0.5, 0.8)
-
-	-- Interior anchor so normal widget chaining works inside the section
-	local interior = CreateFrame("Frame", nil, section)
-	interior:SetPoint("TOPLEFT", section, "TOPLEFT", 4, 0)
-	interior:SetSize(1, 1)
-	interior.section = section
-	return interior
-end
-
-function Widgets.FitToContent(interior, padding)
+local function FitToContent(interior, padding)
 	local section = interior:GetParent()
 	local sectionTop = section:GetTop()
 	if not sectionTop then return end
@@ -62,6 +45,30 @@ function Widgets.FitToContent(interior, padding)
 	section:SetHeight(sectionTop - lowestBottom + (padding or 10))
 end
 
+function Widgets.CreateSection(anchor)
+	local parent = anchor:GetParent() or anchor
+	local section = CreateFrame("Frame", nil, parent, "BackdropTemplate")
+	section:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -10)
+	section:SetPoint("RIGHT", parent, "RIGHT", -16, 0)
+	section:SetBackdrop({
+		edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+		edgeSize = 12,
+		insets = { left = 4, right = 4, top = 4, bottom = 4 },
+	})
+	section:SetBackdropBorderColor(0.5, 0.5, 0.5, 0.8)
+
+	local interior = CreateFrame("Frame", nil, section)
+	interior:SetPoint("TOPLEFT", section, "TOPLEFT", 4, 0)
+	interior:SetSize(1, 1)
+	interior.section = section
+
+	Widgets.panel:HookScript("OnShow", function()
+		FitToContent(interior)
+	end)
+
+	return interior
+end
+
 local function AddTooltip(frame, text)
 	if not text then return end
 	frame:HookScript("OnEnter", function(self)
@@ -72,11 +79,14 @@ local function AddTooltip(frame, text)
 	frame:HookScript("OnLeave", GameTooltip_Hide)
 end
 
-function Widgets.CreateCheckbox(anchor, label, dbKey, x, y, tooltip)
+function Widgets.CreateCheckbox(anchor, label, dbKey, col2, dependency)
 	local parent = anchor:GetParent() or anchor
 	local checkbox = CreateFrame("CheckButton", nil, parent, "InterfaceOptionsCheckButtonTemplate")
-	local anchorPoint = (y == 0) and "TOPLEFT" or "BOTTOMLEFT"
-	checkbox:SetPoint("TOPLEFT", anchor, anchorPoint, x, y)
+	if col2 then
+		checkbox:SetPoint("TOPLEFT", anchor, "TOPLEFT", col2, 0)
+	else
+		checkbox:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -10)
+	end
 	checkbox.Text:SetText(label)
 	checkbox:SetHitRectInsets(0, -checkbox.Text:GetStringWidth(), 0, 0)
 	checkbox:SetScript("OnShow", function(self)
@@ -90,16 +100,22 @@ function Widgets.CreateCheckbox(anchor, label, dbKey, x, y, tooltip)
 			if enabled then module.Enable() else module.Disable() end
 		end
 	end)
-	function checkbox:SetActive(active)
-		if active then
-			self:Enable()
-			self.Text:SetTextColor(1, 0.82, 0)
-		else
-			self:Disable()
-			self.Text:SetTextColor(0.5, 0.5, 0.5)
+
+	if dependency then
+		local function UpdateState()
+			local active = dependency:GetChecked()
+			if active then
+				checkbox:Enable()
+				checkbox.Text:SetTextColor(1, 0.82, 0)
+			else
+				checkbox:Disable()
+				checkbox.Text:SetTextColor(0.5, 0.5, 0.5)
+			end
 		end
+		dependency:HookScript("OnClick", UpdateState)
+		dependency:HookScript("OnShow", UpdateState)
 	end
 
-	AddTooltip(checkbox, tooltip)
+	AddTooltip(checkbox, TOOLTIPS[dbKey])
 	return checkbox
 end
