@@ -40,12 +40,14 @@ local function CreateOverlay()
 
 	local overlay = CreateFrame("StatusBar", nil, bar)
 	overlay:SetAllPoints(bar)
-	overlay:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar")
+	local tex = bar:GetStatusBarTexture()
+	overlay:SetStatusBarTexture(tex:GetTexture())
+	overlay:GetStatusBarTexture():SetDrawLayer("BACKGROUND", -1)
 	local c = QuestDifficultyColors["difficult"]
 	overlay:SetStatusBarColor(c.r, c.g, c.b)
 	overlay:SetMinMaxValues(0, 1)
 	overlay:SetValue(0)
-	overlay:SetFrameLevel(1)
+	overlay:SetFrameLevel(bar:GetFrameLevel())
 	overlay:Hide()
 	cfFrames.questOverlay = overlay
 end

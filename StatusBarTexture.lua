@@ -11,9 +11,10 @@ local UNIT_BARS = {
 
 local function SetBarTexture(bar, texture)
 	local tex = bar:GetStatusBarTexture()
-	local layer = tex and tex:GetDrawLayer()
+	local layer, sublevel = nil, nil
+	if tex then layer, sublevel = tex:GetDrawLayer() end
 	bar:SetStatusBarTexture(texture)
-	if layer then bar:GetStatusBarTexture():SetDrawLayer(layer) end
+	if layer then bar:GetStatusBarTexture():SetDrawLayer(layer, sublevel or 0) end
 end
 
 local function SetAllTextures(texture)
@@ -31,10 +32,31 @@ local function SetAllTextures(texture)
 		TargetFrameNameBackground:SetTexture(texture)
 	end
 	if MainMenuExpBar then SetBarTexture(MainMenuExpBar, texture) end
+	if ExhaustionLevelFillBar then ExhaustionLevelFillBar:SetTexture(texture) end
+	if cfFrames.questOverlay then SetBarTexture(cfFrames.questOverlay, texture) end
+	if ReputationWatchBar and ReputationWatchBar.StatusBar then
+		SetBarTexture(ReputationWatchBar.StatusBar, texture)
+	end
 	if CastingBarFrame then SetBarTexture(CastingBarFrame, texture) end
 	if TargetFrameSpellBar then SetBarTexture(TargetFrameSpellBar, texture) end
 	if PetSpellBar then SetBarTexture(PetSpellBar, texture) end
 end
+
+local npFrame = CreateFrame("Frame")
+npFrame:RegisterEvent("NAME_PLATE_UNIT_ADDED")
+npFrame:SetScript("OnEvent", function(_, _, unit)
+	if not cfFramesDB[M.STATUS_BAR_TEXTURE] then return end
+	local nameplate = C_NamePlate.GetNamePlateForUnit(unit)
+	if not nameplate or not nameplate.UnitFrame then return end
+	local healthBar = nameplate.UnitFrame.healthBar
+	if healthBar then SetBarTexture(healthBar, TEXTURE) end
+end)
+
+hooksecurefunc("DefaultCompactUnitFrameSetup", function(frame)
+	if not cfFramesDB[M.STATUS_BAR_TEXTURE] then return end
+	if frame.healthBar then SetBarTexture(frame.healthBar, TEXTURE) end
+	if frame.powerBar then SetBarTexture(frame.powerBar, TEXTURE) end
+end)
 
 hooksecurefunc("UnitFrameHealthBar_Update", function(bar)
 	if not cfFramesDB[M.STATUS_BAR_TEXTURE] then return end

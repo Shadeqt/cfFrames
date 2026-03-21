@@ -21,18 +21,27 @@ local function GetCastBar(nameplate, unit)
 	bar:SetParent(unitFrame)
 
 	local healthBar = unitFrame.healthBar
-	bar:SetPoint("TOP", healthBar, "BOTTOM", 0, -5)
-	bar:SetSize(healthBar:GetWidth(), healthBar:GetHeight())
+	local hpTex = healthBar:GetStatusBarTexture()
+	if hpTex then
+		local layer, sublevel = bar:GetStatusBarTexture():GetDrawLayer()
+		bar:SetStatusBarTexture(hpTex:GetTexture())
+		bar:GetStatusBarTexture():SetDrawLayer(layer, sublevel or 0)
+	end
+	bar:SetPoint("TOP", healthBar, "BOTTOM", -0.5, -3)
+	bar:SetSize(healthBar:GetWidth(), healthBar:GetHeight()-2)
 
-	hooksecurefunc(bar.Flash, "Show", function(self) self:Hide() end)
+	local bw = healthBar:GetWidth() * 1.16
+	local bh = healthBar:GetHeight() * 1.3
+	bar.Border:SetPoint("TOPLEFT", bw, bh)
+	bar.Border:SetPoint("BOTTOMRIGHT", -bw, -bh)
 
-	bar.Border:SetPoint("TOPLEFT", -18, 16)
-	bar.Border:SetPoint("BOTTOMRIGHT", 16.5, -17)
+	bar.Flash:SetPoint("TOPLEFT", bw, bh)
+	bar.Flash:SetPoint("BOTTOMRIGHT", -bw, -bh)
 
 	bar.Spark:SetSize(16, 16)
 
-	bar.Icon:SetPoint("LEFT", bar, "RIGHT", 8, 0)
-	bar.Icon:SetSize(14, 14)
+	bar.Icon:SetPoint("LEFT", bar, "RIGHT", 3, 0)
+	bar.Icon:SetSize(12, 12)
 
 	bar.Text:SetPoint("CENTER")
 
@@ -68,3 +77,48 @@ local function Disable()
 end
 
 cfFrames:RegisterModule(M.NAMEPLATE_CASTBAR, Enable, Disable)
+
+local testMode = false
+local testFrame = CreateFrame("Frame")
+testFrame:SetScript("OnEvent", function(_, _, unit)
+	local nameplate = C_NamePlate.GetNamePlateForUnit(unit)
+	if not nameplate then return end
+	local bar = GetCastBar(nameplate, unit)
+	bar:SetMinMaxValues(0, 3)
+	bar:SetStatusBarColor(1, 0.7, 0)
+	bar.Icon:SetTexture(133014)
+	bar.Text:SetText("Test Cast")
+	bar:Show()
+	local start = GetTime()
+	bar:SetScript("OnUpdate", function(self)
+		local progress = (GetTime() - start) % 3
+		self:SetValue(progress)
+		self.Spark:ClearAllPoints()
+		self.Spark:SetPoint("CENTER", self, "LEFT", (progress / 3) * self:GetWidth(), 0)
+		self.Spark:Show()
+	end)
+end)
+
+SLASH_CFCTEST1 = "/cfctest"
+SlashCmdList["CFCTEST"] = function()
+	testMode = not testMode
+	if testMode then
+		testFrame:RegisterEvent("NAME_PLATE_UNIT_ADDED")
+		for _, nameplate in pairs(C_NamePlate.GetNamePlates()) do
+			local unit = nameplate.namePlateUnitToken
+			if unit then
+				testFrame:GetScript("OnEvent")(testFrame, "NAME_PLATE_UNIT_ADDED", unit)
+			end
+		end
+		print("cfFrames: castbar test ON")
+	else
+		testFrame:UnregisterAllEvents()
+		for _, nameplate in pairs(C_NamePlate.GetNamePlates()) do
+			if nameplate.cfCastBar then
+				nameplate.cfCastBar:SetScript("OnUpdate", nil)
+				nameplate.cfCastBar:Hide()
+			end
+		end
+		print("cfFrames: castbar test OFF")
+	end
+end
