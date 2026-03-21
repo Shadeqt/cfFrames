@@ -29,6 +29,8 @@ cfFrames.MODULES = {
 	PLAYER_HIT_INDICATOR = "PlayerHitIndicator",
 	PET_COMBAT_GLOW = "PetCombatGlow",
 	PET_HIT_INDICATOR = "PetHitIndicator",
+	STATUS_BAR_TEXTURE = "StatusBarTexture",
+	NAMEPLATE_CASTBAR = "NameplateCastbar",
 }
 
 local M = cfFrames.MODULES
@@ -49,6 +51,8 @@ local DEFAULTS = {
 	[M.PLAYER_HIT_INDICATOR] = true,
 	[M.PET_COMBAT_GLOW] = true,
 	[M.PET_HIT_INDICATOR] = true,
+	[M.STATUS_BAR_TEXTURE] = true,
+	[M.NAMEPLATE_CASTBAR] = true,
 }
 
 local frame = CreateFrame("Frame")

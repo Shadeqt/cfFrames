@@ -22,5 +22,7 @@ ModIntegrations\BetterBlizzFrames\Move_PetName.lua
 ModIntegrations\BetterBlizzFrames\Texture_ExperienceBar.lua
 ModIntegrations\Questie\ExperienceBarQuests.lua
 CombatGlow.lua
+StatusBarTexture.lua
+NameplateCastbar.lua
 Interface\Widgets.lua
 Interface\Settings.lua

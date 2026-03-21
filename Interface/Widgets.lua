@@ -4,6 +4,40 @@ cfFrames.Widgets = Widgets
 local TOOLTIPS = {}
 Widgets.TOOLTIPS = TOOLTIPS
 
+function Widgets.CreateScrollPanel(panel)
+	local scrollFrame = CreateFrame("ScrollFrame", nil, panel, "UIPanelScrollFrameTemplate")
+	scrollFrame:SetPoint("TOPLEFT", 0, 0)
+	scrollFrame:SetPoint("BOTTOMRIGHT", -26, 0)
+
+	local scrollChild = CreateFrame("Frame", nil, scrollFrame)
+	scrollChild:SetSize(600, 1)
+	scrollFrame:SetScrollChild(scrollChild)
+
+	local function UpdateSize()
+		scrollChild:SetWidth(scrollFrame:GetWidth())
+		local top = scrollChild:GetTop()
+		if not top then return end
+		local lowestBottom = top
+		for _, child in pairs({scrollChild:GetChildren()}) do
+			local bottom = child:GetBottom()
+			if bottom and bottom < lowestBottom then
+				lowestBottom = bottom
+			end
+		end
+		for _, region in pairs({scrollChild:GetRegions()}) do
+			local bottom = region:GetBottom()
+			if bottom and bottom < lowestBottom then
+				lowestBottom = bottom
+			end
+		end
+		scrollChild:SetHeight(top - lowestBottom + 20)
+	end
+
+	scrollFrame:HookScript("OnShow", UpdateSize)
+
+	return scrollChild
+end
+
 function Widgets.CreateTitle(anchor, text)
 	local fontString = anchor:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
 	fontString:SetPoint("TOPLEFT", anchor, "TOPLEFT", 0, 0)

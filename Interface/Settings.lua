@@ -23,16 +23,25 @@ T[M.PET_DEBUFFS] = "Display debuff icons on the pet frame"
 T[M.PET_NAME] = "Center the pet name above the health bar, matching player and target name alignment"
 T[M.PET_COMBAT_GLOW] = "Hide the pulsing glow around the pet portrait during combat"
 T[M.PET_HIT_INDICATOR] = "Hide the damage numbers that flash on the pet portrait"
+T[M.STATUS_BAR_TEXTURE] = "Replace the default status bar texture on all unit frames, cast bars, nameplates, and experience bar"
+T[M.NAMEPLATE_CASTBAR] = "Show cast bars on enemy nameplates"
+
+local scrollChild = W.CreateScrollPanel(panel)
 
 -- Mod Integrations
-local title = W.CreateTitle(panel, "cfFrames")
+local title = W.CreateTitle(scrollChild, "cfFrames")
 local modsHeader = W.CreateHeader(title, "Mod Integrations")
 local modsSection = W.CreateSection(modsHeader)
 local bbfIntegration = W.CreateCheckbox(modsSection, "BetterBlizzFrames", M.BBF_INTEGRATION)
 local questieIntegration = W.CreateCheckbox(bbfIntegration, "Questie", M.QUESTIE_INTEGRATION, COL2)
 
+-- Textures
+local texturesHeader = W.CreateHeader(modsSection, "Textures")
+local texturesSection = W.CreateSection(texturesHeader)
+local statusBarTexture = W.CreateCheckbox(texturesSection, "Status Bar Texture", M.STATUS_BAR_TEXTURE)
+
 -- General
-local generalHeader = W.CreateHeader(modsSection, "General")
+local generalHeader = W.CreateHeader(texturesSection, "General")
 local generalSection = W.CreateSection(generalHeader)
 local experienceBar = W.CreateCheckbox(generalSection, "Show Experience Bar Text", M.EXPERIENCE_BAR)
 
@@ -59,6 +68,11 @@ local petDebuffs = W.CreateCheckbox(petLevel, "Show Pet Debuffs", M.PET_DEBUFFS)
 local petName = W.CreateCheckbox(petDebuffs, "Center Pet Name", M.PET_NAME, COL2)
 local petGlow = W.CreateCheckbox(petDebuffs, "Hide Combat Glow", M.PET_COMBAT_GLOW)
 local petHit = W.CreateCheckbox(petGlow, "Hide Hit Indicator", M.PET_HIT_INDICATOR, COL2)
+
+-- Nameplates
+local nameplatesHeader = W.CreateHeader(petSection, "Nameplates")
+local nameplatesSection = W.CreateSection(nameplatesHeader)
+local nameplateCastbar = W.CreateCheckbox(nameplatesSection, "Show Enemy Cast Bars", M.NAMEPLATE_CASTBAR)
 
 local category = Settings.RegisterCanvasLayoutCategory(panel, panel.name, panel.name)
 Settings.RegisterAddOnCategory(category)
