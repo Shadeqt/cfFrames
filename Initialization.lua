@@ -31,6 +31,8 @@ cfFrames.MODULES = {
 	PET_HIT_INDICATOR = "PetHitIndicator",
 	STATUS_BAR_TEXTURE = "StatusBarTexture",
 	NAMEPLATE_CASTBAR = "NameplateCastbar",
+	BIGGER_HEALTHBAR = "BiggerHealthbar",
+	DARK_MODE = "DarkMode",
 }
 
 local M = cfFrames.MODULES
@@ -53,6 +55,8 @@ local DEFAULTS = {
 	[M.PET_HIT_INDICATOR] = true,
 	[M.STATUS_BAR_TEXTURE] = true,
 	[M.NAMEPLATE_CASTBAR] = true,
+	[M.BIGGER_HEALTHBAR] = true,
+	[M.DARK_MODE] = true,
 }
 
 local frame = CreateFrame("Frame")

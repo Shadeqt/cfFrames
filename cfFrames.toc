@@ -24,5 +24,7 @@ ModIntegrations\Questie\ExperienceBarQuests.lua
 CombatGlow.lua
 StatusBarTexture.lua
 NameplateCastbar.lua
+BiggerHealthbar.lua
+DarkMode.lua
 Interface\Widgets.lua
 Interface\Settings.lua

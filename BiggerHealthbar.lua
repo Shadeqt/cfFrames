@@ -1,0 +1,108 @@
+local M = cfFrames.MODULES
+
+local MEDIA = "Interface\\AddOns\\cfFrames\\Media\\"
+local NORMAL_TEXTURE    = MEDIA .. "UI-TargetingFrame"
+local ELITE_TEXTURE     = MEDIA .. "UI-TargetingFrame-Elite"
+local RARE_TEXTURE      = MEDIA .. "UI-TargetingFrame-Rare"
+local RAREELITE_TEXTURE = MEDIA .. "UI-TargetingFrame-Rare-Elite"
+
+local SENTINEL = "cfFramesBiggerHP"
+
+-- EasyFrames-style MoveRegion: locks a frame's position permanently via SetPoint hook
+local function MoveRegion(frame, point, relativeTo, relativePoint, xOffset, yOffset)
+	frame:ClearAllPoints()
+	frame:SetPoint(point, relativeTo, relativePoint, xOffset, yOffset, SENTINEL)
+
+	if not frame.cfBiggerHPHooked then
+		hooksecurefunc(frame, "SetPoint", function(self, _, _, _, _, _, flag)
+			if flag ~= SENTINEL then
+				if not cfFramesDB[M.BIGGER_HEALTHBAR] then return end
+				self:ClearAllPoints()
+				self:SetPoint(point, relativeTo, relativePoint, xOffset, yOffset, SENTINEL)
+			end
+		end)
+		frame.cfBiggerHPHooked = true
+	end
+end
+
+local function Enable()
+	-- Player frame border texture
+	local playerTexture = PlayerFrameTexture
+	playerTexture:SetTexture(NORMAL_TEXTURE)
+
+	-- Player health bar
+	PlayerFrameHealthBar:SetHeight(27)
+	MoveRegion(PlayerFrameHealthBar, "CENTER", PlayerFrame, "CENTER", 50, 14)
+
+	-- Player mana bar
+	MoveRegion(PlayerFrameManaBar, "CENTER", PlayerFrame, "CENTER", 51, -7)
+
+	-- Player name
+	MoveRegion(PlayerName, "CENTER", PlayerFrame, "CENTER", 52, 35)
+
+	-- Player status glow (resting/combat)
+	PlayerStatusTexture:SetHeight(69)
+
+	-- Player health text
+	MoveRegion(PlayerFrameHealthBar.RightText, "RIGHT", PlayerFrame, "RIGHT", -8, 12)
+	MoveRegion(PlayerFrameHealthBar.LeftText, "LEFT", PlayerFrame, "LEFT", 110, 12)
+	MoveRegion(PlayerFrameHealthBar.TextString, "CENTER", PlayerFrame, "CENTER", 52, 12)
+
+	-- Player mana text
+	MoveRegion(PlayerFrameManaBar.TextString, "CENTER", PlayerFrame, "CENTER", 52, -8)
+
+	-- Target health bar
+	TargetFrameHealthBar:SetHeight(27)
+	MoveRegion(TargetFrameHealthBar, "CENTER", TargetFrame, "CENTER", -50, 14)
+
+	-- Target mana bar
+	MoveRegion(TargetFrameManaBar, "CENTER", TargetFrame, "CENTER", -51, -7)
+
+	-- Target name
+	MoveRegion(TargetFrame.name, "CENTER", TargetFrame, "CENTER", -51, 35)
+
+	-- Target health text
+	MoveRegion(TargetFrameHealthBar.RightText, "RIGHT", TargetFrame, "RIGHT", 8, 12)
+	MoveRegion(TargetFrameHealthBar.LeftText, "LEFT", TargetFrame, "LEFT", -110, 12)
+	MoveRegion(TargetFrameHealthBar.TextString, "CENTER", TargetFrame, "CENTER", -50, 12)
+
+	-- Target mana text
+	MoveRegion(TargetFrameManaBar.TextString, "CENTER", TargetFrame, "CENTER", -50, -8)
+
+	-- Target dead text
+	MoveRegion(TargetFrameTextureFrameDeadText, "CENTER", TargetFrame, "CENTER", -50, 12)
+
+	-- Target background
+	TargetFrameNameBackground:SetVertexColor(0, 0, 0, 0)
+	TargetFrame.Background:SetHeight(41)
+end
+
+-- Classification hook: swap border texture per mob type (runs always, guarded by DB check)
+hooksecurefunc("TargetFrame_CheckClassification", function(frame)
+	if not cfFramesDB[M.BIGGER_HEALTHBAR] then return end
+	if not frame or not frame.unit then return end
+
+	local classification = UnitClassification(frame.unit)
+
+	TargetFrame.Background:SetHeight(41)
+
+	if classification == "worldboss" or classification == "elite" then
+		frame.borderTexture:SetTexture(ELITE_TEXTURE)
+	elseif classification == "rareelite" then
+		frame.borderTexture:SetTexture(RAREELITE_TEXTURE)
+	elseif classification == "rare" then
+		frame.borderTexture:SetTexture(RARE_TEXTURE)
+	else
+		frame.borderTexture:SetTexture(NORMAL_TEXTURE)
+	end
+end)
+
+-- Player texture hook: prevent Blizzard from resetting border texture
+hooksecurefunc(PlayerFrameTexture, "SetTexture", function(self, texture)
+	if not cfFramesDB[M.BIGGER_HEALTHBAR] then return end
+	if texture ~= NORMAL_TEXTURE then
+		self:SetTexture(NORMAL_TEXTURE)
+	end
+end)
+
+cfFrames:RegisterModule(M.BIGGER_HEALTHBAR, Enable, function() end)
