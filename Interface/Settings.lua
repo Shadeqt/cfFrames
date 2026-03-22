@@ -27,6 +27,7 @@ T[M.STATUS_BAR_TEXTURE] = "Replace the default status bar texture on all unit fr
 T[M.NAMEPLATE_CASTBAR] = "Show cast bars on enemy nameplates"
 T[M.BIGGER_HEALTHBAR] = "Enlarge the health bar on player and target frames using custom border textures"
 T[M.DARK_MODE] = "Darken unit frame borders, action bars, minimap, and buff icons"
+T[M.HEALTHBAR_COLOR] = "Color health bars by class for players and by reaction for NPCs"
 
 local scrollChild = W.CreateScrollPanel(panel)
 
@@ -43,6 +44,7 @@ local texturesSection = W.CreateSection(texturesHeader)
 local statusBarTexture = W.CreateCheckbox(texturesSection, "Status Bar Texture", M.STATUS_BAR_TEXTURE)
 local biggerHealthbar = W.CreateCheckbox(statusBarTexture, "Bigger Healthbars", M.BIGGER_HEALTHBAR)
 local darkMode = W.CreateCheckbox(biggerHealthbar, "Dark Mode", M.DARK_MODE)
+local healthbarColor = W.CreateCheckbox(darkMode, "Healthbar Colors", M.HEALTHBAR_COLOR)
 
 -- General
 local generalHeader = W.CreateHeader(texturesSection, "General")

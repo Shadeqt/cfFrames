@@ -27,7 +27,7 @@ local function GetCastBar(nameplate, unit)
 		bar:SetStatusBarTexture(hpTex:GetTexture())
 		bar:GetStatusBarTexture():SetDrawLayer(layer, sublevel or 0)
 	end
-	bar:SetPoint("TOP", healthBar, "BOTTOM", -0.5, -3)
+	bar:SetPoint("TOP", healthBar, "BOTTOM", -0.5, -5)
 	bar:SetSize(healthBar:GetWidth(), healthBar:GetHeight()-2)
 
 	local bw = healthBar:GetWidth() * 1.16
@@ -41,9 +41,16 @@ local function GetCastBar(nameplate, unit)
 	bar.Spark:SetSize(16, 16)
 
 	bar.Icon:SetPoint("LEFT", bar, "RIGHT", 3, 0)
-	bar.Icon:SetSize(12, 12)
+	bar.Icon:SetSize(14, 14)
 
 	bar.Text:SetPoint("CENTER")
+
+	-- Darken border and add icon border if dark mode is on
+	if cfFramesDB[M.DARK_MODE] then
+		local c = cfFrames.DARK_COLOR
+		bar.Border:SetVertexColor(c, c, c)
+		cfFrames.CreateDarkBorder(bar, bar.Icon)
+	end
 
 	nameplate.cfCastBar = bar
 	return bar
@@ -57,11 +64,40 @@ frame:SetScript("OnEvent", function(_, event, unit)
 
 	if event == "NAME_PLATE_UNIT_ADDED" then
 		local bar = GetCastBar(nameplate, unit)
+		-- Reset stale state before rebinding
+		bar:Hide()
+		bar.casting = nil
+		bar.channeling = nil
+		bar:SetValue(0)
+		bar:SetMinMaxValues(0, 1)
+		bar:SetParent(nameplate.UnitFrame)
 		bar.unit = unit
 		CastingBarFrame_SetUnit(bar, unit)
+		-- Pick up in-progress cast (PLAYER_ENTERING_WORLD checks UnitCastingInfo internally)
+		if CastingBarFrame_OnEvent then
+			CastingBarFrame_OnEvent(bar, "PLAYER_ENTERING_WORLD")
+		end
+		if not bar.cfHooked then
+			bar.cfHooked = true
+			bar:HookScript("OnEvent", function(self, evt, evtUnit)
+				-- Force template to re-read cast state with correct unit
+				if evt == "UNIT_SPELLCAST_START" or evt == "UNIT_SPELLCAST_CHANNEL_START" then
+					self.unit = evtUnit
+					if CastingBarFrame_OnEvent then
+						CastingBarFrame_OnEvent(self, "PLAYER_ENTERING_WORLD")
+					end
+				end
+				-- Hide on stop/interrupt/fail for our unit only
+				if evtUnit == self.unit then
+					if evt == "UNIT_SPELLCAST_STOP" or evt == "UNIT_SPELLCAST_INTERRUPTED"
+					or evt == "UNIT_SPELLCAST_FAILED" or evt == "UNIT_SPELLCAST_CHANNEL_STOP" then
+						self:Hide()
+					end
+				end
+			end)
+		end
 	elseif event == "NAME_PLATE_UNIT_REMOVED" then
 		if nameplate.cfCastBar then
-			CastingBarFrame_SetUnit(nameplate.cfCastBar, nil)
 			nameplate.cfCastBar:Hide()
 		end
 	end

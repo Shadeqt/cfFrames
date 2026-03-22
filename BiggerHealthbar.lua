@@ -72,8 +72,19 @@ local function Enable()
 	-- Target dead text
 	MoveRegion(TargetFrameTextureFrameDeadText, "CENTER", TargetFrame, "CENTER", -50, 12)
 
-	-- Target background
+	-- Target background — hide and hook to prevent Blizzard resetting it on target change
 	TargetFrameNameBackground:SetVertexColor(0, 0, 0, 0)
+	if not TargetFrameNameBackground.cfBiggerHPHooked then
+		hooksecurefunc(TargetFrameNameBackground, "SetVertexColor", function(self, r, g, b, a)
+			if self.cfChanging then return end
+			if not cfFramesDB[M.BIGGER_HEALTHBAR] then return end
+			if r == 0 and g == 0 and b == 0 and a == 0 then return end
+			self.cfChanging = true
+			self:SetVertexColor(0, 0, 0, 0)
+			self.cfChanging = false
+		end)
+		TargetFrameNameBackground.cfBiggerHPHooked = true
+	end
 	TargetFrame.Background:SetHeight(41)
 end
 
@@ -105,4 +116,38 @@ hooksecurefunc(PlayerFrameTexture, "SetTexture", function(self, texture)
 	end
 end)
 
-cfFrames:RegisterModule(M.BIGGER_HEALTHBAR, Enable, function() end)
+local function RestorePoint(frame, point, relativeTo, relativePoint, x, y)
+	frame:ClearAllPoints()
+	frame:SetPoint(point, relativeTo, relativePoint, x, y, SENTINEL)
+end
+
+local function Disable()
+	-- Restore default textures
+	PlayerFrameTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame")
+	TargetFrameTextureFrameTexture:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame")
+
+	-- Restore default heights
+	PlayerFrameHealthBar:SetHeight(12)
+	TargetFrameHealthBar:SetHeight(12)
+	PlayerStatusTexture:SetHeight(52)
+	TargetFrame.Background:SetHeight(27)
+
+	-- Restore target frame positions (from Blizzard XML defaults)
+	RestorePoint(TargetFrameHealthBar, "TOPRIGHT", TargetFrame, "TOPRIGHT", -106, -41)
+	RestorePoint(TargetFrameManaBar, "TOPRIGHT", TargetFrame, "TOPRIGHT", -106, -52)
+	RestorePoint(TargetFrame.name, "CENTER", TargetFrame, "CENTER", -50, 19)
+	RestorePoint(TargetFrameHealthBar.TextString, "CENTER", TargetFrameHealthBar, "CENTER", 0, 0)
+	RestorePoint(TargetFrameHealthBar.RightText, "RIGHT", TargetFrameHealthBar, "RIGHT", -2, 0)
+	RestorePoint(TargetFrameHealthBar.LeftText, "LEFT", TargetFrameHealthBar, "LEFT", 2, 0)
+	RestorePoint(TargetFrameManaBar.TextString, "CENTER", TargetFrameManaBar, "CENTER", 0, 0)
+	RestorePoint(TargetFrameTextureFrameDeadText, "CENTER", TargetFrameHealthBar, "CENTER", 0, 0)
+
+	-- Let Blizzard re-layout player frame
+	PlayerFrame_ToPlayerArt(PlayerFrame)
+	if UnitExists("target") then
+		TargetFrame_Update(TargetFrame)
+		TargetFrame_CheckClassification(TargetFrame)
+	end
+end
+
+cfFrames:RegisterModule(M.BIGGER_HEALTHBAR, Enable, Disable)

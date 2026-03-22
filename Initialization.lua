@@ -33,6 +33,7 @@ cfFrames.MODULES = {
 	NAMEPLATE_CASTBAR = "NameplateCastbar",
 	BIGGER_HEALTHBAR = "BiggerHealthbar",
 	DARK_MODE = "DarkMode",
+	HEALTHBAR_COLOR = "HealthbarColor",
 }
 
 local M = cfFrames.MODULES
@@ -57,6 +58,7 @@ local DEFAULTS = {
 	[M.NAMEPLATE_CASTBAR] = true,
 	[M.BIGGER_HEALTHBAR] = true,
 	[M.DARK_MODE] = true,
+	[M.HEALTHBAR_COLOR] = true,
 }
 
 local frame = CreateFrame("Frame")

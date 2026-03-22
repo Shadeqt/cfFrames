@@ -26,5 +26,6 @@ StatusBarTexture.lua
 NameplateCastbar.lua
 BiggerHealthbar.lua
 DarkMode.lua
+HealthbarColor.lua
 Interface\Widgets.lua
 Interface\Settings.lua
