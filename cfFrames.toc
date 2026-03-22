@@ -25,7 +25,9 @@ CombatGlow.lua
 StatusBarTexture.lua
 NameplateCastbar.lua
 BiggerHealthbar.lua
-DarkMode.lua
+BuffSize.lua
+IconZoom.lua
 HealthbarColor.lua
+DarkMode.lua
 Interface\Widgets.lua
 Interface\Settings.lua

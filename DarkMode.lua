@@ -286,63 +286,45 @@ nameplateEventFrame:SetScript("OnEvent", function(_, _, unit)
 	if nameplate then DarkenNameplate(nameplate) end
 end)
 
--- Buffs
-local function CreateDarkBorder(parent, icon)
+-- Buff/aura border — sized to parent button
+local function CreateDarkBorder(parent)
 	if parent.cfDarkBorder then return parent.cfDarkBorder end
-	icon = icon or parent.icon or parent.Icon or _G[parent:GetName() and (parent:GetName() .. "Icon")]
-	if not icon then return nil end
+	local w, h = parent:GetSize()
+	if w == 0 or h == 0 then return nil end
 	local border = parent:CreateTexture(nil, "OVERLAY")
-	border:SetTexture("Interface\\Buttons\\UI-Debuff-Border")
-	border:SetPoint("TOPLEFT", icon, "TOPLEFT", -1, 1)
-	border:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", 1, -1)
+	border:SetTexture("Interface\\Buttons\\UI-Debuff-Overlays")
+	border:SetTexCoord(0.296875, 0.5703125, 0, 0.515625)
+	border:SetPoint("CENTER", parent, "CENTER")
+	if w >= 30 and h >= 30 then
+		border:SetSize(w * 1.1, h * 1.07)
+	else
+		border:SetSize(w + 2, h + 1)
+	end
 	border:SetVertexColor(COLOR, COLOR, COLOR)
 	parent.cfDarkBorder = border
 	TrackCreatedTexture(border)
 	return border
 end
+
+-- Castbar icon border — sized to icon
+local function CreateDarkIconBorder(parent, icon)
+	if parent.cfDarkBorder then return parent.cfDarkBorder end
+	if not icon then return nil end
+	local w, h = icon:GetSize()
+	if w == 0 or h == 0 then return nil end
+	local border = parent:CreateTexture(nil, "OVERLAY")
+	border:SetTexture("Interface\\Buttons\\UI-Debuff-Overlays")
+	border:SetTexCoord(0.296875, 0.5703125, 0, 0.515625)
+	border:SetSize(w + 1, h + 1)
+	border:SetPoint("CENTER", icon, "CENTER")
+	border:SetVertexColor(COLOR, COLOR, COLOR)
+	parent.cfDarkBorder = border
+	TrackCreatedTexture(border)
+	return border
+end
+cfFrames.DarkenTexture = DarkenTexture
 cfFrames.CreateDarkBorder = CreateDarkBorder
-
-local function DarkenBuffBorder(button)
-	if not button then return end
-	local name = button:GetName()
-	-- Skip debuffs — preserve DebuffTypeColor
-	if name and name:match("Debuff") then return end
-	-- If button already has a native border, darken it instead of creating one
-	local nativeBorder = name and _G[name .. "Border"]
-	if nativeBorder then
-		DarkenTexture(nativeBorder, COLOR)
-		return
-	end
-	local border = CreateDarkBorder(button)
-	if border then
-		border:Show()
-		border:SetVertexColor(COLOR, COLOR, COLOR)
-	end
-end
-
--- Hook player buff/debuff updates — catches all current and future buttons
-if AuraButton_Update then
-	hooksecurefunc("AuraButton_Update", function(buttonName, index)
-		if not cfFramesDB or not cfFramesDB[M.DARK_MODE] then return end
-		local button = _G[buttonName .. index]
-		if button then DarkenBuffBorder(button) end
-	end)
-end
-
--- Hook target and pet aura updates
-if TargetFrame_UpdateAuras then
-	hooksecurefunc("TargetFrame_UpdateAuras", function()
-		if not cfFramesDB or not cfFramesDB[M.DARK_MODE] then return end
-		for i = 1, MAX_TARGET_BUFFS do
-			local btn = _G["TargetFrameBuff" .. i]
-			if btn and btn:IsShown() then DarkenBuffBorder(btn) end
-		end
-		for i = 1, 16 do
-			local btn = _G["PetFrameBuff" .. i]
-			if btn and btn:IsShown() then DarkenBuffBorder(btn) end
-		end
-	end)
-end
+cfFrames.CreateDarkIconBorder = CreateDarkIconBorder
 
 -- Chat Editbox
 local function DarkenChatEditbox()
@@ -372,9 +354,10 @@ end
 local function DarkenCastbars()
 	if TargetFrameSpellBar and TargetFrameSpellBar.Border then
 		DarkenTexture(TargetFrameSpellBar.Border, COLOR)
-		if TargetFrameSpellBar.Icon then
-			cfFrames.CreateDarkBorder(TargetFrameSpellBar, TargetFrameSpellBar.Icon)
-		end
+		TargetFrameSpellBar:HookScript("OnShow", function(self)
+			if not cfFramesDB or not cfFramesDB[M.BUFF_SIZE] then return end
+			CreateDarkIconBorder(self, self.Icon)
+		end)
 	end
 	if CastingBarFrame and CastingBarFrame.Border then
 		DarkenTexture(CastingBarFrame.Border, COLOR)
@@ -408,10 +391,6 @@ local function Enable()
 	for _, tex in ipairs(createdTextures) do
 		tex:Show()
 		tex:SetVertexColor(COLOR, COLOR, COLOR)
-	end
-	-- Temp enchant borders
-	for i = 1, NUM_TEMP_ENCHANT_FRAMES do
-		DarkenBuffBorder(_G["TempEnchant" .. i])
 	end
 end
 

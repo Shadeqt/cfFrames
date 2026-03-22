@@ -7,16 +7,19 @@ local RARE_TEXTURE      = MEDIA .. "UI-TargetingFrame-Rare"
 local RAREELITE_TEXTURE = MEDIA .. "UI-TargetingFrame-Rare-Elite"
 
 local SENTINEL = "cfFramesBiggerHP"
+local movedFrames = {}
 
--- EasyFrames-style MoveRegion: locks a frame's position permanently via SetPoint hook
 local function MoveRegion(frame, point, relativeTo, relativePoint, xOffset, yOffset)
+	if not frame then return end
 	frame:ClearAllPoints()
 	frame:SetPoint(point, relativeTo, relativePoint, xOffset, yOffset, SENTINEL)
+	movedFrames[frame] = {point, relativeTo, relativePoint, xOffset, yOffset}
 
 	if not frame.cfBiggerHPHooked then
 		hooksecurefunc(frame, "SetPoint", function(self, _, _, _, _, _, flag)
 			if flag ~= SENTINEL then
 				if not cfFramesDB[M.BIGGER_HEALTHBAR] then return end
+				if InCombatLockdown() then return end
 				self:ClearAllPoints()
 				self:SetPoint(point, relativeTo, relativePoint, xOffset, yOffset, SENTINEL)
 			end
@@ -24,6 +27,17 @@ local function MoveRegion(frame, point, relativeTo, relativePoint, xOffset, yOff
 		frame.cfBiggerHPHooked = true
 	end
 end
+
+-- Re-apply positions after combat ends
+local combatFrame = CreateFrame("Frame")
+combatFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
+combatFrame:SetScript("OnEvent", function()
+	if not cfFramesDB[M.BIGGER_HEALTHBAR] then return end
+	for frame, args in pairs(movedFrames) do
+		frame:ClearAllPoints()
+		frame:SetPoint(args[1], args[2], args[3], args[4], args[5], SENTINEL)
+	end
+end)
 
 local function Enable()
 	-- Player frame border texture

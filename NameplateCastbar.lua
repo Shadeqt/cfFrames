@@ -45,11 +45,11 @@ local function GetCastBar(nameplate, unit)
 
 	bar.Text:SetPoint("CENTER")
 
-	-- Darken border and add icon border if dark mode is on
-	if cfFramesDB[M.DARK_MODE] then
+	-- Add icon border if buff size is on
+	if cfFramesDB[M.BUFF_SIZE] then
 		local c = cfFrames.DARK_COLOR
 		bar.Border:SetVertexColor(c, c, c)
-		cfFrames.CreateDarkBorder(bar, bar.Icon)
+		cfFrames.CreateDarkIconBorder(bar, bar.Icon)
 	end
 
 	nameplate.cfCastBar = bar

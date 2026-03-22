@@ -34,6 +34,8 @@ cfFrames.MODULES = {
 	BIGGER_HEALTHBAR = "BiggerHealthbar",
 	DARK_MODE = "DarkMode",
 	HEALTHBAR_COLOR = "HealthbarColor",
+	ICON_ZOOM = "IconZoom",
+	BUFF_SIZE = "BuffSize",
 }
 
 local M = cfFrames.MODULES
@@ -59,6 +61,8 @@ local DEFAULTS = {
 	[M.BIGGER_HEALTHBAR] = true,
 	[M.DARK_MODE] = true,
 	[M.HEALTHBAR_COLOR] = true,
+	[M.ICON_ZOOM] = true,
+	[M.BUFF_SIZE] = true,
 }
 
 local frame = CreateFrame("Frame")
