@@ -26,6 +26,7 @@ StatusBarTexture.lua
 NameplateCastbar.lua
 BiggerHealthbar.lua
 BuffSize.lua
+BuffZoom.lua
 IconZoom.lua
 HealthbarColor.lua
 DarkMode.lua

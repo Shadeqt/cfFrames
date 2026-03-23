@@ -9,13 +9,14 @@ local darkenedTextures = {}
 local createdTextures = {}
 
 -- Darken an existing Blizzard texture (restored to white on Disable)
-local function DarkenTexture(texture, color)
+local function DarkenTexture(texture, color, noDesaturate)
 	if not texture then return end
 	if not texture:IsObjectType("Texture") then return end
 	local name = texture:GetName()
 	if name and name:match("Bg$") then return end
 	if name and name:match("Portrait$") then return end
 	texture:SetVertexColor(color, color, color)
+	if not noDesaturate then texture:SetDesaturated(true) end
 	table.insert(darkenedTextures, texture)
 
 	if not texture.cfDarkHooked then
@@ -34,6 +35,7 @@ end
 local function RestoreTexture(texture)
 	texture.cfDarkChanging = true
 	texture:SetVertexColor(1, 1, 1)
+	texture:SetDesaturated(false)
 	texture.cfDarkChanging = false
 end
 
@@ -135,14 +137,14 @@ local function DarkenActionBar()
 			local btn = _G[btnName]
 			if btn then
 				for i = 1, btn:GetNumRegions() do
-					DarkenTexture(select(i, btn:GetRegions()), COLOR_LIGHT)
+					DarkenTexture(select(i, btn:GetRegions()), COLOR_LIGHT, true)
 				end
 			end
 		end
 	end
 	if KeyRingButton then
 		for i = 1, KeyRingButton:GetNumRegions() do
-			DarkenTexture(select(i, KeyRingButton:GetRegions()), COLOR_LIGHT)
+			DarkenTexture(select(i, KeyRingButton:GetRegions()), COLOR_LIGHT, true)
 		end
 	end
 end
@@ -286,44 +288,56 @@ nameplateEventFrame:SetScript("OnEvent", function(_, _, unit)
 	if nameplate then DarkenNameplate(nameplate) end
 end)
 
--- Buff/aura border — sized to parent button
-local function CreateDarkBorder(parent)
-	if parent.cfDarkBorder then return parent.cfDarkBorder end
-	local w, h = parent:GetSize()
-	if w == 0 or h == 0 then return nil end
-	local border = parent:CreateTexture(nil, "OVERLAY")
-	border:SetTexture("Interface\\Buttons\\UI-Debuff-Overlays")
-	border:SetTexCoord(0.296875, 0.5703125, 0, 0.515625)
-	border:SetPoint("CENTER", parent, "CENTER")
-	if w >= 30 and h >= 30 then
-		border:SetSize(w * 1.1, h * 1.07)
-	else
-		border:SetSize(w + 2, h + 1)
-	end
-	border:SetVertexColor(COLOR, COLOR, COLOR)
-	parent.cfDarkBorder = border
-	TrackCreatedTexture(border)
-	return border
-end
+-- -- NEW: Buff/aura border — BackdropTemplate with Blizzard tooltip border
+-- local function CreateDarkBorder(parent)
+-- 	if parent.cfDarkBorder then return parent.cfDarkBorder end
+-- 	local icon = parent.icon or parent.Icon or (parent.GetName and parent:GetName() and _G[parent:GetName() .. "Icon"])
+-- 	if not icon then return nil end
+-- 	local border = CreateFrame("Frame", nil, parent, "BackdropTemplate")
+-- 	border:SetBackdrop({ edgeFile = "Interface/Tooltips/UI-Tooltip-Border", edgeSize = 8.5 })
+-- 	border:SetPoint("TOPLEFT", icon, -1.5, 1.5)
+-- 	border:SetPoint("BOTTOMRIGHT", icon, 1.5, -2)
+-- 	border:SetBackdropBorderColor(COLOR, COLOR, COLOR)
+-- 	border:SetFrameLevel(parent:GetFrameLevel() + 2)
+-- 	parent.cfDarkBorder = border
+-- 	TrackCreatedTexture(border)
+-- 	return border
+-- end
+--
+-- -- OLD: Buff/aura border — sized to parent button (UI-Debuff-Overlays)
+-- local function CreateDarkBorder(parent)
+-- 	if parent.cfDarkBorder then return parent.cfDarkBorder end
+-- 	local w, h = parent:GetSize()
+-- 	if w == 0 or h == 0 then return nil end
+-- 	local border = parent:CreateTexture(nil, "OVERLAY")
+-- 	border:SetTexture("Interface\\Buttons\\UI-Debuff-Overlays")
+-- 	border:SetTexCoord(0.296875, 0.5703125, 0, 0.515625)
+-- 	border:SetPoint("CENTER", parent, "CENTER")
+-- 	if w >= 30 and h >= 30 then
+-- 		border:SetSize(w * 1.1, h * 1.07)
+-- 	else
+-- 		border:SetSize(w + 2, h + 1)
+-- 	end
+-- 	border:SetVertexColor(COLOR, COLOR, COLOR)
+-- 	parent.cfDarkBorder = border
+-- 	TrackCreatedTexture(border)
+-- 	return border
+-- end
 
--- Castbar icon border — sized to icon
+-- Castbar icon border
 local function CreateDarkIconBorder(parent, icon)
 	if parent.cfDarkBorder then return parent.cfDarkBorder end
 	if not icon then return nil end
-	local w, h = icon:GetSize()
-	if w == 0 or h == 0 then return nil end
-	local border = parent:CreateTexture(nil, "OVERLAY")
-	border:SetTexture("Interface\\Buttons\\UI-Debuff-Overlays")
-	border:SetTexCoord(0.296875, 0.5703125, 0, 0.515625)
-	border:SetSize(w + 1, h + 1)
-	border:SetPoint("CENTER", icon, "CENTER")
-	border:SetVertexColor(COLOR, COLOR, COLOR)
+	local border = CreateFrame("Frame", nil, parent, "BackdropTemplate")
+	border:SetBackdrop({ edgeFile = "Interface/Tooltips/UI-Tooltip-Border", edgeSize = 8.5 })
+	border:SetPoint("TOPLEFT", icon, -1.5, 1.5)
+	border:SetPoint("BOTTOMRIGHT", icon, 1.5, -2)
+	border:SetBackdropBorderColor(COLOR, COLOR, COLOR)
 	parent.cfDarkBorder = border
 	TrackCreatedTexture(border)
 	return border
 end
 cfFrames.DarkenTexture = DarkenTexture
-cfFrames.CreateDarkBorder = CreateDarkBorder
 cfFrames.CreateDarkIconBorder = CreateDarkIconBorder
 
 -- Chat Editbox
@@ -355,7 +369,7 @@ local function DarkenCastbars()
 	if TargetFrameSpellBar and TargetFrameSpellBar.Border then
 		DarkenTexture(TargetFrameSpellBar.Border, COLOR)
 		TargetFrameSpellBar:HookScript("OnShow", function(self)
-			if not cfFramesDB or not cfFramesDB[M.BUFF_SIZE] then return end
+			if not cfFramesDB or not cfFramesDB[M.BUFF_ZOOM] then return end
 			CreateDarkIconBorder(self, self.Icon)
 		end)
 	end
@@ -387,10 +401,14 @@ local function Enable()
 	for _, nameplate in pairs(C_NamePlate.GetNamePlates()) do
 		DarkenNameplate(nameplate)
 	end
-	-- Re-show all created textures
-	for _, tex in ipairs(createdTextures) do
-		tex:Show()
-		tex:SetVertexColor(COLOR, COLOR, COLOR)
+	-- Re-show all created borders/textures
+	for _, obj in ipairs(createdTextures) do
+		obj:Show()
+		if obj.SetBackdropBorderColor then
+			obj:SetBackdropBorderColor(COLOR, COLOR, COLOR)
+		elseif obj.SetVertexColor then
+			obj:SetVertexColor(COLOR, COLOR, COLOR)
+		end
 	end
 end
 

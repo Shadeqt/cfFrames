@@ -30,6 +30,7 @@ T[M.DARK_MODE] = "Darken unit frame borders, action bars, minimap, and buff icon
 T[M.HEALTHBAR_COLOR] = "Color health bars by class for players and by reaction for NPCs"
 T[M.ICON_ZOOM] = "Crop icon edges on action bars, buff icons, and castbar icons"
 T[M.BUFF_SIZE] = "Resize player buff and debuff icons to match action bar size"
+T[M.BUFF_ZOOM] = "Crop buff icon edges and darken borders"
 
 local scrollChild = W.CreateScrollPanel(panel)
 
@@ -48,7 +49,8 @@ local biggerHealthbar = W.CreateCheckbox(statusBarTexture, "Bigger Healthbars", 
 local darkMode = W.CreateCheckbox(biggerHealthbar, "Dark Mode", M.DARK_MODE)
 local healthbarColor = W.CreateCheckbox(darkMode, "Healthbar Colors", M.HEALTHBAR_COLOR)
 local iconZoom = W.CreateCheckbox(healthbarColor, "Icon Zoom", M.ICON_ZOOM)
-local buffSize = W.CreateCheckbox(iconZoom, "EXPERIMENTAL Buff size and borders", M.BUFF_SIZE)
+local buffZoom = W.CreateCheckbox(iconZoom, "Buff Zoom and Borders", M.BUFF_ZOOM)
+local buffSize = W.CreateCheckbox(buffZoom, "Buff Size", M.BUFF_SIZE, COL2)
 
 -- General
 local generalHeader = W.CreateHeader(texturesSection, "General")

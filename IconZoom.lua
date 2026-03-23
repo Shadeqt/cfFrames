@@ -1,6 +1,6 @@
 local M = cfFrames.MODULES
 
-local ZOOM = { 0.075, 0.925, 0.075, 0.925 }
+local ZOOM = { 0.05, 0.95, 0.05, 0.95 }
 local DEFAULT = { 0, 1, 0, 1 }
 
 cfFrames.ICON_ZOOM_COORDS = ZOOM

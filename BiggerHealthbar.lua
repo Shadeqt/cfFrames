@@ -41,8 +41,7 @@ end)
 
 local function Enable()
 	-- Player frame border texture
-	local playerTexture = PlayerFrameTexture
-	playerTexture:SetTexture(NORMAL_TEXTURE)
+	PlayerFrameTexture:SetTexture(NORMAL_TEXTURE)
 
 	-- Player health bar
 	PlayerFrameHealthBar:SetHeight(27)
@@ -100,9 +99,14 @@ local function Enable()
 		TargetFrameNameBackground.cfBiggerHPHooked = true
 	end
 	TargetFrame.Background:SetHeight(41)
+
+	-- Apply classification texture for current target
+	if UnitExists("target") then
+		TargetFrame_CheckClassification(TargetFrame)
+	end
 end
 
--- Classification hook: swap border texture per mob type (runs always, guarded by DB check)
+-- Classification hook: swap border texture per mob type
 hooksecurefunc("TargetFrame_CheckClassification", function(frame)
 	if not cfFramesDB[M.BIGGER_HEALTHBAR] then return end
 	if not frame or not frame.unit then return end
@@ -158,10 +162,6 @@ local function Disable()
 
 	-- Let Blizzard re-layout player frame
 	PlayerFrame_ToPlayerArt(PlayerFrame)
-	if UnitExists("target") then
-		TargetFrame_Update(TargetFrame)
-		TargetFrame_CheckClassification(TargetFrame)
-	end
 end
 
 cfFrames:RegisterModule(M.BIGGER_HEALTHBAR, Enable, Disable)
