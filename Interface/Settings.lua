@@ -12,9 +12,6 @@ T[M.BBF_INTEGRATION] = "Sync dark mode, icon zoom, textures, and pet name center
 T[M.QUESTIE_INTEGRATION] = "Show pending quest XP as a yellow overlay on the experience bar using Questie's quest database"
 T[M.EXPERIENCE_BAR] = "Display the status text format chosen in Blizzard's interface options on the experience bar"
 T[M.TARGET_FRAME_STATUS_TEXT] = "Display the status text format chosen in Blizzard's interface options on the target frame"
-T[M.POWER_TICKER] = "Show a spark on the mana/energy bar indicating tick timing"
-T[M.POWER_TICKER_MANA_FULL] = "Keep the ticker visible when mana is full"
-T[M.POWER_TICKER_ENERGY_FULL] = "Keep the ticker visible when energy is full"
 T[M.PLAYER_COMBAT_GLOW] = "Hide the pulsing glow around the player portrait during combat"
 T[M.PLAYER_HIT_INDICATOR] = "Hide the damage numbers that flash on the player portrait"
 T[M.PET_LEVEL] = "Display pet level on the pet portrait when pet level differs from player level"
@@ -28,9 +25,8 @@ T[M.NAMEPLATE_CASTBAR] = "Show cast bars on enemy nameplates"
 T[M.BIGGER_HEALTHBAR] = "Enlarge the health bar on player and target frames using custom border textures"
 T[M.DARK_MODE] = "Darken unit frame borders, action bars, minimap, and buff icons"
 T[M.HEALTHBAR_COLOR] = "Color health bars by class for players and by reaction for NPCs"
-T[M.ICON_ZOOM] = "Crop icon edges on action bars, buff icons, and castbar icons"
+T[M.ICON_ZOOM] = "Crop icon edges on action bars and buff icons"
 T[M.BUFF_SIZE] = "Resize player buff and debuff icons to match action bar size"
-T[M.BUFF_ZOOM] = "Crop buff icon edges and darken borders"
 
 local scrollChild = W.CreateScrollPanel(panel)
 
@@ -41,34 +37,38 @@ local modsSection = W.CreateSection(modsHeader)
 local bbfIntegration = W.CreateCheckbox(modsSection, "BetterBlizzFrames", M.BBF_INTEGRATION)
 local questieIntegration = W.CreateCheckbox(bbfIntegration, "Questie", M.QUESTIE_INTEGRATION, COL2)
 
--- Textures
-local texturesHeader = W.CreateHeader(modsSection, "Textures")
-local texturesSection = W.CreateSection(texturesHeader)
-local statusBarTexture = W.CreateCheckbox(texturesSection, "Status Bar Texture", M.STATUS_BAR_TEXTURE)
-local biggerHealthbar = W.CreateCheckbox(statusBarTexture, "Bigger Healthbars", M.BIGGER_HEALTHBAR)
-local darkMode = W.CreateCheckbox(biggerHealthbar, "Dark Mode", M.DARK_MODE)
-local healthbarColor = W.CreateCheckbox(darkMode, "Healthbar Colors", M.HEALTHBAR_COLOR)
-local iconZoom = W.CreateCheckbox(healthbarColor, "Icon Zoom", M.ICON_ZOOM)
-local buffZoom = W.CreateCheckbox(iconZoom, "Buff Zoom and Borders", M.BUFF_ZOOM)
-local buffSize = W.CreateCheckbox(buffZoom, "Buff Size", M.BUFF_SIZE, COL2)
+bbfIntegration:HookScript("OnShow", function(self)
+	if not C_AddOns.IsAddOnLoaded("BetterBlizzFrames") then
+		self:Disable()
+		self.Text:SetTextColor(0.5, 0.5, 0.5)
+		T[M.BBF_INTEGRATION] = "BetterBlizzFrames addon not found"
+	end
+end)
+questieIntegration:HookScript("OnShow", function(self)
+	if not C_AddOns.IsAddOnLoaded("Questie") then
+		self:Disable()
+		self.Text:SetTextColor(0.5, 0.5, 0.5)
+		T[M.QUESTIE_INTEGRATION] = "Questie addon not found"
+	end
+end)
 
 -- General
-local generalHeader = W.CreateHeader(texturesSection, "General")
+local generalHeader = W.CreateHeader(modsSection, "General")
 local generalSection = W.CreateSection(generalHeader)
-local experienceBar = W.CreateCheckbox(generalSection, "Show Experience Bar Text", M.EXPERIENCE_BAR)
-
--- Target Frame
-local targetHeader = W.CreateHeader(generalSection, "Target Frame")
-local targetSection = W.CreateSection(targetHeader)
-local targetStatusText = W.CreateCheckbox(targetSection, "Show Status Text", M.TARGET_FRAME_STATUS_TEXT)
+local darkMode = W.CreateCheckbox(generalSection, "Dark Mode", M.DARK_MODE)
+local biggerHealthbar = W.CreateCheckbox(darkMode, "Bigger Healthbars", M.BIGGER_HEALTHBAR)
+local healthbarColor = W.CreateCheckbox(biggerHealthbar, "Healthbar Colors", M.HEALTHBAR_COLOR, COL2)
+local statusBarTexture = W.CreateCheckbox(biggerHealthbar, "Status Bar Texture", M.STATUS_BAR_TEXTURE)
+local targetStatusText = W.CreateCheckbox(statusBarTexture, "Show Target Status Text", M.TARGET_FRAME_STATUS_TEXT)
+local experienceBar = W.CreateCheckbox(targetStatusText, "Show Experience Bar Text", M.EXPERIENCE_BAR, COL2)
+local nameplateCastbar = W.CreateCheckbox(targetStatusText, "Show Enemy Cast Bars", M.NAMEPLATE_CASTBAR)
+local iconZoom = W.CreateCheckbox(nameplateCastbar, "Icon Zoom", M.ICON_ZOOM)
+local buffSize = W.CreateCheckbox(iconZoom, "Buff Size", M.BUFF_SIZE, COL2)
 
 -- Player Frame
-local playerHeader = W.CreateHeader(targetSection, "Player Frame")
+local playerHeader = W.CreateHeader(generalSection, "Player Frame")
 local playerSection = W.CreateSection(playerHeader)
-local powerTicker = W.CreateCheckbox(playerSection, "Show Power Ticker", M.POWER_TICKER)
-local manaFull = W.CreateCheckbox(powerTicker, "Show at Full Mana", M.POWER_TICKER_MANA_FULL, nil, powerTicker)
-local energyFull = W.CreateCheckbox(manaFull, "Show at Full Energy", M.POWER_TICKER_ENERGY_FULL, COL2, powerTicker)
-local playerGlow = W.CreateCheckbox(manaFull, "Hide Combat Glow", M.PLAYER_COMBAT_GLOW)
+local playerGlow = W.CreateCheckbox(playerSection, "Hide Combat Glow", M.PLAYER_COMBAT_GLOW)
 local playerHit = W.CreateCheckbox(playerGlow, "Hide Hit Indicator", M.PLAYER_HIT_INDICATOR, COL2)
 
 -- Pet Frame
@@ -80,11 +80,6 @@ local petDebuffs = W.CreateCheckbox(petLevel, "Show Pet Debuffs", M.PET_DEBUFFS)
 local petName = W.CreateCheckbox(petDebuffs, "Center Pet Name", M.PET_NAME, COL2)
 local petGlow = W.CreateCheckbox(petDebuffs, "Hide Combat Glow", M.PET_COMBAT_GLOW)
 local petHit = W.CreateCheckbox(petGlow, "Hide Hit Indicator", M.PET_HIT_INDICATOR, COL2)
-
--- Nameplates
-local nameplatesHeader = W.CreateHeader(petSection, "Nameplates")
-local nameplatesSection = W.CreateSection(nameplatesHeader)
-local nameplateCastbar = W.CreateCheckbox(nameplatesSection, "Show Enemy Cast Bars", M.NAMEPLATE_CASTBAR)
 
 local category = Settings.RegisterCanvasLayoutCategory(panel, panel.name, panel.name)
 Settings.RegisterAddOnCategory(category)

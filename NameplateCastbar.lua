@@ -42,6 +42,7 @@ local function GetCastBar(nameplate, unit)
 	if cfFramesDB[M.DARK_MODE] then
 		local c = cfFrames.DARK_COLOR
 		bar.Border:SetVertexColor(c, c, c)
+		cfFrames.CreateDarkIconBorder(bar, bar.Icon)
 	end
 
 	-- Fix inaccurate cast progress values in Classic Era

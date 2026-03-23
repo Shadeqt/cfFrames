@@ -288,41 +288,11 @@ nameplateEventFrame:SetScript("OnEvent", function(_, _, unit)
 	if nameplate then DarkenNameplate(nameplate) end
 end)
 
--- -- NEW: Buff/aura border — BackdropTemplate with Blizzard tooltip border
--- local function CreateDarkBorder(parent)
--- 	if parent.cfDarkBorder then return parent.cfDarkBorder end
--- 	local icon = parent.icon or parent.Icon or (parent.GetName and parent:GetName() and _G[parent:GetName() .. "Icon"])
--- 	if not icon then return nil end
--- 	local border = CreateFrame("Frame", nil, parent, "BackdropTemplate")
--- 	border:SetBackdrop({ edgeFile = "Interface/Tooltips/UI-Tooltip-Border", edgeSize = 8.5 })
--- 	border:SetPoint("TOPLEFT", icon, -1.5, 1.5)
--- 	border:SetPoint("BOTTOMRIGHT", icon, 1.5, -2)
--- 	border:SetBackdropBorderColor(COLOR, COLOR, COLOR)
--- 	border:SetFrameLevel(parent:GetFrameLevel() + 2)
--- 	parent.cfDarkBorder = border
--- 	TrackCreatedTexture(border)
--- 	return border
--- end
---
--- -- OLD: Buff/aura border — sized to parent button (UI-Debuff-Overlays)
--- local function CreateDarkBorder(parent)
--- 	if parent.cfDarkBorder then return parent.cfDarkBorder end
--- 	local w, h = parent:GetSize()
--- 	if w == 0 or h == 0 then return nil end
--- 	local border = parent:CreateTexture(nil, "OVERLAY")
--- 	border:SetTexture("Interface\\Buttons\\UI-Debuff-Overlays")
--- 	border:SetTexCoord(0.296875, 0.5703125, 0, 0.515625)
--- 	border:SetPoint("CENTER", parent, "CENTER")
--- 	if w >= 30 and h >= 30 then
--- 		border:SetSize(w * 1.1, h * 1.07)
--- 	else
--- 		border:SetSize(w + 2, h + 1)
--- 	end
--- 	border:SetVertexColor(COLOR, COLOR, COLOR)
--- 	parent.cfDarkBorder = border
--- 	TrackCreatedTexture(border)
--- 	return border
--- end
+-- Icon border (used for buff icons, castbar icons, etc.)
+local function GetIcon(button)
+	if not button then return nil end
+	return button.icon or button.Icon or (button.GetName and button:GetName() and _G[button:GetName() .. "Icon"])
+end
 
 -- Castbar icon border
 local function CreateDarkIconBorder(parent, icon)
@@ -339,6 +309,68 @@ local function CreateDarkIconBorder(parent, icon)
 end
 cfFrames.DarkenTexture = DarkenTexture
 cfFrames.CreateDarkIconBorder = CreateDarkIconBorder
+
+-- Buff/aura borders
+local function DarkenAuraButton(button)
+	if not button then return end
+	local name = button:GetName()
+	-- Skip debuffs — preserve DebuffTypeColor
+	if name and name:match("Debuff") then return end
+	-- If button has a native border, darken it
+	local nativeBorder = name and _G[name .. "Border"]
+	if nativeBorder then
+		nativeBorder:SetVertexColor(COLOR, COLOR, COLOR)
+		nativeBorder:SetDesaturated(true)
+		return
+	end
+	-- Otherwise create a dark border frame
+	local icon = GetIcon(button)
+	if icon then CreateDarkIconBorder(button, icon) end
+end
+
+local function RestoreAuraButton(button)
+	if not button then return end
+	if button.cfDarkBorder then button.cfDarkBorder:Hide() end
+	local name = button:GetName()
+	if name then
+		local nativeBorder = _G[name .. "Border"]
+		if nativeBorder then
+			nativeBorder:SetVertexColor(1, 1, 1)
+			nativeBorder:SetDesaturated(false)
+		end
+	end
+end
+
+local function ForEachAuraButton(fn)
+	for i = 1, BUFF_MAX_DISPLAY do fn(_G["BuffButton" .. i]) end
+	for i = 1, DEBUFF_MAX_DISPLAY do fn(_G["DebuffButton" .. i]) end
+	for i = 1, NUM_TEMP_ENCHANT_FRAMES do fn(_G["TempEnchant" .. i]) end
+	for i = 1, MAX_TARGET_BUFFS do fn(_G["TargetFrameBuff" .. i]) end
+	for i = 1, MAX_TARGET_DEBUFFS do fn(_G["TargetFrameDebuff" .. i]) end
+	for i = 1, 16 do fn(_G["PetFrameBuff" .. i]) end
+end
+
+if AuraButton_Update then
+	hooksecurefunc("AuraButton_Update", function(buttonName, index)
+		if not cfFramesDB[M.DARK_MODE] then return end
+		local button = _G[buttonName .. index]
+		if button then DarkenAuraButton(button) end
+	end)
+end
+
+if TargetFrame_UpdateAuras then
+	hooksecurefunc("TargetFrame_UpdateAuras", function()
+		if not cfFramesDB or not cfFramesDB[M.DARK_MODE] then return end
+		for i = 1, MAX_TARGET_BUFFS do
+			local btn = _G["TargetFrameBuff" .. i]
+			if btn and btn:IsShown() then DarkenAuraButton(btn) end
+		end
+		for i = 1, 16 do
+			local btn = _G["PetFrameBuff" .. i]
+			if btn and btn:IsShown() then DarkenAuraButton(btn) end
+		end
+	end)
+end
 
 -- Chat Editbox
 local function DarkenChatEditbox()
@@ -369,7 +401,7 @@ local function DarkenCastbars()
 	if TargetFrameSpellBar and TargetFrameSpellBar.Border then
 		DarkenTexture(TargetFrameSpellBar.Border, COLOR)
 		TargetFrameSpellBar:HookScript("OnShow", function(self)
-			if not cfFramesDB or not cfFramesDB[M.BUFF_ZOOM] then return end
+			if not cfFramesDB or not cfFramesDB[M.DARK_MODE] then return end
 			CreateDarkIconBorder(self, self.Icon)
 		end)
 	end
@@ -396,6 +428,7 @@ local function Enable()
 	DarkenRaidFrames()
 	DarkenChatEditbox()
 	DarkenCastbars()
+	ForEachAuraButton(DarkenAuraButton)
 	raidEventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
 	nameplateEventFrame:RegisterEvent("NAME_PLATE_UNIT_ADDED")
 	for _, nameplate in pairs(C_NamePlate.GetNamePlates()) do
@@ -421,6 +454,7 @@ local function Disable()
 	for _, tex in ipairs(createdTextures) do
 		tex:Hide()
 	end
+	ForEachAuraButton(RestoreAuraButton)
 end
 
 cfFrames:RegisterModule(M.DARK_MODE, Enable, Disable)

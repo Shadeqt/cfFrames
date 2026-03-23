@@ -14,10 +14,7 @@ function cfFrames:RegisterModule(key, enableFunc, disableFunc)
 end
 
 cfFrames.MODULES = {
-	POWER_TICKER = "PowerTicker",
-	POWER_TICKER_MANA_FULL = "PowerTicker_ManaFull",
-	POWER_TICKER_ENERGY_FULL = "PowerTicker_EnergyFull",
-	TARGET_FRAME_STATUS_TEXT = "TargetFrameStatusText",
+TARGET_FRAME_STATUS_TEXT = "TargetFrameStatusText",
 	EXPERIENCE_BAR = "ExperienceBar",
 	BBF_INTEGRATION = "BetterBlizzFramesIntegration",
 	QUESTIE_INTEGRATION = "QuestieIntegration",
@@ -36,16 +33,12 @@ cfFrames.MODULES = {
 	HEALTHBAR_COLOR = "HealthbarColor",
 	ICON_ZOOM = "IconZoom",
 	BUFF_SIZE = "BuffSize",
-	BUFF_ZOOM = "BuffZoom",
 }
 
 local M = cfFrames.MODULES
 
 local DEFAULTS = {
-	[M.POWER_TICKER] = true,
-	[M.POWER_TICKER_MANA_FULL] = true,
-	[M.POWER_TICKER_ENERGY_FULL] = true,
-	[M.TARGET_FRAME_STATUS_TEXT] = true,
+[M.TARGET_FRAME_STATUS_TEXT] = true,
 	[M.EXPERIENCE_BAR] = true,
 	[M.BBF_INTEGRATION] = true,
 	[M.QUESTIE_INTEGRATION] = true,
@@ -64,7 +57,6 @@ local DEFAULTS = {
 	[M.HEALTHBAR_COLOR] = true,
 	[M.ICON_ZOOM] = true,
 	[M.BUFF_SIZE] = true,
-	[M.BUFF_ZOOM] = true,
 }
 
 local frame = CreateFrame("Frame")

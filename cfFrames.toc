@@ -12,7 +12,6 @@ PetExperienceBar.lua
 PetName.lua
 PetDebuffs.lua
 TargetFrameStatusText.lua
-PowerTicker.lua
 ModIntegrations\BetterBlizzFrames\DarkMode_MinimapBorderTop.lua
 ModIntegrations\BetterBlizzFrames\DarkMode_PetLevelBorder.lua
 ModIntegrations\BetterBlizzFrames\DarkMode_PetActionBar.lua
@@ -26,7 +25,6 @@ StatusBarTexture.lua
 NameplateCastbar.lua
 BiggerHealthbar.lua
 BuffSize.lua
-BuffZoom.lua
 IconZoom.lua
 HealthbarColor.lua
 DarkMode.lua
