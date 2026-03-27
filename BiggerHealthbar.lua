@@ -74,14 +74,6 @@ local function Enable()
 	-- Target name
 	MoveRegion(TargetFrame.name, "CENTER", TargetFrame, "CENTER", -51, 35)
 
-	-- Target health text
-	MoveRegion(TargetFrameHealthBar.RightText, "RIGHT", TargetFrame, "RIGHT", 8, 12)
-	MoveRegion(TargetFrameHealthBar.LeftText, "LEFT", TargetFrame, "LEFT", -110, 12)
-	MoveRegion(TargetFrameHealthBar.TextString, "CENTER", TargetFrame, "CENTER", -50, 12)
-
-	-- Target mana text
-	MoveRegion(TargetFrameManaBar.TextString, "CENTER", TargetFrame, "CENTER", -50, -8)
-
 	-- Target dead text
 	MoveRegion(TargetFrameTextureFrameDeadText, "CENTER", TargetFrame, "CENTER", -50, 12)
 

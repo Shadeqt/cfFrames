@@ -54,11 +54,44 @@ local function ZoomAuraIcon(button, coords)
 	if icon then icon:SetTexCoord(unpack(coords)) end
 end
 
+-- Buff/aura icon border (for buttons that lack a native border)
+local function CreateIconBorder(button)
+	if not button then return end
+	if button.cfIconBorder then return end
+	local name = button:GetName()
+	-- Skip debuffs and buttons with native borders
+	if name and name:match("Debuff") then return end
+	if name and _G[name .. "Border"] then return end
+	local icon = GetIcon(button)
+	if not icon then return end
+	local border = CreateFrame("Frame", nil, button, "BackdropTemplate")
+	border:SetBackdrop({ edgeFile = "Interface/Tooltips/UI-Tooltip-Border", edgeSize = 8.5 })
+	border:SetPoint("TOPLEFT", icon, -1.5, 1.5)
+	border:SetPoint("BOTTOMRIGHT", icon, 1.5, -2)
+	if cfFramesDB[M.DARK_MODE] and cfFrames.DARK_COLOR then
+		border:SetBackdropBorderColor(cfFrames.DARK_COLOR, cfFrames.DARK_COLOR, cfFrames.DARK_COLOR)
+	else
+		border:SetBackdropBorderColor(1, 1, 1)
+	end
+	button.cfIconBorder = border
+end
+
+local function RemoveIconBorder(button)
+	if not button then return end
+	if button.cfIconBorder then
+		button.cfIconBorder:Hide()
+		button.cfIconBorder = nil
+	end
+end
+
 if AuraButton_Update then
 	hooksecurefunc("AuraButton_Update", function(buttonName, index)
 		if not cfFramesDB[M.ICON_ZOOM] then return end
 		local button = _G[buttonName .. index]
-		if button then ZoomAuraIcon(button, ZOOM) end
+		if button then
+			ZoomAuraIcon(button, ZOOM)
+			CreateIconBorder(button)
+		end
 	end)
 end
 
@@ -67,11 +100,17 @@ if TargetFrame_UpdateAuras then
 		if not cfFramesDB[M.ICON_ZOOM] then return end
 		for i = 1, MAX_TARGET_BUFFS do
 			local btn = _G["TargetFrameBuff" .. i]
-			if btn and btn:IsShown() then ZoomAuraIcon(btn, ZOOM) end
+			if btn and btn:IsShown() then
+				ZoomAuraIcon(btn, ZOOM)
+				CreateIconBorder(btn)
+			end
 		end
 		for i = 1, 16 do
 			local btn = _G["PetFrameBuff" .. i]
-			if btn and btn:IsShown() then ZoomAuraIcon(btn, ZOOM) end
+			if btn and btn:IsShown() then
+				ZoomAuraIcon(btn, ZOOM)
+				CreateIconBorder(btn)
+			end
 		end
 	end)
 end
@@ -93,12 +132,14 @@ local function Enable()
 	ZoomActionBars(ZOOM)
 	ZoomPetBar(ZOOM)
 	ZoomAllAuras(ZOOM)
+	ForEachAuraButton(CreateIconBorder)
 end
 
 local function Disable()
 	ZoomActionBars(DEFAULT)
 	ZoomPetBar(DEFAULT)
 	ZoomAllAuras(DEFAULT)
+	ForEachAuraButton(RemoveIconBorder)
 end
 
 cfFrames:RegisterModule(M.ICON_ZOOM, Enable, Disable)

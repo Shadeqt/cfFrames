@@ -33,6 +33,7 @@ TARGET_FRAME_STATUS_TEXT = "TargetFrameStatusText",
 	HEALTHBAR_COLOR = "HealthbarColor",
 	ICON_ZOOM = "IconZoom",
 	BUFF_SIZE = "BuffSize",
+	DRUID_MANA_BAR = "DruidManaBar",
 }
 
 local M = cfFrames.MODULES
@@ -57,6 +58,7 @@ local DEFAULTS = {
 	[M.HEALTHBAR_COLOR] = true,
 	[M.ICON_ZOOM] = true,
 	[M.BUFF_SIZE] = true,
+	[M.DRUID_MANA_BAR] = true,
 }
 
 local frame = CreateFrame("Frame")

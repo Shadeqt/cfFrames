@@ -4,7 +4,6 @@ local COLORS = {
 	SHAMAN       = { 0, 0.44, 0.87 },          -- blue (modern shaman, replaces pink)
 	FRIENDLY     = { 0, 1, 0 },                 -- green (friendly NPCs/pets)
 	TAPPED       = { 0.5, 0.5, 0.5 },           -- grey (Blizzard TargetFrame_CheckFaction)
-	PLAYER_CONTROLLED = { 0, 0, 1 },            -- blue (UnitSelectionColor for players/pets)
 	NAME_BG      = { 0, 0, 0, 0.5 },            -- dark semi-transparent name background
 }
 
@@ -12,28 +11,34 @@ local function ColorsMatch(r, g, b, color)
 	return r == color[1] and g == color[2] and b == color[3]
 end
 
+local function ColorPlayer(unit)
+	local _, class = UnitClass(unit)
+	if not class then return end
+	local color = RAID_CLASS_COLORS[class]
+	if not color then return end
+	if class == "SHAMAN" then return unpack(COLORS.SHAMAN) end
+	return color.r, color.g, color.b
+end
+
+local function GetUnitColor(unit)
+	if UnitIsPlayer(unit) then
+		return ColorPlayer(unit)
+	elseif not UnitPlayerControlled(unit) and UnitIsTapDenied(unit) then
+		return unpack(COLORS.TAPPED)
+	elseif UnitPlayerControlled(unit) then
+		return unpack(COLORS.FRIENDLY)
+	else
+		return UnitSelectionColor(unit)
+	end
+end
+
 local function ColorHealthbar(statusbar, unit)
 	if not statusbar or not unit then return end
 	if not cfFramesDB[M.HEALTHBAR_COLOR] then return end
 	if statusbar:IsForbidden() then return end
 
-	if UnitIsPlayer(unit) then
-		local _, class = UnitClass(unit)
-		if not class then return end
-		local color = RAID_CLASS_COLORS[class]
-		if not color then return end
-		local r, g, b = color.r, color.g, color.b
-		if class == "SHAMAN" then r, g, b = unpack(COLORS.SHAMAN) end
-		statusbar:SetStatusBarColor(r, g, b)
-	else
-		local r, g, b = UnitSelectionColor(unit)
-		if not UnitPlayerControlled(unit) and UnitIsTapDenied(unit) then
-			r, g, b = unpack(COLORS.TAPPED)
-		elseif ColorsMatch(r, g, b, COLORS.PLAYER_CONTROLLED) then
-			r, g, b = unpack(COLORS.FRIENDLY)
-		end
-		statusbar:SetStatusBarColor(r, g, b)
-	end
+	local r, g, b = GetUnitColor(unit)
+	if r then statusbar:SetStatusBarColor(r, g, b) end
 end
 
 -- Standard unit frames
@@ -56,10 +61,23 @@ if CompactUnitFrame_UpdateHealthColor then
 	end)
 end
 
-local UNIT_BARS = {
-	{bar = PlayerFrameHealthBar, unit = "player"},
-	{bar = PetFrameHealthBar, unit = "pet"},
-}
+-- ToT bar updates via poll timer, bypassing HealthBar_OnValueChanged
+if TargetFrameToTHealthBar then
+	hooksecurefunc(TargetFrameToTHealthBar, "SetValue", function()
+		if UnitExists("targettarget") then
+			ColorHealthbar(TargetFrameToTHealthBar, "targettarget")
+		end
+	end)
+end
+
+-- Recolor on events that don't trigger UnitFrameHealthBar_Update
+local eventFrame = CreateFrame("Frame")
+eventFrame:SetScript("OnEvent", function()
+	if not cfFramesDB[M.HEALTHBAR_COLOR] then return end
+	if UnitExists("target") then
+		ColorHealthbar(TargetFrameHealthBar, "target")
+	end
+end)
 
 -- Hide name background when healthbar already shows reaction color
 local function HideNameBackground()
@@ -79,25 +97,36 @@ if TargetFrameNameBackground then
 end
 
 local function Enable()
-	for _, entry in ipairs(UNIT_BARS) do
-		if entry.bar and UnitExists(entry.unit) then
-			ColorHealthbar(entry.bar, entry.unit)
-		end
+	if PlayerFrameHealthBar and UnitExists("player") then
+		ColorHealthbar(PlayerFrameHealthBar, "player")
+	end
+	if PetFrameHealthBar and UnitExists("pet") then
+		ColorHealthbar(PetFrameHealthBar, "pet")
 	end
 	if UnitExists("target") then
 		ColorHealthbar(TargetFrameHealthBar, "target")
 	end
+	if TargetFrameToTHealthBar and UnitExists("targettarget") then
+		ColorHealthbar(TargetFrameToTHealthBar, "targettarget")
+	end
 	HideNameBackground()
+	eventFrame:RegisterEvent("UNIT_FACTION")
+	eventFrame:RegisterEvent("UNIT_FLAGS")
 end
 
 local function Disable()
-	for _, entry in ipairs(UNIT_BARS) do
-		if entry.bar then
-			entry.bar:SetStatusBarColor(unpack(COLORS.FRIENDLY))
-		end
+	eventFrame:UnregisterAllEvents()
+	if PlayerFrameHealthBar then
+		PlayerFrameHealthBar:SetStatusBarColor(unpack(COLORS.FRIENDLY))
+	end
+	if PetFrameHealthBar then
+		PetFrameHealthBar:SetStatusBarColor(unpack(COLORS.FRIENDLY))
 	end
 	if UnitExists("target") then
 		UnitFrameHealthBar_Update(TargetFrameHealthBar, "target")
+		if TargetFrame_CheckFaction then
+			TargetFrame_CheckFaction(TargetFrame)
+		end
 	end
 end
 

@@ -1,10 +1,9 @@
 local M = cfFrames.MODULES
 
 local function GetBarAnchors()
-	local bigHP = cfFramesDB and cfFramesDB[M.BIGGER_HEALTHBAR]
 	return {
-		[TargetFrameHealthBar] = { center = -50, left = 8, right = -110, y = bigHP and 12 or 3 },
-		[TargetFrameManaBar]   = { center = -50, left = 8, right = -110, y = bigHP and -8 or -8 },
+		[TargetFrameHealthBar] = true,
+		[TargetFrameManaBar]   = true,
 	}
 end
 
@@ -19,26 +18,26 @@ end
 
 local setupDone = false
 
-local function SetupBar(bar, anchors)
+local function SetupBar(bar)
 	local parent = TargetFrameTextureFrame
 
 	if not bar.TextString then
 		bar.TextString = parent:CreateFontString(nil, "OVERLAY", "TextStatusBarText")
 	end
 	bar.TextString:ClearAllPoints()
-	bar.TextString:SetPoint("CENTER", parent, "CENTER", anchors.center, anchors.y)
+	bar.TextString:SetPoint("CENTER", bar, "CENTER", 0, 0)
 
 	if not bar.LeftText then
 		bar.LeftText = parent:CreateFontString(nil, "OVERLAY", "TextStatusBarText")
 	end
 	bar.LeftText:ClearAllPoints()
-	bar.LeftText:SetPoint("LEFT", parent, "LEFT", anchors.left, anchors.y)
+	bar.LeftText:SetPoint("LEFT", bar, "LEFT", 2, 0)
 
 	if not bar.RightText then
 		bar.RightText = parent:CreateFontString(nil, "OVERLAY", "TextStatusBarText")
 	end
 	bar.RightText:ClearAllPoints()
-	bar.RightText:SetPoint("RIGHT", parent, "RIGHT", anchors.right, anchors.y)
+	bar.RightText:SetPoint("RIGHT", bar, "RIGHT", -2, 0)
 end
 
 local function OnStatusBarTextUpdate(bar)
@@ -51,22 +50,28 @@ local function OnStatusBarTextUpdate(bar)
 end
 
 local function Enable()
-	local barAnchors = GetBarAnchors()
-	for bar, anchors in pairs(barAnchors) do
-		SetupBar(bar, anchors)
+	local bars = GetBarAnchors()
+	for bar in pairs(bars) do
+		SetupBar(bar)
 		bar.TextString:Show()
 		bar.LeftText:Show()
 		bar.RightText:Show()
-		TextStatusBar_UpdateTextString(bar)
 	end
 	if not setupDone then
 		hooksecurefunc("TextStatusBar_UpdateTextStringWithValues", OnStatusBarTextUpdate)
 		setupDone = true
 	end
+	if UnitExists("target") and IsHealthKnown("target") then
+		TargetFrameHealthBar.showPercentage = false
+	end
+	for bar in pairs(bars) do
+		TextStatusBar_UpdateTextString(bar)
+	end
 end
 
 local function Disable()
 	for bar in pairs(GetBarAnchors()) do
+
 		if bar.TextString then bar.TextString:SetText("") end
 		if bar.LeftText then bar.LeftText:SetText("") end
 		if bar.RightText then bar.RightText:SetText("") end

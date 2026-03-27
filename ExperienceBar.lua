@@ -14,6 +14,8 @@ frame:SetScript("OnEvent", function()
 	UpdateLockShow(bar, cvarStatusText)
 end)
 
+local hookedSetCVar = false
+
 local function Enable()
 	local bar = MainMenuExpBar
 	if not bar then return end
@@ -23,12 +25,15 @@ local function Enable()
 
 	frame:RegisterEvent("PLAYER_ENTERING_WORLD")
 
-	hooksecurefunc("SetCVar", function(cvar, value)
-		if not cfFramesDB[M.EXPERIENCE_BAR] then return end
-		if cvar == STATUS_TEXT_CVAR then
-			UpdateLockShow(bar, value)
-		end
-	end)
+	if not hookedSetCVar then
+		hooksecurefunc("SetCVar", function(cvar, value)
+			if not cfFramesDB[M.EXPERIENCE_BAR] then return end
+			if cvar == STATUS_TEXT_CVAR then
+				UpdateLockShow(bar, value)
+			end
+		end)
+		hookedSetCVar = true
+	end
 end
 
 local function Disable()

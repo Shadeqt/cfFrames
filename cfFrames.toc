@@ -24,6 +24,7 @@ CombatGlow.lua
 StatusBarTexture.lua
 NameplateCastbar.lua
 BiggerHealthbar.lua
+DruidManaBar.lua
 BuffSize.lua
 IconZoom.lua
 HealthbarColor.lua

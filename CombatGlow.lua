@@ -3,10 +3,13 @@ local M = cfFrames.MODULES
 local function HookHide(frame, dbKey)
 	if not frame then return end
 	frame:Hide()
-	hooksecurefunc(frame, "Show", function(self)
-		if not cfFramesDB[dbKey] then return end
-		self:Hide()
-	end)
+	if not frame.cfHideHooked then
+		hooksecurefunc(frame, "Show", function(self)
+			if not cfFramesDB[dbKey] then return end
+			self:Hide()
+		end)
+		frame.cfHideHooked = true
+	end
 end
 
 cfFrames:RegisterModule(M.PLAYER_COMBAT_GLOW, function()
@@ -27,12 +30,8 @@ end)
 
 cfFrames:RegisterModule(M.PLAYER_HIT_INDICATOR, function()
 	HookHide(PlayerHitIndicator, M.PLAYER_HIT_INDICATOR)
-end, function()
-	if PlayerHitIndicator then PlayerHitIndicator:Show() end
-end)
+end, function() end)
 
 cfFrames:RegisterModule(M.PET_HIT_INDICATOR, function()
 	HookHide(PetHitIndicator, M.PET_HIT_INDICATOR)
-end, function()
-	if PetHitIndicator then PetHitIndicator:Show() end
-end)
+end, function() end)

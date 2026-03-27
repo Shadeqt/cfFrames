@@ -209,9 +209,21 @@ local function DarkenMinimapDeferred()
 	end
 
 	-- LibDBIcon minimap buttons
-	for key, val in pairs(_G) do
-		if type(key) == "string" and key:match("^LibDBIcon10_") and type(val) == "table" and val.border then
-			DarkenTexture(val.border, COLOR)
+	local LDBIcon = LibStub and LibStub("LibDBIcon-1.0", true)
+	if LDBIcon then
+		for _, name in ipairs(LDBIcon:GetButtonList()) do
+			local button = LDBIcon:GetMinimapButton(name)
+			if button and button.border then
+				DarkenTexture(button.border, COLOR)
+			end
+		end
+		if not cfFrames.ldbIconCallbackRegistered then
+			LDBIcon.RegisterCallback(cfFrames, "LibDBIcon_IconCreated", function(_, button)
+				if cfFramesDB[M.DARK_MODE] and button.border then
+					DarkenTexture(button.border, COLOR)
+				end
+			end)
+			cfFrames.ldbIconCallbackRegistered = true
 		end
 	end
 end
@@ -282,10 +294,43 @@ local function DarkenNameplate(nameplate)
 	end
 end
 
-nameplateEventFrame:SetScript("OnEvent", function(_, _, unit)
+local lastTargetPlate = nil
+
+local function UpdateTargetNameplate()
+	if lastTargetPlate then
+		DarkenNameplate(lastTargetPlate)
+		lastTargetPlate = nil
+	end
+	local targetPlate = C_NamePlate.GetNamePlateForUnit("target")
+	if targetPlate then
+		local uf = targetPlate.UnitFrame
+		local healthBar = uf and uf.healthBar
+		if healthBar and healthBar.border then
+			for _, region in pairs({healthBar.border:GetRegions()}) do
+				region.cfDarkChanging = true
+				region:SetVertexColor(COLOR_LIGHT, COLOR_LIGHT, COLOR_LIGHT)
+				region.cfDarkChanging = false
+			end
+		end
+		lastTargetPlate = targetPlate
+	end
+end
+
+nameplateEventFrame:SetScript("OnEvent", function(_, event, unit)
 	if not cfFramesDB or not cfFramesDB[M.DARK_MODE] then return end
-	local nameplate = C_NamePlate.GetNamePlateForUnit(unit)
-	if nameplate then DarkenNameplate(nameplate) end
+	if event == "NAME_PLATE_UNIT_ADDED" then
+		local nameplate = C_NamePlate.GetNamePlateForUnit(unit)
+		if nameplate then
+			local targetPlate = C_NamePlate.GetNamePlateForUnit("target")
+			if nameplate == targetPlate then
+				lastTargetPlate = nameplate
+			else
+				DarkenNameplate(nameplate)
+			end
+		end
+	elseif event == "PLAYER_TARGET_CHANGED" then
+		UpdateTargetNameplate()
+	end
 end)
 
 -- Icon border (used for buff icons, castbar icons, etc.)
@@ -316,21 +361,20 @@ local function DarkenAuraButton(button)
 	local name = button:GetName()
 	-- Skip debuffs — preserve DebuffTypeColor
 	if name and name:match("Debuff") then return end
-	-- If button has a native border, darken it
+	-- Darken native border if it exists
 	local nativeBorder = name and _G[name .. "Border"]
 	if nativeBorder then
 		nativeBorder:SetVertexColor(COLOR, COLOR, COLOR)
 		nativeBorder:SetDesaturated(true)
-		return
 	end
-	-- Otherwise create a dark border frame
-	local icon = GetIcon(button)
-	if icon then CreateDarkIconBorder(button, icon) end
+	-- Darken IconZoom border if it exists
+	if button.cfIconBorder then
+		button.cfIconBorder:SetBackdropBorderColor(COLOR, COLOR, COLOR)
+	end
 end
 
 local function RestoreAuraButton(button)
 	if not button then return end
-	if button.cfDarkBorder then button.cfDarkBorder:Hide() end
 	local name = button:GetName()
 	if name then
 		local nativeBorder = _G[name .. "Border"]
@@ -338,6 +382,9 @@ local function RestoreAuraButton(button)
 			nativeBorder:SetVertexColor(1, 1, 1)
 			nativeBorder:SetDesaturated(false)
 		end
+	end
+	if button.cfIconBorder then
+		button.cfIconBorder:SetBackdropBorderColor(1, 1, 1)
 	end
 end
 
@@ -397,13 +444,18 @@ local function DarkenChatEditbox()
 end
 
 -- Castbars
+local castbarHooked = false
+
 local function DarkenCastbars()
 	if TargetFrameSpellBar and TargetFrameSpellBar.Border then
 		DarkenTexture(TargetFrameSpellBar.Border, COLOR)
-		TargetFrameSpellBar:HookScript("OnShow", function(self)
-			if not cfFramesDB or not cfFramesDB[M.DARK_MODE] then return end
-			CreateDarkIconBorder(self, self.Icon)
-		end)
+		if not castbarHooked then
+			TargetFrameSpellBar:HookScript("OnShow", function(self)
+				if not cfFramesDB or not cfFramesDB[M.DARK_MODE] then return end
+				CreateDarkIconBorder(self, self.Icon)
+			end)
+			castbarHooked = true
+		end
 	end
 	if CastingBarFrame and CastingBarFrame.Border then
 		DarkenTexture(CastingBarFrame.Border, COLOR)
@@ -431,9 +483,11 @@ local function Enable()
 	ForEachAuraButton(DarkenAuraButton)
 	raidEventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
 	nameplateEventFrame:RegisterEvent("NAME_PLATE_UNIT_ADDED")
+	nameplateEventFrame:RegisterEvent("PLAYER_TARGET_CHANGED")
 	for _, nameplate in pairs(C_NamePlate.GetNamePlates()) do
 		DarkenNameplate(nameplate)
 	end
+	UpdateTargetNameplate()
 	-- Re-show all created borders/textures
 	for _, obj in ipairs(createdTextures) do
 		obj:Show()
@@ -451,9 +505,11 @@ local function Disable()
 	for _, tex in ipairs(darkenedTextures) do
 		RestoreTexture(tex)
 	end
+	wipe(darkenedTextures)
 	for _, tex in ipairs(createdTextures) do
 		tex:Hide()
 	end
+	wipe(createdTextures)
 	ForEachAuraButton(RestoreAuraButton)
 end
 
