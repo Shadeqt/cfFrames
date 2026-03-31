@@ -1,90 +1,72 @@
-local M = cfFrames.MODULES
-local TEXTURE = "Interface\\AddOns\\cfFrames\\Media\\BlizzardRetailBarCrop2"
-local DEFAULT_TEXTURE = "Interface\\TargetingFrame\\UI-StatusBar"
+local TEXTURE
 
-local UNIT_BARS = {
-	PlayerFrameHealthBar, PlayerFrameManaBar,
-	TargetFrameHealthBar, TargetFrameManaBar,
-	TargetFrameToTHealthBar, TargetFrameToTManaBar,
-	PetFrameHealthBar, PetFrameManaBar,
-}
-
-local function SetBarTexture(bar, texture)
+local function SetBarTexture(bar)
+	if not bar then return end
 	local tex = bar:GetStatusBarTexture()
-	local layer, sublevel = nil, nil
+	local layer, sublevel
 	if tex then layer, sublevel = tex:GetDrawLayer() end
-	bar:SetStatusBarTexture(texture)
+	bar:SetStatusBarTexture(TEXTURE)
 	if layer then bar:GetStatusBarTexture():SetDrawLayer(layer, sublevel or 0) end
 end
 
-local function SetAllTextures(texture)
-	for _, bar in ipairs(UNIT_BARS) do
-		if bar then SetBarTexture(bar, texture) end
-	end
-	for i = 1, 4 do
-		local party = _G["PartyMemberFrame" .. i]
-		if party then
-			if party.healthbar then SetBarTexture(party.healthbar, texture) end
-			if party.ManaBar then SetBarTexture(party.ManaBar, texture) end
-		end
-	end
-	if TargetFrameNameBackground then
-		TargetFrameNameBackground:SetTexture(texture)
-	end
-	if MainMenuExpBar then SetBarTexture(MainMenuExpBar, texture) end
-	if ExhaustionLevelFillBar then ExhaustionLevelFillBar:SetTexture(texture) end
-	if cfFrames.questOverlay then SetBarTexture(cfFrames.questOverlay, texture) end
-	if ReputationWatchBar and ReputationWatchBar.StatusBar then
-		SetBarTexture(ReputationWatchBar.StatusBar, texture)
-	end
-	if PetPaperDollFrameExpBar then SetBarTexture(PetPaperDollFrameExpBar, texture) end
-	if CastingBarFrame then SetBarTexture(CastingBarFrame, texture) end
-	if TargetFrameSpellBar then SetBarTexture(TargetFrameSpellBar, texture) end
-	if PetSpellBar then SetBarTexture(PetSpellBar, texture) end
+local function SetStaticBars()
+	if TargetFrameNameBackground then TargetFrameNameBackground:SetTexture(TEXTURE) end
+	SetBarTexture(CastingBarFrame)
+	SetBarTexture(TargetFrameSpellBar)
+	SetBarTexture(PetSpellBar)
+	SetBarTexture(MainMenuExpBar)
+	if ExhaustionLevelFillBar then ExhaustionLevelFillBar:SetTexture(TEXTURE) end
+	if ReputationWatchBar then SetBarTexture(ReputationWatchBar.StatusBar) end
+	SetBarTexture(PlayerFrameHealthBar)
+	SetBarTexture(PlayerFrameManaBar)
+	SetBarTexture(PetFrameHealthBar)
+	SetBarTexture(PetFrameManaBar)
 end
 
-local npFrame = CreateFrame("Frame")
-npFrame:RegisterEvent("NAME_PLATE_UNIT_ADDED")
-npFrame:SetScript("OnEvent", function(_, _, unit)
-	if not cfFramesDB[M.STATUS_BAR_TEXTURE] then return end
-	local nameplate = C_NamePlate.GetNamePlateForUnit(unit)
-	if not nameplate or not nameplate.UnitFrame then return end
-	local healthBar = nameplate.UnitFrame.healthBar
-	if healthBar then SetBarTexture(healthBar, TEXTURE) end
-end)
+local hookedBars = {}
 
-hooksecurefunc("DefaultCompactUnitFrameSetup", function(frame)
-	if not cfFramesDB[M.STATUS_BAR_TEXTURE] then return end
-	if frame.healthBar then SetBarTexture(frame.healthBar, TEXTURE) end
-	if frame.powerBar then SetBarTexture(frame.powerBar, TEXTURE) end
-end)
+local function HookCompactBar(bar)
+	if not bar or hookedBars[bar] then return end
+	hookedBars[bar] = true
+	SetBarTexture(bar)
+	hooksecurefunc(bar, "SetStatusBarTexture", function(self, tex)
+		if tex ~= TEXTURE then
+			self:SetStatusBarTexture(TEXTURE)
+		end
+	end)
+end
 
-hooksecurefunc("ReputationFrame_Update", function()
-	if not cfFramesDB[M.STATUS_BAR_TEXTURE] then return end
-	for i = 1, NUM_FACTIONS_DISPLAYED do
-		local bar = _G["ReputationBar" .. i]
-		if bar then SetBarTexture(bar, TEXTURE) end
+local function HookDynamicBars()
+	hooksecurefunc("UnitFrameHealthBar_Update", function(bar)
+		SetBarTexture(bar)
+	end)
+	hooksecurefunc("UnitFrameManaBar_UpdateType", function(bar)
+		SetBarTexture(bar)
+	end)
+
+	if CompactUnitFrame_UpdateHealthColor then
+		hooksecurefunc("CompactUnitFrame_UpdateHealthColor", function(f)
+			if not f then return end
+			if f.healthBar then HookCompactBar(f.healthBar) end
+			if f.powerBar then HookCompactBar(f.powerBar) end
+		end)
 	end
-end)
+end
 
-hooksecurefunc("SkillFrame_SetStatusBar", function(statusBarID)
-	if not cfFramesDB[M.STATUS_BAR_TEXTURE] then return end
-	local bar = _G["SkillRankFrame" .. statusBarID .. "Bar"]
-	if bar then bar:SetTexture(TEXTURE) end
-end)
+local function HookNameplates()
+	local frame = CreateFrame("Frame")
+	frame:RegisterEvent("NAME_PLATE_UNIT_ADDED")
+	frame:SetScript("OnEvent", function(_, _, unit)
+		local nameplate = C_NamePlate.GetNamePlateForUnit(unit)
+		if not nameplate or not nameplate.UnitFrame then return end
+		SetBarTexture(nameplate.UnitFrame.healthBar)
+	end)
+end
 
-hooksecurefunc("UnitFrameHealthBar_Update", function(bar)
-	if not cfFramesDB[M.STATUS_BAR_TEXTURE] then return end
-	SetBarTexture(bar, TEXTURE)
-end)
-
-hooksecurefunc("UnitFrameManaBar_UpdateType", function(bar)
-	if not cfFramesDB[M.STATUS_BAR_TEXTURE] then return end
-	SetBarTexture(bar, TEXTURE)
-end)
-
-cfFrames:RegisterModule(M.STATUS_BAR_TEXTURE, function()
-	SetAllTextures(TEXTURE)
-end, function()
-	SetAllTextures(DEFAULT_TEXTURE)
-end)
+function cfFrames.initStatusBarTexture()
+	TEXTURE = cfFramesDB.StatusBarTexture
+	cfFrames.registerBarTexture(TEXTURE)
+	SetStaticBars()
+	HookDynamicBars()
+	HookNameplates()
+end

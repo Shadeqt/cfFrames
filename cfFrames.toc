@@ -1,33 +1,37 @@
 ## Interface: 11508
 ## Title: cfFrames
-## Notes: Improvements and fixes for the native UI
+## Notes: Simple UI tweaks, reload to toggle
 ## Author: Cowfoot
 ## Version: 0.1
 ## SavedVariablesPerCharacter: cfFramesDB
 
-Initialization.lua
-ExperienceBar.lua
+Init.lua
+Core.lua
+BlueShamans.lua
+DarkMode.lua
+CastbarPlayerIcon.lua
+CastbarTargetFix.lua
+StatusText.lua
+NameplateCastbar.lua
+NameplateClassification.lua
+StatusBarTexture.lua
+HealthbarColor.lua
+NameBackground.lua
+DruidBar.lua
+BiggerHealthbar.lua
+ExperienceBarQuests.lua
+HitIndicator.lua
+CombatGlow.lua
+IconZoom.lua
+IconBorder.lua
 PetLevel.lua
-PetExperienceBar.lua
+PetXpBar.lua
 PetName.lua
 PetDebuffs.lua
-TargetFrameStatusText.lua
-ModIntegrations\BetterBlizzFrames\DarkMode_MinimapBorderTop.lua
-ModIntegrations\BetterBlizzFrames\DarkMode_PetLevelBorder.lua
-ModIntegrations\BetterBlizzFrames\DarkMode_PetActionBar.lua
-ModIntegrations\BetterBlizzFrames\IconZoom_PetStanceBar.lua
-ModIntegrations\BetterBlizzFrames\DarkMode_PetXpBarBorder.lua
-ModIntegrations\BetterBlizzFrames\Move_PetName.lua
-ModIntegrations\BetterBlizzFrames\Texture_ExperienceBar.lua
-ModIntegrations\Questie\ExperienceBarQuests.lua
-CombatGlow.lua
-StatusBarTexture.lua
-NameplateCastbar.lua
-BiggerHealthbar.lua
-DruidManaBar.lua
-BuffSize.lua
-IconZoom.lua
-HealthbarColor.lua
-DarkMode.lua
-Interface\Widgets.lua
-Interface\Settings.lua
+PetStatusText.lua
+
+NameplateLevelFix.lua
+GroupIndicator.lua
+
+GUI\Factory.lua
+GUI\Settings.lua

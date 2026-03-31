@@ -1,10 +1,9 @@
-local M = cfFrames.MODULES
-
-local debuffFrames = {}
-local container
 local ICON_SIZE = 15
 local ICON_SPACING = 2
 local DEBUFFS_PER_ROW = 6
+
+local debuffFrames = {}
+local container
 
 local function GetOrCreateDebuffFrame(index)
 	if debuffFrames[index] then return debuffFrames[index] end
@@ -39,6 +38,10 @@ local function GetOrCreateDebuffFrame(index)
 	return btn
 end
 
+local function CreateContainer()
+	container = CreateFrame("Frame", nil, UIParent)
+end
+
 local function Update()
 	if not PetFrame or not PetFrame:IsShown() then
 		container:Hide()
@@ -46,7 +49,6 @@ local function Update()
 	end
 
 	container:Show()
-
 	container:ClearAllPoints()
 	local firstBuff = _G["PetFrameBuff1"]
 	local hasBuffs = firstBuff and firstBuff:IsShown()
@@ -65,7 +67,6 @@ local function Update()
 		btn.auraIndex = i
 		btn.icon:SetTexture(icon)
 
-		-- Color border by debuff type
 		local color = DebuffTypeColor[debuffType] or DebuffTypeColor["none"]
 		btn.border:SetVertexColor(color.r, color.g, color.b)
 
@@ -84,28 +85,25 @@ local function Update()
 
 	local cols = math.min(index, DEBUFFS_PER_ROW)
 	local rows = math.ceil(index / DEBUFFS_PER_ROW)
-	container:SetSize(math.max(1, cols * (ICON_SIZE + ICON_SPACING) - ICON_SPACING), math.max(1, rows * (ICON_SIZE + ICON_SPACING) - ICON_SPACING))
+	container:SetSize(
+		math.max(1, cols * (ICON_SIZE + ICON_SPACING) - ICON_SPACING),
+		math.max(1, rows * (ICON_SIZE + ICON_SPACING) - ICON_SPACING)
+	)
 end
 
-local frame = CreateFrame("Frame")
-frame:SetScript("OnEvent", function(self, event, arg1)
-	if event == "UNIT_AURA" and arg1 ~= "pet" then return end
-	Update()
-end)
-
-local function Enable()
-	if not container then
-		container = CreateFrame("Frame", "cfPetDebuffsContainer", UIParent)
-	end
+local function SetupEvents()
+	local frame = CreateFrame("Frame")
 	frame:RegisterEvent("UNIT_AURA")
 	frame:RegisterEvent("UNIT_PET")
 	frame:RegisterEvent("PLAYER_ENTERING_WORLD")
+	frame:SetScript("OnEvent", function(_, event, arg1)
+		if event == "UNIT_AURA" and arg1 ~= "pet" then return end
+		Update()
+	end)
+end
+
+function cfFrames.initPetDebuffs()
+	CreateContainer()
+	SetupEvents()
 	Update()
 end
-
-local function Disable()
-	frame:UnregisterAllEvents()
-	if container then container:Hide() end
-end
-
-cfFrames:RegisterModule(M.PET_DEBUFFS, Enable, Disable)
