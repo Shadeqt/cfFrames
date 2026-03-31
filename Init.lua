@@ -28,6 +28,8 @@ M.PetStatusText = "PetStatusText"
 M.NameplateLevelFix = "NameplateLevelFix"
 M.GroupIndicator = "GroupIndicator"
 M.PortraitToTFix = "PortraitToTFix"
+M.AuraSorting = "AuraSorting"
+M.NameTargetFix = "NameTargetFix"
 
 local DEFAULTS = {}
 for _, key in pairs(M) do
@@ -69,6 +71,8 @@ local function init()
 	if db[M.NameplateLevelFix] then cfFrames.initNameplateLevelFix() end
 	if db[M.GroupIndicator] then cfFrames.initGroupIndicator() end
 	if db[M.PortraitToTFix] then cfFrames.initPortraitToTFix() end
+	if db[M.AuraSorting] then cfFrames.initAuraSorting() end
+	if db[M.NameTargetFix] then cfFrames.initNameTargetFix() end
 end
 
 EventUtil.ContinueOnAddOnLoaded("cfFrames", function()

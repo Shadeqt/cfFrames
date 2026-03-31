@@ -29,6 +29,8 @@ PetXpBar.lua
 PetName.lua
 PetDebuffs.lua
 PetStatusText.lua
+AuraSorting.lua
+NameTargetFix.lua
 
 NameplateLevelFix.lua
 GroupIndicator.lua

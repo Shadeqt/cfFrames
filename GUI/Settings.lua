@@ -14,6 +14,7 @@ local hFixes            = F.CreateHeader(title, "Fixes")
 local nameplateLevelFix = F.CreateCheckbox(hFixes, "Nameplate Level Fix", M.NameplateLevelFix, nil, "Adjust nameplate level text position")
 local castbarTargetFix  = F.CreateCheckbox(nameplateLevelFix, "Target Castbar Fix", M.CastbarTargetFix, COL2, "Widen target castbar border")
 local portraitToTFix    = F.CreateCheckbox(nameplateLevelFix, "ToT Portrait Fix", M.PortraitToTFix, nil, "Fix Target of Target portrait alignment")
+local nameTargetFix     = F.CreateCheckbox(portraitToTFix, "Target Name Fix", M.NameTargetFix, COL2, "Widen target name to reduce truncation")
 
 -- General
 local h1           = F.CreateHeader(portraitToTFix, "General")
