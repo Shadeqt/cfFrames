@@ -65,7 +65,5 @@ function cfFrames.initStatusText()
 	HookCVarUpdate()
 
 	-- Register so other features can add bar text without importing StatusText
-	cfFrames.registerBarTextSetup(function(bar, parent)
-		CreateBarText(bar, parent)
-	end)
+	cfFrames.registerBarTextSetup(CreateBarText)
 end

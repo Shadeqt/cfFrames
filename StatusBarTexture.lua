@@ -3,6 +3,7 @@ local TEXTURE
 local function SetBarTexture(bar)
 	if not bar then return end
 	local tex = bar:GetStatusBarTexture()
+	if tex and tex:GetTexture() == TEXTURE then return end
 	local layer, sublevel
 	if tex then layer, sublevel = tex:GetDrawLayer() end
 	bar:SetStatusBarTexture(TEXTURE)

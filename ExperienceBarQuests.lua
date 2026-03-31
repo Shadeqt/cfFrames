@@ -4,9 +4,11 @@ local function GetCompletedQuestXP()
 	local totalXP = 0
 	for i = 1, GetNumQuestLogEntries() do
 		local _, _, _, isHeader, _, isComplete = GetQuestLogTitle(i)
-		if not isHeader and isComplete then
+		if not isHeader then
 			SelectQuestLogEntry(i)
-			totalXP = totalXP + (GetQuestLogRewardXP() or 0)
+			if isComplete or GetNumQuestLeaderBoards() == 0 then
+				totalXP = totalXP + (GetQuestLogRewardXP() or 0)
+			end
 		end
 	end
 	return totalXP

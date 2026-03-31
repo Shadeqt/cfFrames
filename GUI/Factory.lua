@@ -6,7 +6,6 @@ local function AddTooltip(frame, text)
 	frame:HookScript("OnEnter", function(self)
 		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
 		GameTooltip:SetText(text)
-		GameTooltip:Show()
 	end)
 	frame:HookScript("OnLeave", GameTooltip_Hide)
 end

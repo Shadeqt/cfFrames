@@ -6,13 +6,11 @@ local RAREELITE_TEXTURE = MEDIA .. "UI-TargetingFrame-Rare-Elite"
 local STATUS_TEXTURE    = MEDIA .. "UI-Player-Status"
 
 local SENTINEL = "cfFramesBiggerHP"
-local movedFrames = {}
 
 local function MoveRegion(frame, point, relativeTo, relativePoint, xOffset, yOffset)
 	if not frame then return end
 	frame:ClearAllPoints()
 	frame:SetPoint(point, relativeTo, relativePoint, xOffset, yOffset, SENTINEL)
-	movedFrames[frame] = {point, relativeTo, relativePoint, xOffset, yOffset}
 
 	if not frame.cfsBiggerHPHooked then
 		hooksecurefunc(frame, "SetPoint", function(self, _, _, _, _, _, flag)

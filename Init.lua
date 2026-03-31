@@ -27,6 +27,7 @@ M.PetDebuffs = "PetDebuffs"
 M.PetStatusText = "PetStatusText"
 M.NameplateLevelFix = "NameplateLevelFix"
 M.GroupIndicator = "GroupIndicator"
+M.PortraitToTFix = "PortraitToTFix"
 
 local DEFAULTS = {}
 for _, key in pairs(M) do
@@ -67,6 +68,7 @@ local function init()
 	if db[M.PetStatusText] then cfFrames.initPetStatusText() end
 	if db[M.NameplateLevelFix] then cfFrames.initNameplateLevelFix() end
 	if db[M.GroupIndicator] then cfFrames.initGroupIndicator() end
+	if db[M.PortraitToTFix] then cfFrames.initPortraitToTFix() end
 end
 
 EventUtil.ContinueOnAddOnLoaded("cfFrames", function()

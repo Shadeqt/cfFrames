@@ -13,9 +13,10 @@ local title = F.CreateTitle(sc, "cfFrames")
 local hFixes            = F.CreateHeader(title, "Fixes")
 local nameplateLevelFix = F.CreateCheckbox(hFixes, "Nameplate Level Fix", M.NameplateLevelFix, nil, "Adjust nameplate level text position")
 local castbarTargetFix  = F.CreateCheckbox(nameplateLevelFix, "Target Castbar Fix", M.CastbarTargetFix, COL2, "Widen target castbar border")
+local portraitToTFix    = F.CreateCheckbox(nameplateLevelFix, "ToT Portrait Fix", M.PortraitToTFix, nil, "Fix Target of Target portrait alignment")
 
 -- General
-local h1           = F.CreateHeader(castbarTargetFix, "General")
+local h1           = F.CreateHeader(portraitToTFix, "General")
 local darkMode     = F.CreateCheckbox(h1, "Dark Mode", M.DarkMode, nil, "Darken all UI frame textures")
 local blueShamans  = F.CreateCheckbox(darkMode, "Blue Shamans", M.BlueShamans, COL2, "Modern blue shaman class color")
 local expBarQuests = F.CreateCheckbox(darkMode, "XP Bar Quest Overlay", M.ExperienceBarQuests, nil, "Show pending quest XP on experience bar")

@@ -1,10 +1,11 @@
-local COLOR = 0.4
-local COLOR_LIGHT = 0.6
+local COLOR_DARK = 0.25
+local COLOR_MID = 0.5
+local COLOR_LIGHT = 0.75
 
 local function DarkenTexture(texture, color, desaturate)
 	if not texture then return end
 	if not texture:IsObjectType("Texture") then return end
-	local c = color or COLOR
+	local c = color or COLOR_DARK
 	texture:SetVertexColor(c, c, c)
 	if desaturate ~= false then texture:SetDesaturated(true) end
 end
@@ -19,7 +20,7 @@ end
 
 local function DarkenTextureHook(texture, color, desaturate)
 	if not texture then return end
-	local c = color or COLOR
+	local c = color or COLOR_DARK
 	DarkenTexture(texture, color, desaturate)
 	hooksecurefunc(texture, "SetVertexColor", function(self, r, g, b)
 		if r == c and g == c and b == c then return end
@@ -50,13 +51,13 @@ end
 local function DarkenActionBars()
 	-- Artwork
 	for i = 0, 3 do
-		DarkenTexture(_G["MainMenuBarTexture" .. i], COLOR_LIGHT)
 		DarkenTexture(_G["MainMenuXPBarTexture" .. i])
+		DarkenTexture(_G["MainMenuBarTexture" .. i], COLOR_MID)
 	end
-	DarkenTexture(MainMenuBarLeftEndCap, COLOR_LIGHT)
-	DarkenTexture(MainMenuBarRightEndCap, COLOR_LIGHT)
-	DarkenTexture(ExhaustionTickNormal)
-	DarkenTexture(ExhaustionTickHighlight)
+	DarkenTexture(MainMenuBarLeftEndCap, COLOR_MID)
+	DarkenTexture(MainMenuBarRightEndCap, COLOR_MID)
+	DarkenTexture(ExhaustionTickNormal, COLOR_LIGHT)
+	DarkenTexture(ExhaustionTickHighlight, COLOR_LIGHT)
 
 	-- Action button borders
 	local barNames = { "ActionButton", "MultiBarBottomLeftButton", "MultiBarBottomRightButton", "MultiBarRightButton", "MultiBarLeftButton" }
@@ -143,8 +144,8 @@ local function DarkenMinimap()
 	DarkenTexture(MiniMapTrackingBorder)
 
 	-- Zoom buttons
-	DarkenRegions(MinimapZoomIn, COLOR_LIGHT)
-	DarkenRegions(MinimapZoomOut, COLOR_LIGHT)
+	DarkenRegions(MinimapZoomIn, COLOR_MID)
+	DarkenRegions(MinimapZoomOut, COLOR_MID)
 
 end
 
@@ -171,7 +172,7 @@ local function DarkenMinimapDeferred()
 			DarkenTexture(LFGMinimapFrameBorder)
 		elseif addon == "Blizzard_TimeManager" then
 			-- See _Docs/clock-investigation.md for full breakdown of popup frames
-			DarkenTexture((select(1, TimeManagerClockButton:GetRegions())))
+			DarkenTexture((TimeManagerClockButton:GetRegions()))
 		end
 	end)
 
@@ -226,7 +227,7 @@ local function DarkenCompactFrames()
 end
 
 local function DarkenNameplate(_, unit)
-	local plate = C_NamePlate.GetNamePlateForUnit(unit or "target")
+	local plate = C_NamePlate.GetNamePlateForUnit(unit)
 	if not plate then return end
 	local healthBar = plate.UnitFrame and plate.UnitFrame.healthBar
 	local border = healthBar and healthBar.border
@@ -234,7 +235,12 @@ local function DarkenNameplate(_, unit)
 	local regions = { border:GetRegions() }
 	for _, region in ipairs(regions) do
 		if region:IsObjectType("Texture") then
-			DarkenTextureHook(region, COLOR_LIGHT)
+			if not region.cfDarkHooked then
+				region.cfDarkHooked = true
+				DarkenTextureHook(region, COLOR_MID)
+			else
+				DarkenTexture(region, COLOR_MID)
+			end
 		end
 	end
 

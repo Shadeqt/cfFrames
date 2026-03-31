@@ -35,7 +35,7 @@ end
 
 local function SetupEvents()
 	local frame = CreateFrame("Frame")
-	frame:RegisterEvent("UNIT_PET")
+	frame:RegisterUnitEvent("UNIT_PET", "player")
 	frame:RegisterEvent("PLAYER_ENTERING_WORLD")
 	frame:RegisterEvent("PLAYER_LEVEL_UP")
 	frame:RegisterUnitEvent("UNIT_LEVEL", "pet")

@@ -50,7 +50,7 @@ local function OnEvent(self, event, _, powerType)
 		self:SetValue(UnitPower("player", MANA))
 		if self.lockShow then TextStatusBar_UpdateTextString(self) end
 	else
-		self.lockShow = C_CVar.GetCVarBool("statusText") and 1 or 0
+		self.lockShow = C_CVar.GetCVarBool("statusText")
 		self:SetMinMaxValues(0, UnitPowerMax("player", MANA))
 		self:SetValue(UnitPower("player", MANA))
 		if self.lockShow then TextStatusBar_UpdateTextString(self) end

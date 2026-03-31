@@ -1,4 +1,4 @@
-local ZOOM = { 0.07, 0.93, 0.07, 0.93 }
+local L, R, T, B = 0.07, 0.93, 0.07, 0.93
 
 local function GetIcon(button)
 	if not button then return end
@@ -8,11 +8,11 @@ end
 local function ZoomIcon(target)
 	if not target then return end
 	if target:IsObjectType("Texture") then
-		target:SetTexCoord(unpack(ZOOM))
+		target:SetTexCoord(L, R, T, B)
 		return
 	end
 	local icon = GetIcon(target)
-	if icon then icon:SetTexCoord(unpack(ZOOM)) end
+	if icon then icon:SetTexCoord(L, R, T, B) end
 end
 
 local function ZoomBar(prefix, count)
@@ -63,10 +63,10 @@ function cfFrames.initIconZoom()
 	-- Castbar icons
 	if TargetFrameSpellBar and TargetFrameSpellBar.Icon then
 		hooksecurefunc(TargetFrameSpellBar, "Show", function(self)
-			if self.Icon then self.Icon:SetTexCoord(unpack(ZOOM)) end
+			if self.Icon then self.Icon:SetTexCoord(L, R, T, B) end
 		end)
 		hooksecurefunc(TargetFrameSpellBar.Icon, "SetTexture", function(self)
-			self:SetTexCoord(unpack(ZOOM))
+			self:SetTexCoord(L, R, T, B)
 		end)
 	end
 
@@ -76,14 +76,14 @@ function cfFrames.initIconZoom()
 		if CompactUnitFrame_UtilSetBuff then
 			hooksecurefunc("CompactUnitFrame_UtilSetBuff", function(buffFrame)
 				if buffFrame and buffFrame.icon then
-					buffFrame.icon:SetTexCoord(unpack(ZOOM))
+					buffFrame.icon:SetTexCoord(L, R, T, B)
 				end
 			end)
 		end
 		if CompactUnitFrame_UtilSetDebuff then
 			hooksecurefunc("CompactUnitFrame_UtilSetDebuff", function(_, debuffFrame)
 				if debuffFrame and debuffFrame.icon then
-					debuffFrame.icon:SetTexCoord(unpack(ZOOM))
+					debuffFrame.icon:SetTexCoord(L, R, T, B)
 				end
 			end)
 		end

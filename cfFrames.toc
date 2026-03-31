@@ -32,6 +32,7 @@ PetStatusText.lua
 
 NameplateLevelFix.lua
 GroupIndicator.lua
+PortraitToTFix.lua
 
 GUI\Factory.lua
 GUI\Settings.lua

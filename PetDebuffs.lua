@@ -98,6 +98,7 @@ local function SetupEvents()
 	frame:RegisterEvent("PLAYER_ENTERING_WORLD")
 	frame:SetScript("OnEvent", function(_, event, arg1)
 		if event == "UNIT_AURA" and arg1 ~= "pet" then return end
+		if event == "UNIT_PET" and arg1 ~= "player" then return end
 		Update()
 	end)
 end

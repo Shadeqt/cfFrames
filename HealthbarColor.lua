@@ -3,9 +3,11 @@ local function GetUnitColor(unit)
         local _, class = UnitClass(unit)
         if not class then return end
         return GetClassColor(class)
-    elseif not UnitPlayerControlled(unit) and UnitIsTapDenied(unit) then
+    end
+    local controlled = UnitPlayerControlled(unit)
+    if not controlled and UnitIsTapDenied(unit) then
         return 0.5, 0.5, 0.5
-    elseif UnitPlayerControlled(unit) then
+    elseif controlled then
         return FRIENDLY_STATUS_COLOR:GetRGB()
     else
         return UnitSelectionColor(unit)
