@@ -21,7 +21,10 @@ local function ColorBar(bar, unit)
 end
 
 function cfFrames.initHealthbarColor()
-    hooksecurefunc("UnitFrameHealthBar_Update", ColorBar)
+    hooksecurefunc("UnitFrameHealthBar_Update", function(bar, unit)
+        if bar == TargetFrameToTHealthBar then return end
+        ColorBar(bar, unit)
+    end)
     hooksecurefunc("HealthBar_OnValueChanged", function(self)
         if self.unit then ColorBar(self, self.unit) end
     end)
@@ -31,7 +34,16 @@ function cfFrames.initHealthbarColor()
         end)
     end
     if TargetFrameToTHealthBar then
+        -- SetValue for ongoing health changes
         hooksecurefunc(TargetFrameToTHealthBar, "SetValue", function()
+            if UnitExists("targettarget") then
+                ColorBar(TargetFrameToTHealthBar, "targettarget")
+            end
+        end)
+        -- UNIT_TARGET for when target's target changes (data is fresh here)
+        local f = CreateFrame("Frame")
+        f:RegisterUnitEvent("UNIT_TARGET", "target")
+        f:SetScript("OnEvent", function()
             if UnitExists("targettarget") then
                 ColorBar(TargetFrameToTHealthBar, "targettarget")
             end

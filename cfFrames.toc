@@ -29,12 +29,13 @@ PetXpBar.lua
 PetName.lua
 PetDebuffs.lua
 PetStatusText.lua
-AuraSorting.lua
+BuffSorting.lua
 NameTargetFix.lua
 
 NameplateLevelFix.lua
 GroupIndicator.lua
-PortraitToTFix.lua
+ToTPortraitFix.lua
+ToTPositionFix.lua
 
 GUI\Factory.lua
 GUI\Settings.lua

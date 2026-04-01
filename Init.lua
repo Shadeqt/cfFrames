@@ -27,8 +27,9 @@ M.PetDebuffs = "PetDebuffs"
 M.PetStatusText = "PetStatusText"
 M.NameplateLevelFix = "NameplateLevelFix"
 M.GroupIndicator = "GroupIndicator"
-M.PortraitToTFix = "PortraitToTFix"
-M.AuraSorting = "AuraSorting"
+M.ToTPortraitFix = "ToTPortraitFix"
+M.ToTPositionFix = "ToTPositionFix"
+M.BuffSorting = "BuffSorting"
 M.NameTargetFix = "NameTargetFix"
 
 local DEFAULTS = {}
@@ -70,9 +71,10 @@ local function init()
 	if db[M.PetStatusText] then cfFrames.initPetStatusText() end
 	if db[M.NameplateLevelFix] then cfFrames.initNameplateLevelFix() end
 	if db[M.GroupIndicator] then cfFrames.initGroupIndicator() end
-	if db[M.PortraitToTFix] then cfFrames.initPortraitToTFix() end
-	if db[M.AuraSorting] then cfFrames.initAuraSorting() end
-	if db[M.NameTargetFix] then cfFrames.initNameTargetFix() end
+	if db[M.ToTPortraitFix] then cfFrames.initToTPortraitFix() end
+	if db[M.ToTPositionFix] then cfFrames.initToTPositionFix() end
+	--if db[M.BuffSorting] then cfFrames.initBuffSorting() end
+	--if db[M.NameTargetFix] then cfFrames.initNameTargetFix() end
 end
 
 EventUtil.ContinueOnAddOnLoaded("cfFrames", function()

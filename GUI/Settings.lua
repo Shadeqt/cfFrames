@@ -13,7 +13,7 @@ local title = F.CreateTitle(sc, "cfFrames")
 local hFixes            = F.CreateHeader(title, "Fixes")
 local nameplateLevelFix = F.CreateCheckbox(hFixes, "Nameplate Level Fix", M.NameplateLevelFix, nil, "Adjust nameplate level text position")
 local castbarTargetFix  = F.CreateCheckbox(nameplateLevelFix, "Target Castbar Fix", M.CastbarTargetFix, COL2, "Widen target castbar border")
-local portraitToTFix    = F.CreateCheckbox(nameplateLevelFix, "ToT Portrait Fix", M.PortraitToTFix, nil, "Fix Target of Target portrait alignment")
+local portraitToTFix    = F.CreateCheckbox(nameplateLevelFix, "ToT Portrait Fix", M.ToTPortraitFix, nil, "Fix Target of Target portrait alignment")
 local nameTargetFix     = F.CreateCheckbox(portraitToTFix, "Target Name Fix", M.NameTargetFix, COL2, "Widen target name to reduce truncation")
 
 -- General

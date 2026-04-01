@@ -1,4 +1,15 @@
 local EDGE_FILE
+local MASK_PATH = "Interface\\AddOns\\cfFrames\\Media\\UIFrameIconMask"
+
+local function AddMask(icon, parent)
+	if not icon._roundedMask and icon.AddMaskTexture then
+		local mask = parent:CreateMaskTexture()
+		mask:SetTexture(MASK_PATH)
+		mask:SetAllPoints(icon)
+		icon:AddMaskTexture(mask)
+		icon._roundedMask = mask
+	end
+end
 
 local function AddBorder(target)
 	if not target then return end
@@ -16,12 +27,14 @@ local function AddBorder(target)
 		if not icon then return end
 	end
 
+	AddMask(icon, parent)
+
 	if parent.cfIconBorder then return end
 
 	local border = CreateFrame("Frame", nil, parent, "BackdropTemplate")
 	border:SetBackdrop({ edgeFile = EDGE_FILE, edgeSize = 8.5 })
-	border:SetPoint("TOPLEFT", icon, -2, 2)
-	border:SetPoint("BOTTOMRIGHT", icon, 2, -2)
+	border:SetPoint("TOPLEFT", icon, -1, 1)
+	border:SetPoint("BOTTOMRIGHT", icon, 1, -1)
 	parent.cfIconBorder = border
 	cfFrames.styleRegions(border)
 end
