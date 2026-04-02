@@ -81,6 +81,111 @@ function Factory.CreateCheckbox(anchor, label, dbKey, col2, tooltip)
 	return cb
 end
 
+function Factory.CreateEditBox(anchor, col2, tooltip)
+	local parent = anchor:GetParent() or anchor
+	local editBox = CreateFrame("EditBox", nil, parent, "InputBoxTemplate")
+	editBox:SetSize(40, 16)
+	if col2 then
+		editBox:SetPoint("TOPLEFT", anchor, "TOPLEFT", col2, 0)
+	else
+		editBox:SetPoint("LEFT", anchor, "RIGHT", 8, 0)
+	end
+	editBox:SetAutoFocus(false)
+	editBox:SetFontObject(GameFontHighlightSmall)
+	editBox:SetJustifyH("CENTER")
+	editBox:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
+	AddTooltip(editBox, tooltip)
+	return editBox
+end
+
+function Factory.CreateSlider(anchor, label, dbTable, dbKey, min, max, step, col2, tooltip, onChange)
+	local parent = anchor:GetParent() or anchor
+	local frame = CreateFrame("Frame", nil, parent)
+	frame:SetSize(160, 34)
+	if col2 then
+		frame:SetPoint("TOPLEFT", anchor, "TOPLEFT", col2, 0)
+	else
+		frame:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -4)
+	end
+
+	local title = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
+	title:SetPoint("TOPLEFT", 0, 0)
+	title:SetJustifyH("CENTER")
+	title:SetText(label)
+
+	local slider = CreateFrame("Slider", nil, frame, "OptionsSliderTemplate")
+	slider:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -2)
+	slider:SetWidth(140)
+	title:SetWidth(slider:GetWidth())
+	slider:SetMinMaxValues(min, max)
+	slider:SetValueStep(step)
+	slider:SetObeyStepOnDrag(true)
+	slider.Low:SetText("")
+	slider.High:SetText("")
+
+	local decimals = #(tostring(step):match("%.(%d+)") or "")
+	local fmt = "%." .. decimals .. "f"
+
+	local editBox = Factory.CreateEditBox(slider)
+
+	local function DisplayValue(val)
+		editBox:SetText(format(fmt, val))
+		editBox:ClearFocus()
+	end
+
+	editBox:SetScript("OnEnterPressed", function(self)
+		local val = tonumber(self:GetText())
+		if val then
+			val = math.max(min, math.min(max, val))
+			slider:SetValue(val)
+		else
+			DisplayValue(slider:GetValue())
+		end
+		self:ClearFocus()
+	end)
+	editBox:SetScript("OnEscapePressed", function(self)
+		DisplayValue(slider:GetValue())
+		self:ClearFocus()
+	end)
+
+	local function GetSliderDB()
+		if type(dbTable) ~= "string" then return dbTable end
+		-- New flat DB first, fall back to old elements subtable
+		return cfFramesDB[dbTable]
+			or (cfFramesDB.elements and cfFramesDB.elements[dbTable])
+	end
+
+	slider:SetScript("OnShow", function(self)
+		local db = GetSliderDB()
+		local val = db and db[dbKey] or min
+		self:SetValue(val)
+		DisplayValue(val)
+	end)
+	slider:SetScript("OnValueChanged", function(self, value)
+		value = math.floor(value / step + 0.5) * step
+		local db = GetSliderDB()
+		if db then db[dbKey] = value end
+		DisplayValue(value)
+		if onChange then onChange() end
+	end)
+	AddTooltip(slider, tooltip)
+	return frame
+end
+
+function Factory.CreateButton(anchor, label, col, onClick)
+	local parent = anchor:GetParent() or anchor
+	local btn = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
+	btn:SetSize(80, 22)
+	btn:SetText(label)
+	if col then
+		btn:SetPoint("TOPLEFT", anchor, "TOPLEFT", col, 0)
+	else
+		btn:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -4)
+	end
+	if onClick then btn:SetScript("OnClick", onClick) end
+	return btn
+end
+
 function Factory.CreateDropdown(anchor, label, dbKey, options, tooltip)
 	local parent = anchor:GetParent() or anchor
 	local frame = CreateFrame("Frame", nil, parent)

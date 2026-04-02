@@ -2,7 +2,6 @@ local _, class = UnitClass("player")
 if class ~= "DRUID" then return end
 
 local MANA = Enum.PowerType.Mana
-local SHOW_FOR = { [Enum.PowerType.Rage] = true, [Enum.PowerType.Energy] = true }
 
 local function CreateBar()
 	local w, h = PlayerFrameManaBar:GetSize()
@@ -54,7 +53,7 @@ local function OnEvent(self, event, _, powerType)
 		self:SetMinMaxValues(0, UnitPowerMax("player", MANA))
 		self:SetValue(UnitPower("player", MANA))
 		if self.lockShow then TextStatusBar_UpdateTextString(self) end
-		local show = UnitPowerMax("player", MANA) > 0 and SHOW_FOR[UnitPowerType("player")]
+		local show = UnitPowerMax("player", MANA) > 0 and UnitPowerType("player") ~= MANA
 		self:SetShown(show)
 	end
 end

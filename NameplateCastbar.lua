@@ -1,3 +1,6 @@
+cfFrames.NameplateCastbarOrigin = { x = 18, y = -5 }
+cfFrames.NameplateCastbarIconOrigin = { x = -5, y = 0, size = 14 }
+
 local function CreateCastbar(unitFrame, unit)
 	local healthBar = unitFrame.healthBar
 	local bar = CreateFrame("StatusBar", nil, unitFrame, "SmallCastingBarFrameTemplate")

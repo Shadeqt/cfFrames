@@ -6,6 +6,7 @@ cfFrames.M = M
 M.BlueShamans = "BlueShamans"
 M.DarkMode = "DarkMode"
 M.CastbarPlayerIcon = "CastbarPlayerIcon"
+M.CastbarTargetIcon = "CastbarTargetIcon"
 M.CastbarTargetFix = "CastbarTargetFix"
 M.NameplateCastbar = "NameplateCastbar"
 M.NameplateClassification = "NameplateClassification"
@@ -52,11 +53,14 @@ local function init()
 	if db[M.StatusText] then cfFrames.initStatusText() end
 	if db[M.StatusBarTexture] ~= "blizzard" then cfFrames.initStatusBarTexture() end
 
+	if cfFrames.InitMovables then cfFrames.InitMovables() end
+
 	-- Then features that consume styles
 	if db[M.HealthbarColor] then cfFrames.initHealthbarColor() end
 	if db[M.NameBackground] then cfFrames.initNameBackground() end
 	if db[M.BiggerHealthbar] then cfFrames.initBiggerHealthbar() end
-	if db[M.CastbarPlayerIcon] then cfFrames.initCastbarPlayerIcon() end
+	if cfFrames.initCastbarPlayerIcon then cfFrames.initCastbarPlayerIcon() end
+	if cfFrames.initTargetCastbarIcon then cfFrames.initTargetCastbarIcon() end
 	if db[M.CastbarTargetFix] then cfFrames.initCastbarTargetFix() end
 	if db[M.NameplateCastbar] then cfFrames.initNameplateCastbar() end
 	if db[M.NameplateClassification] then cfFrames.initNameplateClassification() end
@@ -75,6 +79,7 @@ local function init()
 	if db[M.ToTPositionFix] then cfFrames.initToTPositionFix() end
 	--if db[M.BuffSorting] then cfFrames.initBuffSorting() end
 	--if db[M.NameTargetFix] then cfFrames.initNameTargetFix() end
+
 end
 
 EventUtil.ContinueOnAddOnLoaded("cfFrames", function()
@@ -88,9 +93,9 @@ EventUtil.ContinueOnAddOnLoaded("cfFrames", function()
 		end
 	end
 
-	-- Remove keys not found in defaults
+	-- Remove keys not found in defaults (preserve subtables like elements)
 	for key in pairs(cfFramesDB) do
-		if DEFAULTS[key] == nil then
+		if DEFAULTS[key] == nil and type(cfFramesDB[key]) ~= "table" then
 			cfFramesDB[key] = nil
 		end
 	end

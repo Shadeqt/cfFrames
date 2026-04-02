@@ -7,9 +7,14 @@
 
 Init.lua
 Core.lua
+
+Frames\_Movable.lua
+GUI\_Factory.lua
+
 BlueShamans.lua
 DarkMode.lua
 CastbarPlayerIcon.lua
+CastbarTargetIcon.lua
 CastbarTargetFix.lua
 StatusText.lua
 NameplateCastbar.lua
@@ -37,5 +42,14 @@ GroupIndicator.lua
 ToTPortraitFix.lua
 ToTPositionFix.lua
 
-GUI\Factory.lua
+Frames\PlayerCastbar.lua
+Frames\TargetCastbar.lua
+Frames\Nameplates.lua
+Frames\PlayerFrame.lua
+Frames\TargetFrame.lua
+Frames\TargetOfTarget.lua
+
 GUI\Settings.lua
+GUI\UnitFrames.lua
+GUI\Castbars.lua
+GUI\Nameplates.lua

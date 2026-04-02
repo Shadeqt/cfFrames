@@ -67,9 +67,19 @@ local petStatusText = F.CreateCheckbox(petName, "Pet Status Text", M.PetStatusTe
 
 -- Register
 local category = Settings.RegisterCanvasLayoutCategory(panel, panel.name, panel.name)
+cfFrames.category = category
 Settings.RegisterAddOnCategory(category)
 
 SLASH_CFFRAMES1 = "/cff"
 SlashCmdList["CFFRAMES"] = function()
 	Settings.OpenToCategory(category:GetID())
+end
+
+-- Make the Options window draggable
+if SettingsPanel then
+	SettingsPanel:SetMovable(true)
+	SettingsPanel:EnableMouse(true)
+	SettingsPanel:RegisterForDrag("LeftButton")
+	SettingsPanel:SetScript("OnDragStart", SettingsPanel.StartMoving)
+	SettingsPanel:SetScript("OnDragStop", SettingsPanel.StopMovingOrSizing)
 end
