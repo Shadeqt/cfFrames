@@ -1,73 +1,73 @@
-local TEXTURE
+local hooked = false
 
-local function SetBarTexture(bar)
+local function SetStatusBarTexture(bar)
 	if not bar then return end
 	local tex = bar:GetStatusBarTexture()
-	if tex and tex:GetTexture() == TEXTURE then return end
 	local layer, sublevel
 	if tex then layer, sublevel = tex:GetDrawLayer() end
-	bar:SetStatusBarTexture(TEXTURE)
+	bar:SetStatusBarTexture(cfFramesDB.StatusBar)
 	if layer then bar:GetStatusBarTexture():SetDrawLayer(layer, sublevel or 0) end
 end
 
 local function SetStaticBars()
-	if TargetFrameNameBackground then TargetFrameNameBackground:SetTexture(TEXTURE) end
-	SetBarTexture(CastingBarFrame)
-	SetBarTexture(TargetFrameSpellBar)
-	SetBarTexture(PetSpellBar)
-	SetBarTexture(MainMenuExpBar)
-	if ExhaustionLevelFillBar then ExhaustionLevelFillBar:SetTexture(TEXTURE) end
-	if ReputationWatchBar then SetBarTexture(ReputationWatchBar.StatusBar) end
-	SetBarTexture(PlayerFrameHealthBar)
-	SetBarTexture(PlayerFrameManaBar)
-	SetBarTexture(PetFrameHealthBar)
-	SetBarTexture(PetFrameManaBar)
-end
-
-local hookedBars = {}
-
-local function HookCompactBar(bar)
-	if not bar or hookedBars[bar] then return end
-	hookedBars[bar] = true
-	SetBarTexture(bar)
-	hooksecurefunc(bar, "SetStatusBarTexture", function(self, tex)
-		if tex ~= TEXTURE then
-			self:SetStatusBarTexture(TEXTURE)
+	SetStatusBarTexture(PlayerFrameHealthBar)
+	SetStatusBarTexture(PlayerFrameManaBar)
+	SetStatusBarTexture(TargetFrameHealthBar)
+	SetStatusBarTexture(TargetFrameManaBar)
+	SetStatusBarTexture(PetFrameHealthBar)
+	SetStatusBarTexture(PetFrameManaBar)
+	SetStatusBarTexture(CastingBarFrame)
+	SetStatusBarTexture(TargetFrameSpellBar)
+	SetStatusBarTexture(PetSpellBar)
+	SetStatusBarTexture(MainMenuExpBar)
+	if TargetFrameNameBackground then TargetFrameNameBackground:SetTexture(cfFramesDB.StatusBar) end
+	if ExhaustionLevelFillBar then ExhaustionLevelFillBar:SetTexture(cfFramesDB.StatusBar) end
+	if ReputationWatchBar then SetStatusBarTexture(ReputationWatchBar.StatusBar) end
+	for i = 1, 5 do
+		local frame = _G["CompactRaidFrame" .. i]
+		if frame then
+			SetStatusBarTexture(frame.healthBar)
+			SetStatusBarTexture(frame.powerBar)
 		end
-	end)
+	end
+	for _, plate in ipairs(C_NamePlate.GetNamePlates()) do
+		if plate.UnitFrame then SetStatusBarTexture(plate.UnitFrame.healthBar) end
+	end
 end
 
 local function HookDynamicBars()
 	hooksecurefunc("UnitFrameHealthBar_Update", function(bar)
-		SetBarTexture(bar)
+		SetStatusBarTexture(bar)
 	end)
 	hooksecurefunc("UnitFrameManaBar_UpdateType", function(bar)
-		SetBarTexture(bar)
+		SetStatusBarTexture(bar)
 	end)
 
 	if CompactUnitFrame_UpdateHealthColor then
-		hooksecurefunc("CompactUnitFrame_UpdateHealthColor", function(f)
-			if not f then return end
-			if f.healthBar then HookCompactBar(f.healthBar) end
-			if f.powerBar then HookCompactBar(f.powerBar) end
+		hooksecurefunc("CompactUnitFrame_UpdateHealthColor", function(frame)
+			if not frame then return end
+			SetStatusBarTexture(frame.healthBar)
+			SetStatusBarTexture(frame.powerBar)
 		end)
 	end
 end
 
-local function HookNameplates()
+local function RegisterEventBars()
 	local frame = CreateFrame("Frame")
 	frame:RegisterEvent("NAME_PLATE_UNIT_ADDED")
 	frame:SetScript("OnEvent", function(_, _, unit)
-		local nameplate = C_NamePlate.GetNamePlateForUnit(unit)
-		if not nameplate or not nameplate.UnitFrame then return end
-		SetBarTexture(nameplate.UnitFrame.healthBar)
+		local plate = C_NamePlate.GetNamePlateForUnit(unit)
+		if plate and plate.UnitFrame then SetStatusBarTexture(plate.UnitFrame.healthBar) end
 	end)
 end
 
-function cfFrames.initStatusBarTexture()
-	TEXTURE = cfFramesDB.StatusBarTexture
-	cfFrames.registerBarTexture(TEXTURE)
+function cff.EnableStatusBar()
 	SetStaticBars()
+
+	if hooked then return end
+	if cfFramesDB.StatusBar == "Interface\\TargetingFrame\\UI-StatusBar" then return end
+	hooked = true
+
 	HookDynamicBars()
-	HookNameplates()
+	RegisterEventBars()
 end

@@ -1,55 +1,21 @@
 ## Interface: 11508
 ## Title: cfFrames
-## Notes: Simple UI tweaks, reload to toggle
+## Notes: UI tweaks with live settings
 ## Author: Cowfoot
-## Version: 0.1
+## Version: 0.2
 ## SavedVariablesPerCharacter: cfFramesDB
 
 Init.lua
-Core.lua
-
-Frames\_Movable.lua
-GUI\_Factory.lua
-
-BlueShamans.lua
-DarkMode.lua
-CastbarPlayerIcon.lua
-CastbarTargetIcon.lua
-CastbarTargetFix.lua
-StatusText.lua
-NameplateCastbar.lua
-NameplateClassification.lua
+Fixes\ActionBarAlphaFix.lua
+Fixes\ToTPortraitFix.lua
+Fixes\TargetCastbarBorderFix.lua
+Fixes\TargetNameWidthFix.lua
+Fixes\TargetCastbarIconFix.lua
+Fixes\NameplateLevelPositionFix.lua
 StatusBarTexture.lua
-HealthbarColor.lua
-NameBackground.lua
-DruidBar.lua
 BiggerHealthbar.lua
-ExperienceBarQuests.lua
-HitIndicator.lua
-CombatGlow.lua
-IconZoom.lua
-IconBorder.lua
-PetLevel.lua
-PetXpBar.lua
-PetName.lua
-PetDebuffs.lua
-PetStatusText.lua
-BuffSorting.lua
-NameTargetFix.lua
-
-NameplateLevelFix.lua
-GroupIndicator.lua
-ToTPortraitFix.lua
-ToTPositionFix.lua
-
-Frames\PlayerCastbar.lua
-Frames\TargetCastbar.lua
-Frames\Nameplates.lua
-Frames\PlayerFrame.lua
-Frames\TargetFrame.lua
-Frames\TargetOfTarget.lua
-
-GUI\Settings.lua
-GUI\UnitFrames.lua
-GUI\Castbars.lua
-GUI\Nameplates.lua
+HealthbarColor.lua
+DarkMode.lua
+Settings\Main.lua
+Settings\DarkMode.lua
+Settings\_Register.lua

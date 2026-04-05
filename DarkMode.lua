@@ -1,228 +1,235 @@
-local COLOR_DARK = 0.25
-local COLOR_MID = 0.5
-local COLOR_LIGHT = 0.75
+local originalState = {}
+local compactHooked = false
+local nameplateHooked = false
+local ldbIconHooked = false
+local lodFrame = nil
 
-local function DarkenTexture(texture, color, desaturate)
+local function ApplyDark(texture, color, desaturate, alpha)
+	local c = color or cfFramesDB.DarkModeColor
+	local d = desaturate ~= false
+	local _, _, _, a = texture:GetVertexColor()
+	texture:SetVertexColor(c, c, c, alpha or a, cff.SENTINEL)
+	texture:SetDesaturated(d)
+end
+
+local function SaveAndDarken(texture, color, desaturate, alpha)
 	if not texture then return end
 	if not texture:IsObjectType("Texture") then return end
-	local c = color or COLOR_DARK
-	texture:SetVertexColor(c, c, c)
-	if desaturate ~= false then texture:SetDesaturated(true) end
+
+	if not originalState[texture] then
+		local r, g, b, a = texture:GetVertexColor()
+		local d = texture:IsDesaturated()
+		originalState[texture] = { r = r, g = g, b = b, a = a, d = d }
+	end
+
+	ApplyDark(texture, color, desaturate, alpha)
 end
 
-local function DarkenRegions(frame, color, desaturate)
+local function SaveAndDarkenRegions(frame, color, desaturate, alpha)
 	if not frame then return end
-	local regions = { frame:GetRegions() }
-	for _, region in ipairs(regions) do
-		DarkenTexture(region, color, desaturate)
+	for _, region in pairs({ frame:GetRegions() }) do
+		SaveAndDarken(region, color, desaturate, alpha)
 	end
 end
 
-local function DarkenTextureHook(texture, color, desaturate)
+local function SaveAndDarkenHook(texture, dbKey)
 	if not texture then return end
-	local c = color or COLOR_DARK
-	DarkenTexture(texture, color, desaturate)
-	hooksecurefunc(texture, "SetVertexColor", function(self, r, g, b)
-		if r == c and g == c and b == c then return end
-		self:SetVertexColor(c, c, c)
+	SaveAndDarken(texture)
+	if texture.cffHooked then return end
+	texture.cffHooked = true
+	hooksecurefunc(texture, "SetVertexColor", function(self, _, _, _, _, flag)
+		if flag == cff.SENTINEL then return end
+		if not cfFramesDB.DarkMode then return end
+		if dbKey and not cfFramesDB[dbKey] then return end
+		ApplyDark(self)
 	end)
-	if desaturate ~= false then
-		hooksecurefunc(texture, "SetDesaturated", function(self, desat)
-			if not desat then self:SetDesaturated(true) end
-		end)
-	end
 end
 
-local function DarkenFrames()
-	-- Player, target, target-of-target
-	DarkenTexture(PlayerFrameTexture)
-	DarkenTexture(TargetFrameTextureFrameTexture)
-	DarkenTexture(TargetFrameToTTextureFrameTexture)
-
-	-- Pet
-	DarkenTexture(PetFrameTexture)
-
-	-- Party
-	for i = 1, 4 do
-		DarkenTexture(_G["PartyMemberFrame" .. i .. "Texture"])
-	end
+local function IsMainBarTexture(texture)
+	local name = texture:GetName()
+	return name and name:match("^ActionButton%d+NormalTexture$")
 end
 
-local function DarkenActionBars()
-	-- Artwork
-	for i = 0, 3 do
-		DarkenTexture(_G["MainMenuXPBarTexture" .. i])
-		DarkenTexture(_G["MainMenuBarTexture" .. i], COLOR_MID)
-	end
-	DarkenTexture(MainMenuBarLeftEndCap, COLOR_MID)
-	DarkenTexture(MainMenuBarRightEndCap, COLOR_MID)
-	DarkenTexture(ExhaustionTickNormal, COLOR_LIGHT)
-	DarkenTexture(ExhaustionTickHighlight, COLOR_LIGHT)
+local function Restore(texture)
+	if not texture then return end
+	local s = originalState[texture]
+	if not s then return end
 
-	-- Action button borders
-	local barNames = { "ActionButton", "MultiBarBottomLeftButton", "MultiBarBottomRightButton", "MultiBarRightButton", "MultiBarLeftButton" }
-	for _, barName in ipairs(barNames) do
-		for i = 1, NUM_ACTIONBAR_BUTTONS do
-			local btn = _G[barName .. i]
-			if btn then
-				local tex = btn:GetNormalTexture()
-				DarkenTextureHook(tex)
-			end
-		end
-	end
-
-	-- Pet action buttons
-	for i = 1, NUM_PET_ACTION_SLOTS do
-		local btn = _G["PetActionButton" .. i]
-		if btn then
-			local tex = btn:GetNormalTexture()
-			DarkenTexture(tex)
-		end
-	end
-
-	-- Stance buttons
-	for i = 1, NUM_STANCE_SLOTS do
-		local btn = _G["StanceButton" .. i]
-		if btn then
-			local tex = btn:GetNormalTexture()
-			DarkenTexture(tex)
-		end
-	end
-
-	-- Bag buttons
-	for i = 0, 3 do
-		local tex = _G["CharacterBag" .. i .. "SlotNormalTexture"]
-		DarkenTextureHook(tex)
-	end
-	DarkenTextureHook(MainMenuBarBackpackButtonNormalTexture)
-
-	-- Page buttons
-	DarkenRegions(ActionBarUpButton, COLOR_LIGHT, false)
-	DarkenRegions(ActionBarDownButton, COLOR_LIGHT, false)
-
-	-- Micro buttons
-	if MICRO_BUTTONS then
-		for _, btnName in ipairs(MICRO_BUTTONS) do
-			DarkenRegions(_G[btnName], COLOR_LIGHT, false)
-		end
-	end
-
-	-- Key ring
-	DarkenRegions(KeyRingButton, COLOR_LIGHT, false)
-end
-
-local function DarkenChat()
-	-- Edit box border
-	if ChatFrame1EditBox then
-		for i = 1, ChatFrame1EditBox:GetNumRegions() do
-			local region = select(i, ChatFrame1EditBox:GetRegions())
-			if region:GetName() then
-				DarkenTexture(region)
-			end
-		end
-	end
-
-	-- Tab textures
-	for i = 1, NUM_CHAT_WINDOWS do
-		local tab = _G["ChatFrame" .. i .. "Tab"]
-		if tab then
-			for j = 1, tab:GetNumRegions() do
-				local region = select(j, tab:GetRegions())
-				local name = region:GetName()
-				if name and not name:match("Highlight") and not name:match("Glow") then
-					DarkenTexture(region)
-				end
-			end
-		end
-	end
-end
-
-local function DarkenMinimap()
-	-- Borders
-	DarkenTexture(MinimapBorder)
-	DarkenTexture(MinimapBorderTop)
-	DarkenTexture(MiniMapTrackingBorder)
-
-	-- Zoom buttons
-	DarkenRegions(MinimapZoomIn, COLOR_MID)
-	DarkenRegions(MinimapZoomOut, COLOR_MID)
-
-end
-
-local function DarkenCastbars()
-	-- Target castbar
-	if TargetFrameSpellBar then
-		if TargetFrameSpellBar.Border then
-			DarkenTexture(TargetFrameSpellBar.Border)
-		end
-	end
-
-	-- Player castbar
-	if CastingBarFrame and CastingBarFrame.Border then
-		DarkenTexture(CastingBarFrame.Border)
-	end
-end
-
-local function DarkenMinimapDeferred()
-	-- Blizzard LoD addons (loaded on demand)
-	local frame = CreateFrame("Frame")
-	frame:RegisterEvent("ADDON_LOADED")
-	frame:SetScript("OnEvent", function(_, _, addon)
-		if addon == "Blizzard_GroupFinder_VanillaStyle" then
-			DarkenTexture(LFGMinimapFrameBorder)
-		elseif addon == "Blizzard_TimeManager" then
-			-- See _Docs/clock-investigation.md for full breakdown of popup frames
-			DarkenTexture((TimeManagerClockButton:GetRegions()))
-		end
-	end)
-
-	-- LibDBIcon minimap buttons (other addons)
-	local LDBIcon = LibStub and LibStub("LibDBIcon-1.0", true)
-	if LDBIcon then
-		for _, name in ipairs(LDBIcon:GetButtonList()) do
-			local button = LDBIcon:GetMinimapButton(name)
-			if button then
-				local border = button.border
-				if border then DarkenTexture(border) end
-			end
-		end
-		LDBIcon.RegisterCallback(cfFrames, "LibDBIcon_IconCreated", function(_, button)
-			local border = button.border
-			if border then DarkenTexture(border) end
-		end)
-	end
+	local a = IsMainBarTexture(texture) and 0.5 or s.a
+	texture:SetVertexColor(s.r, s.g, s.b, a, cff.SENTINEL)
+	texture:SetDesaturated(s.d)
+	originalState[texture] = nil
 end
 
 local function DarkenCompactMember(member)
 	if not member then return end
-	for i = 1, member:GetNumRegions() do
-		local region = select(i, member:GetRegions())
+	for _, region in pairs({ member:GetRegions() }) do
 		local name = region:GetName()
 		if name and (name:find("Border") or name:find("Divider") or name:find("Background")) then
-			DarkenTexture(region)
+			SaveAndDarken(region)
 		end
 	end
+	SaveAndDarken(member.horizDivider)
+	SaveAndDarken(member.horizTopBorder)
+	SaveAndDarken(member.horizBottomBorder)
+	SaveAndDarken(member.vertLeftBorder)
+	SaveAndDarken(member.vertRightBorder)
 end
 
-local function DarkenCompactFrameLayout()
-	-- Party border frame and member borders
-	DarkenRegions(CompactPartyFrameBorderFrame)
+local function DarkenCompactFrames()
+	SaveAndDarkenRegions(CompactPartyFrameBorderFrame)
+	SaveAndDarkenRegions(CompactRaidFrameContainerBorderFrame)
 	for m = 1, 5 do
 		DarkenCompactMember(_G["CompactPartyFrameMember" .. m])
+		DarkenCompactMember(_G["CompactRaidFrame" .. m])
 	end
-
-	-- Raid group borders and member borders
 	for g = 1, NUM_RAID_GROUPS do
-		DarkenRegions(_G["CompactRaidGroup" .. g .. "BorderFrame"])
+		SaveAndDarkenRegions(_G["CompactRaidGroup" .. g .. "BorderFrame"])
 		for m = 1, 5 do
 			DarkenCompactMember(_G["CompactRaidGroup" .. g .. "Member" .. m])
 		end
 	end
 end
 
-local function DarkenCompactFrames()
+local function DarkenFrames()
+	SaveAndDarken(PlayerFrameTexture)
+	SaveAndDarken(TargetFrameTextureFrameTexture)
+	SaveAndDarken(TargetFrameToTTextureFrameTexture)
+	SaveAndDarken(PetFrameTexture)
+	for i = 1, 4 do
+		SaveAndDarken(_G["PartyMemberFrame" .. i .. "Texture"])
+	end
+
+	-- Compact party/raid frames (LoD)
 	if CompactRaidFrameContainer_LayoutFrames then
-		hooksecurefunc("CompactRaidFrameContainer_LayoutFrames", DarkenCompactFrameLayout)
+		DarkenCompactFrames()
+		if not compactHooked then
+			compactHooked = true
+			hooksecurefunc("CompactRaidFrameContainer_LayoutFrames", DarkenCompactFrames)
+		end
+	end
+end
+
+local function DarkenActionBars()
+	local sc = cfFramesDB.DarkModeColorSecondary
+	for i = 0, 3 do
+		SaveAndDarken(_G["MainMenuXPBarTexture" .. i])
+		SaveAndDarken(_G["MainMenuBarTexture" .. i])
+		SaveAndDarken(_G["MainMenuMaxLevelBar" .. i])
+		if ReputationWatchBar and ReputationWatchBar.StatusBar then
+			SaveAndDarken(ReputationWatchBar.StatusBar["WatchBarTexture" .. i])
+			SaveAndDarken(ReputationWatchBar.StatusBar["XPBarTexture" .. i])
+		end
+	end
+
+	SaveAndDarken(MainMenuBarLeftEndCap)
+	SaveAndDarken(MainMenuBarRightEndCap)
+	SaveAndDarken(ExhaustionTickNormal, sc, false)
+	SaveAndDarken(ExhaustionTickHighlight, sc, false)
+
+	local barNames = { "ActionButton", "MultiBarBottomLeftButton", "MultiBarBottomRightButton", "MultiBarRightButton", "MultiBarLeftButton" }
+	for _, barName in ipairs(barNames) do
+		for i = 1, NUM_ACTIONBAR_BUTTONS do
+			local btn = _G[barName .. i]
+			if btn then
+				SaveAndDarkenHook(btn:GetNormalTexture(), "DarkModeActionBars")
+			end
+		end
+	end
+
+	for i = 1, NUM_PET_ACTION_SLOTS do
+		local btn = _G["PetActionButton" .. i]
+		if btn then SaveAndDarken(btn:GetNormalTexture()) end
+	end
+
+	for i = 1, NUM_STANCE_SLOTS do
+		local btn = _G["StanceButton" .. i]
+		if btn then SaveAndDarken(btn:GetNormalTexture()) end
+	end
+
+	for i = 0, 3 do
+		SaveAndDarkenHook(_G["CharacterBag" .. i .. "SlotNormalTexture"], "DarkModeActionBars")
+	end
+	SaveAndDarkenHook(MainMenuBarBackpackButtonNormalTexture, "DarkModeActionBars")
+
+	SaveAndDarkenRegions(ActionBarUpButton, sc, false)
+	SaveAndDarkenRegions(ActionBarDownButton, sc, false)
+
+	if MICRO_BUTTONS then
+		for _, btnName in ipairs(MICRO_BUTTONS) do
+			SaveAndDarkenRegions(_G[btnName], sc, false)
+		end
+	end
+
+	SaveAndDarkenRegions(KeyRingButton, sc, false)
+end
+
+local function DarkenLibDBIcon()
+	local LDBIcon = LibStub and LibStub("LibDBIcon-1.0", true)
+	if not LDBIcon then return end
+	for _, name in ipairs(LDBIcon:GetButtonList()) do
+		local button = LDBIcon:GetMinimapButton(name)
+		if button and button.border then
+			SaveAndDarken(button.border)
+		end
+	end
+	if not ldbIconHooked then
+		ldbIconHooked = true
+		LDBIcon.RegisterCallback(cff, "LibDBIcon_IconCreated", function(_, button)
+			if not cfFramesDB.DarkMode then return end
+			if button.border then SaveAndDarken(button.border) end
+		end)
+	end
+end
+
+local function DarkenMinimap()
+	local sc = cfFramesDB.DarkModeColorSecondary
+	SaveAndDarken(MinimapBorder)
+	SaveAndDarken(MinimapBorderTop)
+	SaveAndDarken(MiniMapTrackingBorder)
+	SaveAndDarkenRegions(MinimapZoomIn, sc, false)
+	SaveAndDarkenRegions(MinimapZoomOut, sc, false)
+	if GameTimeFrame then SaveAndDarkenRegions(GameTimeFrame, sc, false) end
+	if LFGMinimapFrameBorder then SaveAndDarken(LFGMinimapFrameBorder) end
+	if TimeManagerClockButton then SaveAndDarkenRegions(TimeManagerClockButton) end
+	DarkenLibDBIcon()
+end
+
+local function DarkenMinimapAddons(_, _, addon)
+	if addon == "Blizzard_GroupFinder_VanillaStyle" then
+		SaveAndDarken(LFGMinimapFrameBorder)
+	elseif addon == "Blizzard_TimeManager" then
+		SaveAndDarkenRegions(TimeManagerClockButton)
+	end
+	DarkenLibDBIcon()
+end
+
+local function DarkenChat()
+	for _, region in pairs({ ChatFrame1EditBox:GetRegions() }) do
+		if region:GetName() then
+			SaveAndDarken(region)
+		end
+	end
+
+	for i = 1, NUM_CHAT_WINDOWS do
+		local tab = _G["ChatFrame" .. i .. "Tab"]
+		if tab then
+			for _, region in pairs({ tab:GetRegions() }) do
+				local name = region:GetName()
+				if name and not name:match("Highlight") and not name:match("Glow") then
+					SaveAndDarken(region)
+				end
+			end
+		end
+	end
+end
+
+local function DarkenCastbars()
+	if TargetFrameSpellBar and TargetFrameSpellBar.Border then
+		SaveAndDarken(TargetFrameSpellBar.Border)
+	end
+	if CastingBarFrame and CastingBarFrame.Border then
+		SaveAndDarken(CastingBarFrame.Border)
 	end
 end
 
@@ -232,43 +239,58 @@ local function DarkenNameplate(_, unit)
 	local healthBar = plate.UnitFrame and plate.UnitFrame.healthBar
 	local border = healthBar and healthBar.border
 	if not border then return end
-	local regions = { border:GetRegions() }
-	for _, region in ipairs(regions) do
+	for _, region in pairs({ border:GetRegions() }) do
 		if region:IsObjectType("Texture") then
-			if not region.cfDarkHooked then
-				region.cfDarkHooked = true
-				DarkenTextureHook(region, COLOR_MID)
+			if not region.cffHooked then
+				region.cffHooked = true
+				SaveAndDarkenHook(region, "DarkModeNameplates")
 			else
-				DarkenTexture(region, COLOR_MID)
+				SaveAndDarken(region)
 			end
 		end
 	end
 
-	-- Move selectionHighlight below the border (ARTWORK)
 	local selectionHighlight = plate.UnitFrame.selectionHighlight
 	if selectionHighlight then
 		selectionHighlight:SetDrawLayer("BORDER", 1)
 	end
-
 end
 
 local function DarkenNameplates()
 	if not NamePlateDriverFrame then return end
-	hooksecurefunc(NamePlateDriverFrame, "OnNamePlateAdded", DarkenNameplate)
+	if not nameplateHooked then
+		nameplateHooked = true
+		hooksecurefunc(NamePlateDriverFrame, "OnNamePlateAdded", DarkenNameplate)
+	end
+	for _, plate in ipairs(C_NamePlate.GetNamePlates()) do
+		if plate.UnitFrame and plate.UnitFrame.unit then
+			DarkenNameplate(nil, plate.UnitFrame.unit)
+		end
+	end
 end
 
+function cff.EnableDarkMode()
+	if not cfFramesDB.DarkMode then return end
+	if cfFramesDB.DarkModeFrames then DarkenFrames() end
+	if cfFramesDB.DarkModeActionBars then DarkenActionBars() end
+	if cfFramesDB.DarkModeMinimap then
+		DarkenMinimap()
+		if not lodFrame then
+			lodFrame = CreateFrame("Frame")
+			lodFrame:RegisterEvent("ADDON_LOADED")
+			lodFrame:SetScript("OnEvent", function(...)
+				if not cfFramesDB.DarkMode or not cfFramesDB.DarkModeMinimap then return end
+				DarkenMinimapAddons(...)
+			end)
+		end
+	end
+	if cfFramesDB.DarkModeChat then DarkenChat() end
+	if cfFramesDB.DarkModeCastbars then DarkenCastbars() end
+	if cfFramesDB.DarkModeNameplates then DarkenNameplates() end
+end
 
-function cfFrames.initDarkMode()
-	DarkenFrames()
-	DarkenActionBars()
-	DarkenChat()
-	DarkenCastbars()
-	DarkenMinimap()
-	DarkenMinimapDeferred()
-	DarkenCompactFrames()
-	DarkenNameplates()
-
-	-- Register styles so other features can request darkening without importing DarkMode
-	cfFrames.registerTextureStyle(DarkenTexture)
-	cfFrames.registerRegionStyle(DarkenRegions)
+function cff.DisableDarkMode()
+	for texture in pairs(originalState) do
+		Restore(texture)
+	end
 end
