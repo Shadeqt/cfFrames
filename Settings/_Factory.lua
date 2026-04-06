@@ -23,11 +23,30 @@ function cff.Dropdown(cat, key, name, tooltip, options, callback)
 	return dd
 end
 
+function cff.InfoText(cat, getText)
+	local layout = SettingsPanel:GetLayout(cat)
+	local init = CreateFromMixins(ScrollBoxFactoryInitializerMixin)
+	init:Init("SettingsListSectionHeaderTemplate")
+	function init:InitFrame(frame)
+		frame.Title:SetText(getText())
+		frame.Title:SetFontObject("GameFontNormalSmall")
+		frame.Title:SetTextColor(0.7, 0.7, 0.7)
+	end
+	function init:ShouldShow() return true end
+	function init:GetExtent() return 20 end
+	function init:IsSearchIgnoredInLayout() return true end
+	layout:AddInitializer(init)
+end
+
 function cff.Header(cat, text, shownPredicate)
 	local layout = SettingsPanel:GetLayout(cat)
 	local init = CreateFromMixins(ScrollBoxFactoryInitializerMixin)
 	init:Init("SettingsListSectionHeaderTemplate")
-	function init:InitFrame(frame) frame.Title:SetText(text) end
+	function init:InitFrame(frame)
+		frame.Title:SetText(text)
+		frame.Title:SetFontObject("GameFontHighlightLarge")
+		frame.Title:SetTextColor(1, 1, 1)
+	end
 	function init:ShouldShow() return not shownPredicate or shownPredicate() end
 	function init:GetExtent() return 26 end
 	function init:IsSearchIgnoredInLayout() return true end
@@ -60,4 +79,8 @@ EventUtil.ContinueOnAddOnLoaded("cfFrames", function()
 	end
 
 	cff.SetupSettings()
+	cff.SetupDarkModeSettings()
+	cff.SetupPlayerSettings()
+	cff.SetupPetSettings()
+	cff.SetupTargetSettings()
 end)

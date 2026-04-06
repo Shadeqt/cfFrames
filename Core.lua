@@ -13,6 +13,6 @@ function cff.RunCallbacks(key)
 end
 
 function cff.GetStatusBarTexture()
-	if cfFramesDB[cff.MODULES.StatusBar] then return cfFramesDB[cff.MODULES.StatusBarTexture] end
+	if cfFramesDB[cff.MODULES.StatusBar] then return cfFramesDB[cff.VALUES.StatusBarTexture] end
 	return "Interface\\TargetingFrame\\UI-StatusBar"
 end

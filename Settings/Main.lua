@@ -1,18 +1,5 @@
 local M = cff.MODULES
-
-local function refreshDarkMode()
-	if cfFramesDB[M.DarkMode] then
-		cff.DisableDarkMode()
-		cff.EnableDarkMode()
-	end
-end
-
-local function refreshIcons()
-	cff.DisableDarkModeIcons()
-	if cfFramesDB[M.DarkMode] then
-		cff.EnableDarkModeIcons()
-	end
-end
+local V = cff.VALUES
 
 function cff.SetupSettings()
 	local cat = cff.category
@@ -23,7 +10,7 @@ function cff.SetupSettings()
 		cff.RunCallbacks(M.StatusBar)
 	end)
 
-	local dd = cff.Dropdown(cat, M.StatusBarTexture, "Status Bar Texture", "Choose status bar texture", function()
+	local dd = cff.Dropdown(cat, V.StatusBarTexture, "Status Bar Texture", "Choose status bar texture", function()
 		local c = Settings.CreateControlTextContainer()
 		c:Add("Interface\\AddOns\\cfFrames\\Media\\StatusBar\\BlizzardRetailBarCrop2", "Retail Bar")
 		c:Add("Interface\\AddOns\\cfFrames\\Media\\StatusBar\\DragonflightTexture", "Dragonflight")
@@ -44,14 +31,6 @@ function cff.SetupSettings()
 			cff.EnableNameplateCastbar()
 		else
 			cff.DisableNameplateCastbar()
-		end
-	end)
-
-	cff.Checkbox(cat, M.PlayerCastbarIcon, "Player Castbar Icon", "Show spell icon on player castbar", function()
-		if cfFramesDB[M.PlayerCastbarIcon] then
-			cff.EnablePlayerCastbarIcon()
-		else
-			cff.DisablePlayerCastbarIcon()
 		end
 	end)
 
@@ -79,65 +58,12 @@ function cff.SetupSettings()
 		StaticPopup_Show("CFF_RELOAD_UI")
 	end)
 
-	-- Dark Mode
-	cff.Header(cat, "Dark Mode")
-
-	cff.Checkbox(cat, M.DarkMode, "Dark Mode", "Darken UI frame textures", function()
-		if cfFramesDB[M.DarkMode] then
-			cff.EnableDarkMode()
-		else
-			cff.DisableDarkMode()
-		end
-	end)
-
-	local sliders = {
-		[M.DarkModeColor]          = { name = "Dark Mode Color", tooltip = "Darkness level (0 = black, 1 = white)" },
-		[M.DarkModeColorSecondary] = { name = "Secondary Color", tooltip = "Small elements without a separate border (0 = black, 1 = white)" },
-	}
-	for _, key in ipairs(M) do
-		local sl = sliders[key]
-		if sl then
-			local slider = cff.Slider(cat, key, sl.name, sl.tooltip, 0, 1, 0.05, refreshDarkMode)
-			slider:AddShownPredicate(function() return cfFramesDB[M.DarkMode] end)
-		end
-	end
-
-	local toggles = {
-		[M.DarkModeFrames]     = { name = "Unit Frames", tooltip = "Player, target, pet, party, compact raid frames" },
-		[M.DarkModeActionBars] = { name = "Action Bars", tooltip = "Action buttons, bag slots, menu bar" },
-		[M.DarkModeMinimap]    = { name = "Minimap",     tooltip = "Minimap borders, zoom buttons, addon icons" },
-		[M.DarkModeChat]       = { name = "Chat",        tooltip = "Chat edit box and tab textures" },
-		[M.DarkModeCastbars]   = { name = "Castbars",    tooltip = "Player and target castbar borders" },
-		[M.DarkModeNameplates] = { name = "Nameplates",  tooltip = "Nameplate health bar borders" },
-	}
-	for _, key in ipairs(M) do
-		local toggle = toggles[key]
-		if toggle then
-			local cb = cff.Checkbox(cat, key, toggle.name, toggle.tooltip, refreshDarkMode)
-			cb:AddShownPredicate(function() return cfFramesDB[M.DarkMode] end)
-		end
-	end
-
-	cff.Header(cat, "Icons", function() return cfFramesDB[M.DarkMode] end)
-
-	local iconToggles = {
-		[M.DarkModeIconBuffs]      = { name = "Buffs",       tooltip = "Borders on player, target, pet, and compact raid buff icons" },
-		[M.DarkModeIconActionBars] = { name = "Action Bars",  tooltip = "Borders on action bar, pet bar, stance bar, and bag icons" },
-	}
-	for _, key in ipairs(M) do
-		local toggle = iconToggles[key]
-		if toggle then
-			local cb = cff.Checkbox(cat, key, toggle.name, toggle.tooltip, refreshIcons)
-			cb:AddShownPredicate(function() return cfFramesDB[M.DarkMode] end)
-		end
-	end
-
-	-- Fixes
+	-- Subcategories
+	cff.darkModeCategory = Settings.RegisterVerticalLayoutSubcategory(cat, "Dark Mode")
 	local fixes = Settings.RegisterVerticalLayoutSubcategory(cat, "Fixes")
-
-	-- Player
-	local player = Settings.RegisterVerticalLayoutSubcategory(cat, "Player")
-	cff.Header(player, "Player Frame")
+	cff.playerCategory = Settings.RegisterVerticalLayoutSubcategory(cat, "Player")
+	cff.petCategory = Settings.RegisterVerticalLayoutSubcategory(cat, "Pet")
+	cff.targetCategory = Settings.RegisterVerticalLayoutSubcategory(cat, "Target")
 
 	cff.Header(fixes, "Fixes (requires reload)")
 
@@ -151,6 +77,7 @@ function cff.SetupSettings()
 		[M.NameplateLevelPositionFix] = { name = "Nameplate Level Position Fix", tooltip = "Centers level text on compact unit frame nameplates" },
 		[M.ActionBarIconPositionFix]  = { name = "Action Bar Icon Position Fix", tooltip = "Shifts action bar icons 1px left and down to center in border" },
 		[M.PetActionBarCheckedFix]    = { name = "Pet Action Bar Checked Fix",  tooltip = "Aligns pet action button checked texture with icon" },
+		[M.UnitFrameResetFix]         = { name = "Unit Frame Reset Fix",       tooltip = "Makes reset-to-default position persist on reload for player and target frames" },
 	}
 	for _, key in ipairs(M) do
 		local fix = fixToggles[key]

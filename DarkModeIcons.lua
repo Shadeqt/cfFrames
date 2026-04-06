@@ -1,4 +1,5 @@
 local M = cff.MODULES
+local V = cff.VALUES
 local borders = {}
 
 -- zoom: left, right, top, bottom
@@ -29,7 +30,7 @@ end
 
 local function ColorBorder(border)
 	if not border then return end
-	local c = cfFramesDB[M.DarkModeColor]
+	local c = cfFramesDB[V.DarkModeColor]
 	border:SetBackdropBorderColor(c, c, c, 1)
 	--border:SetBackdropBorderColor(1, 0, 0, 1)
 	border:Show()

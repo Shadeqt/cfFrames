@@ -1,4 +1,5 @@
 local M = cff.MODULES
+local V = cff.VALUES
 local originalState = {}
 local compactHooked = false
 local nameplateHooked = false
@@ -6,7 +7,7 @@ local ldbIconHooked = false
 local lodFrame = nil
 
 local function ApplyDark(texture, color, desaturate, alpha)
-	local c = color or cfFramesDB[M.DarkModeColor]
+	local c = color or cfFramesDB[V.DarkModeColor]
 	local d = desaturate ~= false
 	local _, _, _, a = texture:GetVertexColor()
 	texture:SetVertexColor(c, c, c, alpha or a, cff.SENTINEL)
@@ -113,7 +114,7 @@ local function DarkenFrames()
 end
 
 local function DarkenActionBars()
-	local sc = cfFramesDB[M.DarkModeColorSecondary]
+	local sc = cfFramesDB[V.DarkModeColorSecondary]
 	for i = 0, 3 do
 		cff.SaveAndDarken(_G["MainMenuXPBarTexture" .. i])
 		cff.SaveAndDarken(_G["MainMenuBarTexture" .. i])
@@ -139,9 +140,15 @@ local function DarkenActionBars()
 		end
 	end
 
+	cff.SaveAndDarken(SlidingActionBarTexture0)
+	cff.SaveAndDarken(SlidingActionBarTexture1)
+
 	for i = 1, NUM_PET_ACTION_SLOTS do
 		local btn = _G["PetActionButton" .. i]
-		if btn then cff.SaveAndDarken(btn:GetNormalTexture()) end
+		if btn then
+			cff.SaveAndDarken(btn:GetNormalTexture())
+			--cff.SaveAndDarken(_G["PetActionButton" .. i .. "NormalTexture2"])
+		end
 	end
 
 	for i = 1, NUM_STANCE_SLOTS do
@@ -185,7 +192,7 @@ local function DarkenLibDBIcon()
 end
 
 local function DarkenMinimap()
-	local sc = cfFramesDB[M.DarkModeColorSecondary]
+	local sc = cfFramesDB[V.DarkModeColorSecondary]
 	cff.SaveAndDarken(MinimapBorder)
 	cff.SaveAndDarken(MinimapBorderTop)
 	cff.SaveAndDarken(MiniMapTrackingBorder)
