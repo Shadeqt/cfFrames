@@ -20,7 +20,14 @@ local function ColorBar(bar, unit)
 	if r then bar:SetStatusBarColor(r, g, b) end
 end
 
-local function RefreshAll()
+-- Sync CVar-based toggles (raid = instant, nameplates = needs reload)
+function cff.SyncHealthbarCVars()
+	SetCVar("raidFramesDisplayClassColor", cfFramesDB[M.HealthbarColorRaid] and "1" or "0")
+	SetCVar("ShowClassColorInNameplate", cfFramesDB[M.HealthbarColorNameplateEnemy] and "1" or "0")
+	SetCVar("ShowClassColorInFriendlyNameplate", cfFramesDB[M.HealthbarColorNameplateFriendly] and "1" or "0")
+end
+
+local function RefreshUnitFrames()
 	if UnitExists("player") then
 		UnitFrameHealthBar_Update(PlayerFrameHealthBar, "player")
 		if cfFramesDB[M.HealthbarColor] then ColorBar(PlayerFrameHealthBar, "player") end
@@ -28,10 +35,6 @@ local function RefreshAll()
 	if UnitExists("target") then
 		UnitFrameHealthBar_Update(TargetFrameHealthBar, "target")
 		if cfFramesDB[M.HealthbarColor] then ColorBar(TargetFrameHealthBar, "target") end
-	end
-	if UnitExists("pet") then
-		UnitFrameHealthBar_Update(PetFrameHealthBar, "pet")
-		if cfFramesDB[M.HealthbarColor] then ColorBar(PetFrameHealthBar, "pet") end
 	end
 	if UnitExists("targettarget") then
 		UnitFrameHealthBar_Update(TargetFrameToTHealthBar, "targettarget")
@@ -47,9 +50,6 @@ local function RefreshAll()
 			end
 		end
 	end
-	for _, plate in ipairs(C_NamePlate.GetNamePlates()) do
-		if plate.UnitFrame then ColorBar(plate.UnitFrame.healthBar, plate.UnitFrame.unit) end
-	end
 end
 
 local function HookUnitFrames()
@@ -63,13 +63,6 @@ local function HookUnitFrames()
 		if not cfFramesDB[M.HealthbarColor] then return end
 		if self.unit then ColorBar(self, self.unit) end
 	end)
-
-	if CompactUnitFrame_UpdateHealthColor then
-		hooksecurefunc("CompactUnitFrame_UpdateHealthColor", function(f)
-			if not cfFramesDB[M.HealthbarColor] then return end
-			if f and f.unit then ColorBar(f.healthBar, f.unit) end
-		end)
-	end
 end
 
 local function HookTargetOfTarget()
@@ -86,29 +79,18 @@ local function HookTargetOfTarget()
 	end)
 end
 
-local function RegisterNameplates()
-	local f = CreateFrame("Frame")
-	f:RegisterEvent("NAME_PLATE_UNIT_ADDED")
-	f:SetScript("OnEvent", function(_, _, unit)
-		if not cfFramesDB[M.HealthbarColor] then return end
-		local plate = C_NamePlate.GetNamePlateForUnit(unit)
-		if plate and plate.UnitFrame then ColorBar(plate.UnitFrame.healthBar, unit) end
-	end)
-end
-
 function cff.EnableHealthbarColor()
 	if not cfFramesDB[M.HealthbarColor] then return end
 
-	RefreshAll()
+	RefreshUnitFrames()
 
 	if hooked then return end
 	hooked = true
 
 	HookUnitFrames()
 	HookTargetOfTarget()
-	RegisterNameplates()
 end
 
 function cff.DisableHealthbarColor()
-	RefreshAll()
+	RefreshUnitFrames()
 end

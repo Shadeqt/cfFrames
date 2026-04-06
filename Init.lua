@@ -7,7 +7,11 @@ cff.MODULES = {
 	"StatusBarTexture",
 	"BiggerHealthbar",
 	"HealthbarColor",
+	"HealthbarColorRaid",
+	"HealthbarColorNameplateEnemy",
+	"HealthbarColorNameplateFriendly",
 	"PlayerCastbarIcon",
+	"NameplateCastbar",
 	-- Dark Mode
 	"DarkMode",
 	"DarkModeColor",
@@ -18,7 +22,6 @@ cff.MODULES = {
 	"DarkModeChat",
 	"DarkModeCastbars",
 	"DarkModeNameplates",
-	"NameplateCastbar",
 	"DarkModeIconBuffs",
 	"DarkModeIconActionBars",
 	-- Fixes
@@ -43,6 +46,7 @@ cff.DEFAULTS.DarkModeColor = 0.25
 cff.DEFAULTS.DarkModeColorSecondary = 0.75
 
 EventUtil.ContinueOnAddOnLoaded("cfFrames", function()
+	local fresh = not cfFramesDB
 	cfFramesDB = cfFramesDB or {}
 
 	-- Add new keys
@@ -50,6 +54,13 @@ EventUtil.ContinueOnAddOnLoaded("cfFrames", function()
 		if cfFramesDB[key] == nil then
 			cfFramesDB[key] = value
 		end
+	end
+
+	-- First install: read CVar state so we don't override user preferences
+	if fresh then
+		cfFramesDB[cff.MODULES.HealthbarColorRaid] = GetCVarBool("raidFramesDisplayClassColor")
+		cfFramesDB[cff.MODULES.HealthbarColorNameplateEnemy] = GetCVarBool("ShowClassColorInNameplate")
+		cfFramesDB[cff.MODULES.HealthbarColorNameplateFriendly] = GetCVarBool("ShowClassColorInFriendlyNameplate")
 	end
 
 	-- Remove stale keys
@@ -66,6 +77,7 @@ EventUtil.ContinueOnAddOnLoaded("cfFrames", function()
 		cff.EnableStatusBar()
 		cff.EnableBiggerHealthbar()
 		cff.EnableHealthbarColor()
+		cff.SyncHealthbarCVars()
 		cff.EnablePlayerCastbarIcon()
 		cff.EnableNameplateCastbar()
 		cff.EnableDarkMode()

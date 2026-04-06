@@ -2,7 +2,7 @@
 ## Title: cfFrames
 ## Notes: UI tweaks with live settings
 ## Author: Cowfoot
-## Version: 0.2
+## Version: 0.3
 ## SavedVariablesPerCharacter: cfFramesDB
 
 Init.lua
@@ -25,4 +25,3 @@ DarkMode.lua
 DarkModeIcons.lua
 Settings\_Factory.lua
 Settings\Main.lua
-Settings\DarkMode.lua

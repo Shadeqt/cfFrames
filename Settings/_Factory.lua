@@ -23,16 +23,26 @@ function cff.Dropdown(cat, key, name, tooltip, options, callback)
 	return dd
 end
 
-function cff.Header(cat, text)
+function cff.Header(cat, text, shownPredicate)
 	local layout = SettingsPanel:GetLayout(cat)
 	local init = CreateFromMixins(ScrollBoxFactoryInitializerMixin)
 	init:Init("SettingsListSectionHeaderTemplate")
 	function init:InitFrame(frame) frame.Title:SetText(text) end
-	function init:ShouldShow() return true end
+	function init:ShouldShow() return not shownPredicate or shownPredicate() end
 	function init:GetExtent() return 26 end
 	function init:IsSearchIgnoredInLayout() return true end
 	layout:AddInitializer(init)
 end
+
+StaticPopupDialogs["CFF_RELOAD_UI"] = {
+	text = "This setting requires a UI reload to take effect.\nReload now?",
+	button1 = "Reload",
+	button2 = "Later",
+	OnAccept = ReloadUI,
+	timeout = 0,
+	whileDead = true,
+	hideOnEscape = true,
+}
 
 EventUtil.ContinueOnAddOnLoaded("cfFrames", function()
 	cff.category = Settings.RegisterVerticalLayoutCategory("cfFrames")
@@ -48,4 +58,6 @@ EventUtil.ContinueOnAddOnLoaded("cfFrames", function()
 	SlashCmdList["CFF"] = function()
 		Settings.OpenToCategory(cff.category:GetID())
 	end
+
+	cff.SetupSettings()
 end)
