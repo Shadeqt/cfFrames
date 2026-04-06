@@ -2,13 +2,18 @@ EventUtil.ContinueOnAddOnLoaded("cfFrames", function()
 	local M = cff.MODULES
 	local cat = cff.category
 
-	cff.Dropdown(cat, M.StatusBar, "Status Bar Texture", "Choose status bar texture", function()
+	cff.Checkbox(cat, M.StatusBar, "Custom Status Bar Texture", "Replace default status bar textures", function()
+		cff.EnableStatusBar()
+		cff.RunCallbacks(M.StatusBar)
+	end)
+
+	local dd = cff.Dropdown(cat, M.StatusBarTexture, "Status Bar Texture", "Choose status bar texture", function()
 		local c = Settings.CreateControlTextContainer()
-		c:Add("Interface\\TargetingFrame\\UI-StatusBar", "Blizzard")
 		c:Add("Interface\\AddOns\\cfFrames\\Media\\StatusBar\\BlizzardRetailBarCrop2", "Retail Bar")
 		c:Add("Interface\\AddOns\\cfFrames\\Media\\StatusBar\\DragonflightTexture", "Dragonflight")
 		return c:GetData()
-	end, function() cff.EnableStatusBar(); cff.RunCallbacks(cff.MODULES.StatusBar) end)
+	end, function() cff.EnableStatusBar(); cff.RunCallbacks(M.StatusBar) end)
+	dd:AddShownPredicate(function() return cfFramesDB[M.StatusBar] end)
 
 	cff.Checkbox(cat, M.BiggerHealthbar, "Bigger Health Bars", "Enlarge player and target health bars", function()
 		if cfFramesDB[M.BiggerHealthbar] then

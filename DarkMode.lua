@@ -81,13 +81,13 @@ end
 local function DarkenCompactFrames()
 	SaveAndDarkenRegions(CompactPartyFrameBorderFrame)
 	SaveAndDarkenRegions(CompactRaidFrameContainerBorderFrame)
-	for m = 1, 5 do
+	for m = 1, MEMBERS_PER_RAID_GROUP do
 		DarkenCompactMember(_G["CompactPartyFrameMember" .. m])
 		DarkenCompactMember(_G["CompactRaidFrame" .. m])
 	end
 	for g = 1, NUM_RAID_GROUPS do
 		SaveAndDarkenRegions(_G["CompactRaidGroup" .. g .. "BorderFrame"])
-		for m = 1, 5 do
+		for m = 1, MEMBERS_PER_RAID_GROUP do
 			DarkenCompactMember(_G["CompactRaidGroup" .. g .. "Member" .. m])
 		end
 	end
@@ -98,7 +98,7 @@ local function DarkenFrames()
 	cff.SaveAndDarken(TargetFrameTextureFrameTexture)
 	cff.SaveAndDarken(TargetFrameToTTextureFrameTexture)
 	cff.SaveAndDarken(PetFrameTexture)
-	for i = 1, 4 do
+	for i = 1, MAX_PARTY_MEMBERS do
 		cff.SaveAndDarken(_G["PartyMemberFrame" .. i .. "Texture"])
 	end
 

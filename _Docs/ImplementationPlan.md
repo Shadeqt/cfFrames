@@ -2,7 +2,7 @@
 
 ## Current State
 
-cfFrames v0.2 has a clean modular architecture with dark mode, status bar textures, bigger health bars, class health colors, icon borders/zoom, and various UI fixes. Each feature has Enable/Disable functions, per-character saved variables, and a Settings panel with live toggles.
+cfFrames v0.3 has a clean modular architecture with dark mode, status bar textures, bigger health bars, class health colors, icon borders/zoom, nameplate castbars, player castbar icon, a Core callback system, and various UI fixes. Each feature has Enable/Disable functions, per-character saved variables, and a Settings panel with live toggles.
 
 ---
 
@@ -34,6 +34,8 @@ Vertex color darkening + desaturation across all UI elements with per-category t
 - Castbars (player, target borders)
 - Nameplates (health bar borders)
 
+Exposes `cff.SaveAndDarken` for external modules. Fires `cff.RunCallbacks(M.DarkMode)` on enable for cross-module darkening.
+
 #### 2.2 Dark Mode Icons — `DarkModeIcons.lua` ✓
 
 Icon borders (BackdropTemplate tooltip-style) and icon zoom (SetTexCoord) on:
@@ -41,6 +43,20 @@ Icon borders (BackdropTemplate tooltip-style) and icon zoom (SetTexCoord) on:
 - **Action Bars toggle:** All action bars, pet bar, stance bar, bag slots, backpack
 
 Separate settings toggles: `DarkModeIconBuffs`, `DarkModeIconActionBars`. Full disable support (hides borders, resets zoom).
+
+### Phase 3 — Castbars & Core ✓
+
+#### 3.1 Nameplate Castbars — `NameplateCastbar.lua` ✓
+
+Cast bars on enemy nameplates using `SmallCastingBarFrameTemplate`. Lazy-created per plate, cached on `plate.cffCastBar`. Border, flash, icon, text repositioned. Registered callbacks for DarkMode (darken border) and StatusBar (update texture).
+
+#### 3.2 Player Castbar Icon — `PlayerCastbarIcon.lua` ✓
+
+Shows the existing hidden `CastingBarFrame.Icon`, sized to match bar height, positioned left of the bar.
+
+#### 3.3 Core Callback System — `Core.lua` ✓
+
+Generic callback registry: `cff.RegisterCallback(key, fn)` / `cff.RunCallbacks(key)` using module keys. Shared `cff.GetStatusBarTexture()` getter with Blizzard fallback.
 
 ### Fixes ✓
 
@@ -60,30 +76,9 @@ Separate settings toggles: `DarkModeIconBuffs`, `DarkModeIconActionBars`. Full d
 
 ## Remaining
 
-### Phase 3 — Nameplate Enhancements
+### Phase 4 — Nameplate Enhancements
 
-#### 3.1 Nameplate Castbars — `NameplateCastbar.lua`
-
-**What:** Show cast bars on enemy nameplates.
-
-**Reference:** `cfTest/NameplateCastbar.lua`, `_Old/NameplateCastbar.lua`
-
-**Implementation:**
-- `cff.EnableNameplateCastbar()` / `cff.DisableNameplateCastbar()`
-- On `NAME_PLATE_UNIT_ADDED`: create castbar from `SmallCastingBarFrameTemplate`, call `CastingBarFrame_OnLoad`, set unit via `CastingBarFrame_SetUnit`
-- Position below health bar with configurable offset
-- Style: border, flash, icon, text — all repositioned to align
-- On `NAME_PLATE_UNIT_REMOVED`: hide castbar, clear unit
-- Use statusbar texture from StatusBarTexture.lua if enabled
-
-**Settings:**
-- Checkbox: "Nameplate Castbars"
-- DB key: `NameplateCastbar` (boolean)
-- Default: `true`
-
----
-
-#### 3.2 Nameplate Classification Icons — `NameplateClassification.lua`
+#### 4.1 Nameplate Classification Icons — `NameplateClassification.lua`
 
 **What:** Show elite/rare icons on nameplates.
 
@@ -96,22 +91,59 @@ Separate settings toggles: `DarkModeIconBuffs`, `DarkModeIconActionBars`. Full d
 - rare/rareelite → `Interface\Tooltips\RareEliteNameplateIcon`
 - Desaturate border for rares
 
-**Settings:**
-- Checkbox: "Nameplate Classification"
-- DB key: `NameplateClassification` (boolean)
-- Default: `true`
+---
+
+### Phase 5 — Pet Features
+
+| Feature | File | Reference | Description |
+|---------|------|-----------|-------------|
+| Pet Debuffs | `PetDebuffs.lua` | `_Old/PetDebuffs.lua` | Show debuff icons on pet frame |
+| Pet Level | `PetLevel.lua` | `_Old/PetLevel.lua` | Show pet level when different from player |
+| Pet Name | `PetName.lua` | `_Old/PetName.lua` | Reposition pet name above health bar |
+| Pet XP Bar | `PetXpBar.lua` | `_Old/PetXpBar.lua` | Show pet experience bar |
 
 ---
 
-### Phase 4 — Nice-to-Have (Lower Priority)
+### Phase 6 — Buff & Aura Features
 
-| Feature | File | Reference |
-|---------|------|-----------|
-| Druid Mana Bar | `DruidBar.lua` | `cfTest/DruidBar.lua` |
-| Player Castbar Icon | `CastbarIcon.lua` | `cfTest/CastbarIcon.lua` |
-| Pet Level / XP Bar | `PetLevel.lua` | `_Old/PetLevel.lua`, `_Old/PetXpBar.lua` |
-| Hide Combat Glow | `CombatGlow.lua` | `_Old/CombatGlow.lua` |
-| Hide Hit Indicator | `HitIndicator.lua` | `_Old/HitIndicator.lua` |
+| Feature | File | Reference | Description |
+|---------|------|-----------|-------------|
+| Buff Sorting | `BuffSorting.lua` | `_Old/BuffSorting.lua` | Sort player buffs by duration, target buffs by player-cast first |
+| Target Castbar Icon | `TargetCastbarIcon.lua` | `_Old/CastbarTargetIcon.lua` | Show spell icon on target castbar |
+
+---
+
+### Phase 7 — UI Tweaks (Simple Toggles)
+
+| Feature | File | Reference | Description |
+|---------|------|-----------|-------------|
+| Hide Combat Glow | `CombatGlow.lua` | `_Old/CombatGlow.lua` | Hide combat glow on player/pet frames |
+| Hide Hit Indicator | `HitIndicator.lua` | `_Old/HitIndicator.lua` | Hide hit text on player/pet frames |
+| Hide Group Indicator | `GroupIndicator.lua` | `_Old/GroupIndicator.lua` | Hide group number on player frame |
+| Name Background | `NameBackground.lua` | `_Old/NameBackground.lua` | Hide/darken target name background |
+
+---
+
+### Phase 8 — Druid & Class Features
+
+| Feature | File | Reference | Description |
+|---------|------|-----------|-------------|
+| Druid Mana Bar | `DruidBar.lua` | `_Old/DruidBar.lua`, `cfTest/DruidBar.lua` | Extra mana bar for druids when shapeshifted |
+
+---
+
+### Phase 9 — Frame Positioning (Low Priority)
+
+The old version had a movability system for repositioning UI frames. This is a large feature that may not be needed if other addons handle frame positioning.
+
+| Feature | File | Reference | Description |
+|---------|------|-----------|-------------|
+| Movable Frames | `Frames/_Movable.lua` | `_Old/Frames/_Movable.lua` | Drag-to-reposition system |
+| Player Frame | `Frames/PlayerFrame.lua` | `_Old/Frames/PlayerFrame.lua` | Player frame positioning |
+| Target Frame | `Frames/TargetFrame.lua` | `_Old/Frames/TargetFrame.lua` | Target frame positioning |
+| Target of Target | `Frames/TargetOfTarget.lua` | `_Old/Frames/TargetOfTarget.lua` | ToT frame positioning |
+| Player Castbar | `Frames/PlayerCastbar.lua` | `_Old/Frames/PlayerCastbar.lua` | Player castbar positioning |
+| Target Castbar | `Frames/TargetCastbar.lua` | `_Old/Frames/TargetCastbar.lua` | Target castbar positioning |
 
 ---
 
@@ -121,11 +153,14 @@ Separate settings toggles: `DarkModeIconBuffs`, `DarkModeIconActionBars`. Full d
 cfFrames/
 ├── cfFrames.toc
 ├── Init.lua
+├── Core.lua
 ├── DarkMode.lua
 ├── DarkModeIcons.lua
 ├── StatusBarTexture.lua
 ├── BiggerHealthbar.lua
 ├── HealthbarColor.lua
+├── PlayerCastbarIcon.lua
+├── NameplateCastbar.lua
 ├── Fixes/
 │   ├── ActionBarAlphaFix.lua
 │   ├── ToTPortraitFix.lua
@@ -161,6 +196,7 @@ cfFrames/
 
 ```
 Init.lua
+Core.lua
 Fixes\ActionBarAlphaFix.lua
 Fixes\ToTPortraitFix.lua
 Fixes\ToTBackgroundFix.lua
@@ -173,6 +209,8 @@ Fixes\PetActionBarCheckedFix.lua
 StatusBarTexture.lua
 BiggerHealthbar.lua
 HealthbarColor.lua
+PlayerCastbarIcon.lua
+NameplateCastbar.lua
 DarkMode.lua
 DarkModeIcons.lua
 Settings\_Factory.lua
@@ -180,7 +218,7 @@ Settings\Main.lua
 Settings\DarkMode.lua
 ```
 
-Init first. Fixes before features (they run at PLAYER_ENTERING_WORLD). Features in dependency order. Settings last so all modules are defined.
+Init first, Core second. Fixes before features (they run at PLAYER_ENTERING_WORLD). Features in dependency order. DarkMode after features that register callbacks. Settings last so all modules are defined.
 
 ---
 

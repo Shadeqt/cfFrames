@@ -4,6 +4,7 @@ cff.SENTINEL = "cff"
 cff.MODULES = {
 	-- General
 	"StatusBar",
+	"StatusBarTexture",
 	"BiggerHealthbar",
 	"HealthbarColor",
 	"PlayerCastbarIcon",
@@ -37,7 +38,7 @@ for _, key in ipairs(cff.MODULES) do
 	cff.DEFAULTS[key] = true
 	cff.MODULES[key] = key
 end
-cff.DEFAULTS.StatusBar = "Interface\\AddOns\\cfFrames\\Media\\StatusBar\\BlizzardRetailBarCrop2"
+cff.DEFAULTS.StatusBarTexture = "Interface\\AddOns\\cfFrames\\Media\\StatusBar\\BlizzardRetailBarCrop2"
 cff.DEFAULTS.DarkModeColor = 0.25
 cff.DEFAULTS.DarkModeColorSecondary = 0.75
 

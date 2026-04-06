@@ -18,8 +18,9 @@ end
 
 function cff.Dropdown(cat, key, name, tooltip, options, callback)
 	local s = Settings.RegisterAddOnSetting(cat, key, key, cfFramesDB, Settings.VarType.String, name, d[key])
-	Settings.CreateDropdown(cat, s, options, tooltip)
+	local dd = Settings.CreateDropdown(cat, s, options, tooltip)
 	if callback then Settings.SetOnValueChangedCallback(key, callback) end
+	return dd
 end
 
 function cff.Header(cat, text)

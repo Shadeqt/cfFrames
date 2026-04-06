@@ -37,7 +37,7 @@ local function RefreshAll()
 		UnitFrameHealthBar_Update(TargetFrameToTHealthBar, "targettarget")
 		if cfFramesDB[M.HealthbarColor] then ColorBar(TargetFrameToTHealthBar, "targettarget") end
 	end
-	for i = 1, 4 do
+	for i = 1, MAX_PARTY_MEMBERS do
 		local unit = "party" .. i
 		if UnitExists(unit) then
 			local bar = _G["PartyMemberFrame" .. i .. "HealthBar"]

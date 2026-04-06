@@ -12,10 +12,7 @@ function cff.RunCallbacks(key)
 	end
 end
 
-local BLIZZARD_STATUSBAR = "Interface\\TargetingFrame\\UI-StatusBar"
-
 function cff.GetStatusBarTexture()
-	local tex = cfFramesDB[cff.MODULES.StatusBar]
-	if not tex or tex == true or tex == BLIZZARD_STATUSBAR then return nil end
-	return tex
+	if cfFramesDB[cff.MODULES.StatusBar] then return cfFramesDB[cff.MODULES.StatusBarTexture] end
+	return "Interface\\TargetingFrame\\UI-StatusBar"
 end

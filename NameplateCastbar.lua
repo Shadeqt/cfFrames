@@ -6,8 +6,7 @@ local function CreateCastbar(unitFrame, unit)
 	local bar = CreateFrame("StatusBar", nil, unitFrame, "SmallCastingBarFrameTemplate")
 	bar:Hide()
 	CastingBarFrame_OnLoad(bar, unit)
-	local tex = cff.GetStatusBarTexture()
-	if tex then bar:SetStatusBarTexture(tex) end
+	if cfFramesDB[M.StatusBar] then bar:SetStatusBarTexture(cff.GetStatusBarTexture()) end
 	bar:ClearAllPoints()
 	bar:SetPoint("TOP", hp, "BOTTOM", 0, -5)
 	bar:SetSize(hp:GetWidth(), hp:GetHeight())
@@ -54,11 +53,10 @@ end)
 
 cff.RegisterCallback(M.StatusBar, function()
 	if not cfFramesDB[M.NameplateCastbar] then return end
-	local tex = cff.GetStatusBarTexture()
-	if not tex then return end
+	if not cfFramesDB[M.StatusBar] then return end
 	for _, plate in ipairs(C_NamePlate.GetNamePlates()) do
 		if plate.cffCastBar then
-			plate.cffCastBar:SetStatusBarTexture(tex)
+			plate.cffCastBar:SetStatusBarTexture(cff.GetStatusBarTexture())
 		end
 	end
 end)
