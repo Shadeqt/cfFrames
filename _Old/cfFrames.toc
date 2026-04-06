@@ -1,0 +1,45 @@
+## Interface: 11508
+## Title: cfFrames
+## Notes: Simple UI tweaks, reload to toggle
+## Author: Cowfoot
+## Version: 0.1
+## SavedVariablesPerCharacter: cfFramesDB
+
+Init.lua
+Core.lua
+
+Frames\_Movable.lua
+GUI\_Factory.lua
+
+CastbarPlayerIcon.lua
+CastbarTargetIcon.lua
+NameplateCastbar.lua
+NameplateClassification.lua
+StatusBarTexture.lua
+HealthbarColor.lua
+NameBackground.lua
+DruidBar.lua
+BiggerHealthbar.lua
+HitIndicator.lua
+CombatGlow.lua
+PetLevel.lua
+PetXpBar.lua
+PetName.lua
+PetDebuffs.lua
+BuffSorting.lua
+
+GroupIndicator.lua
+ToTPositionFix.lua
+
+Frames\PlayerCastbar.lua
+Frames\TargetCastbar.lua
+Frames\Nameplates.lua
+Frames\PlayerFrame.lua
+Frames\TargetFrame.lua
+Frames\TargetOfTarget.lua
+
+GUI\Settings.lua
+GUI\SettingsNew.lua
+GUI\UnitFrames.lua
+GUI\Castbars.lua
+GUI\Nameplates.lua

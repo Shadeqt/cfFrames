@@ -8,7 +8,6 @@ local function CreateLevelDisplay()
 	border:SetTexture("Interface\\Minimap\\MiniMap-TrackingBorder")
 	border:SetSize(38, 38)
 	border:SetPoint("CENTER", PetFrame, "BOTTOMLEFT", 15, 8)
-	cfFrames.styleTexture(border)
 
 	bg = levelFrame:CreateTexture(nil, "ARTWORK")
 	bg:SetTexture("Interface\\CHARACTERFRAME\\TempPortraitAlphaMaskSmall")

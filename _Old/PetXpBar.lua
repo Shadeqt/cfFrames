@@ -15,7 +15,6 @@ local function CreateBar()
 	border:SetTexture("Interface\\PaperDollInfoFrame\\UI-Character-Skills-BarBorder")
 	border:SetSize(42, 12)
 	border:SetPoint("CENTER", bar, "CENTER", 0, 0)
-	cfFrames.styleTexture(border)
 end
 
 local function Update()

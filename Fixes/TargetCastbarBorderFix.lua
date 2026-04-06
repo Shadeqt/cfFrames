@@ -1,5 +1,5 @@
 function cff.InitTargetCastbarBorderFix()
-	if not cfFramesDB.TargetCastbarBorderFix then return end
+	if not cfFramesDB[cff.MODULES.TargetCastbarBorderFix] then return end
 	if not TargetFrameSpellBar or not TargetFrameSpellBar.Border then return end
 
 	local border = TargetFrameSpellBar.Border

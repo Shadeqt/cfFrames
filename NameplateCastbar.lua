@@ -1,76 +1,100 @@
-cfFrames.NameplateCastbarOrigin = { x = 18, y = -5 }
-cfFrames.NameplateCastbarIconOrigin = { x = -5, y = 0, size = 14 }
+local M = cff.MODULES
+local hooked = false
 
 local function CreateCastbar(unitFrame, unit)
-	local healthBar = unitFrame.healthBar
+	local hp = unitFrame.healthBar
 	local bar = CreateFrame("StatusBar", nil, unitFrame, "SmallCastingBarFrameTemplate")
 	bar:Hide()
 	CastingBarFrame_OnLoad(bar, unit)
-	bar:SetStatusBarTexture(cfFrames.getBarTexture())
+	local tex = cff.GetStatusBarTexture()
+	if tex then bar:SetStatusBarTexture(tex) end
 	bar:ClearAllPoints()
-	bar:SetPoint("TOP", healthBar, "BOTTOM", 18, -5)
-	bar:SetSize(healthBar:GetWidth(), healthBar:GetHeight())
-	return bar
-end
+	bar:SetPoint("TOP", hp, "BOTTOM", 0, -5)
+	bar:SetSize(hp:GetWidth(), hp:GetHeight())
 
-local function StyleCastbar(bar)
 	bar.Border:ClearAllPoints()
-	bar.Border:SetPoint("TOPLEFT", bar, -17, 16)
-	bar.Border:SetPoint("BOTTOMRIGHT", bar, 17, -16)
+	bar.Border:SetPoint("TOPLEFT", bar, -17.5, 16)
+	bar.Border:SetPoint("BOTTOMRIGHT", bar, 17.5, -15.5)
 	bar.Flash:ClearAllPoints()
-	bar.Flash:SetPoint("TOPLEFT", bar, -17, 16)
-	bar.Flash:SetPoint("BOTTOMRIGHT", bar, 17, -16)
+	bar.Flash:SetPoint("TOPLEFT", bar, -17.5, 16)
+	bar.Flash:SetPoint("BOTTOMRIGHT", bar, 17.5, -15.5)
 	bar.Icon:ClearAllPoints()
-	bar.Icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
-	bar.Icon:SetSize(14, 14)
-	if bar.Text then
-		bar.Text:ClearAllPoints()
-		bar.Text:SetPoint("CENTER", bar, "CENTER", 0, 0)
-	end
-	cfFrames.styleTexture(bar.Border)
-	cfFrames.styleIcon(bar.Icon)
-end
+	bar.Icon:SetPoint("LEFT", bar, "RIGHT", 3, 0)
+	bar.Icon:SetSize(15.5, 15.5)
+	if bar.Text then bar.Text:ClearAllPoints(); bar.Text:SetPoint("CENTER") end
 
-local function HookCastbar(bar)
 	bar:HookScript("OnEvent", function(self, event)
 		if event == "UNIT_SPELLCAST_START" or event == "UNIT_SPELLCAST_CHANNEL_START" then
 			CastingBarFrame_OnEvent(self, "PLAYER_ENTERING_WORLD")
 		end
 	end)
-end
 
-local function GetCastbar(nameplate, unit)
-	if nameplate.cfCastBar then return nameplate.cfCastBar end
-	local bar = CreateCastbar(nameplate.UnitFrame, unit)
-	StyleCastbar(bar)
-	HookCastbar(bar)
-	nameplate.cfCastBar = bar
+	if cfFramesDB[M.DarkModeNameplates] then
+		cff.SaveAndDarken(bar.Border)
+	end
+
 	return bar
 end
 
-local function SetupEvents()
+local function GetCastbar(plate, unit)
+	if plate.cffCastBar then return plate.cffCastBar end
+	plate.cffCastBar = CreateCastbar(plate.UnitFrame, unit)
+	return plate.cffCastBar
+end
+
+cff.RegisterCallback(M.DarkMode, function()
+	if not cfFramesDB[M.NameplateCastbar] then return end
+	if not cfFramesDB[M.DarkModeNameplates] then return end
+	for _, plate in ipairs(C_NamePlate.GetNamePlates()) do
+		if plate.cffCastBar then
+			cff.SaveAndDarken(plate.cffCastBar.Border)
+		end
+	end
+end)
+
+cff.RegisterCallback(M.StatusBar, function()
+	if not cfFramesDB[M.NameplateCastbar] then return end
+	local tex = cff.GetStatusBarTexture()
+	if not tex then return end
+	for _, plate in ipairs(C_NamePlate.GetNamePlates()) do
+		if plate.cffCastBar then
+			plate.cffCastBar:SetStatusBarTexture(tex)
+		end
+	end
+end)
+
+function cff.EnableNameplateCastbar()
+	if not cfFramesDB[M.NameplateCastbar] then return end
+	if hooked then return end
+	hooked = true
+
 	local frame = CreateFrame("Frame")
 	frame:RegisterEvent("NAME_PLATE_UNIT_ADDED")
 	frame:RegisterEvent("NAME_PLATE_UNIT_REMOVED")
 	frame:SetScript("OnEvent", function(_, event, unit)
-		local nameplate = C_NamePlate.GetNamePlateForUnit(unit)
-		if not nameplate then return end
-
+		local plate = C_NamePlate.GetNamePlateForUnit(unit)
+		if not plate then return end
 		if event == "NAME_PLATE_UNIT_ADDED" then
-			local bar = GetCastbar(nameplate, unit)
+			if not cfFramesDB[M.NameplateCastbar] then return end
+			local bar = GetCastbar(plate, unit)
 			CastingBarFrame_SetUnit(bar, unit)
 			if UnitCastingInfo(unit) or UnitChannelInfo(unit) then
 				CastingBarFrame_OnEvent(bar, "PLAYER_ENTERING_WORLD")
 			end
-		elseif event == "NAME_PLATE_UNIT_REMOVED" then
-			if nameplate.cfCastBar then
-				CastingBarFrame_SetUnit(nameplate.cfCastBar, nil)
-				nameplate.cfCastBar:Hide()
+		else
+			if plate.cffCastBar then
+				CastingBarFrame_SetUnit(plate.cffCastBar, nil)
+				plate.cffCastBar:Hide()
 			end
 		end
 	end)
 end
 
-function cfFrames.initNameplateCastbar()
-	SetupEvents()
+function cff.DisableNameplateCastbar()
+	for _, plate in ipairs(C_NamePlate.GetNamePlates()) do
+		if plate.cffCastBar then
+			CastingBarFrame_SetUnit(plate.cffCastBar, nil)
+			plate.cffCastBar:Hide()
+		end
+	end
 end

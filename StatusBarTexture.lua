@@ -1,11 +1,14 @@
+local M = cff.MODULES
 local hooked = false
 
 local function SetStatusBarTexture(bar)
 	if not bar then return end
+	local newTex = cff.GetStatusBarTexture()
+	if not newTex then return end
 	local tex = bar:GetStatusBarTexture()
 	local layer, sublevel
 	if tex then layer, sublevel = tex:GetDrawLayer() end
-	bar:SetStatusBarTexture(cfFramesDB.StatusBar)
+	bar:SetStatusBarTexture(newTex)
 	if layer then bar:GetStatusBarTexture():SetDrawLayer(layer, sublevel or 0) end
 end
 
@@ -20,8 +23,11 @@ local function SetStaticBars()
 	SetStatusBarTexture(TargetFrameSpellBar)
 	SetStatusBarTexture(PetSpellBar)
 	SetStatusBarTexture(MainMenuExpBar)
-	if TargetFrameNameBackground then TargetFrameNameBackground:SetTexture(cfFramesDB.StatusBar) end
-	if ExhaustionLevelFillBar then ExhaustionLevelFillBar:SetTexture(cfFramesDB.StatusBar) end
+	local tex = cff.GetStatusBarTexture()
+	if tex then
+		if TargetFrameNameBackground then TargetFrameNameBackground:SetTexture(tex) end
+		if ExhaustionLevelFillBar then ExhaustionLevelFillBar:SetTexture(tex) end
+	end
 	if ReputationWatchBar then SetStatusBarTexture(ReputationWatchBar.StatusBar) end
 	for i = 1, 5 do
 		local frame = _G["CompactRaidFrame" .. i]
@@ -65,7 +71,7 @@ function cff.EnableStatusBar()
 	SetStaticBars()
 
 	if hooked then return end
-	if cfFramesDB.StatusBar == "Interface\\TargetingFrame\\UI-StatusBar" then return end
+	if not cff.GetStatusBarTexture() then return end
 	hooked = true
 
 	HookDynamicBars()

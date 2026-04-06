@@ -18,10 +18,7 @@ local nameTargetFix     = F.CreateCheckbox(portraitToTFix, "Target Name Fix", M.
 
 -- General
 local h1           = F.CreateHeader(portraitToTFix, "General")
-local darkMode     = F.CreateCheckbox(h1, "Dark Mode", M.DarkMode, nil, "Darken all UI frame textures")
-local blueShamans  = F.CreateCheckbox(darkMode, "Blue Shamans", M.BlueShamans, COL2, "Modern blue shaman class color")
-local expBarQuests = F.CreateCheckbox(darkMode, "XP Bar Quest Overlay", M.ExperienceBarQuests, nil, "Show pending quest XP on experience bar")
-local druidBar = F.CreateDropdown(expBarQuests, "Druid Bar", M.DruidBar, {
+local druidBar = F.CreateDropdown(h1, "Druid Bar", M.DruidBar, {
 	{ label = "Blizzard", value = "blizzard" },
 	{ label = "Toast", value = "Interface\\FriendsFrame\\UI-Toast-Border" },
 	{ label = "Dialog", value = "Interface\\DialogFrame\\UI-DialogBox-Border" },
@@ -35,7 +32,6 @@ local statusBarChoice = F.CreateDropdown(h2, "Status Bar Texture", M.StatusBarTe
 	{ label = "Dragonflight", value = "Interface\\AddOns\\cfFrames\\Media\\StatusBar\\DragonflightTexture" },
 }, "Choose status bar texture")
 local biggerHealthbar = F.CreateCheckbox(statusBarChoice, "Bigger Healthbars", M.BiggerHealthbar, nil, "Enlarge player and target health bars")
-local statusText      = F.CreateCheckbox(biggerHealthbar, "Status Text", M.StatusText, COL2, "Show health/mana text on bars")
 local healthbarColor  = F.CreateCheckbox(biggerHealthbar, "Healthbar Color", M.HealthbarColor, nil, "Class-colored health bars")
 local hitIndicator    = F.CreateCheckbox(healthbarColor, "Hide Hit Indicator", M.HitIndicator, COL2, "Hide hit text on player and pet")
 local combatGlow      = F.CreateCheckbox(healthbarColor, "Hide Combat Glow", M.CombatGlow, nil, "Hide combat glow on player and pet")
@@ -47,15 +43,8 @@ local h3               = F.CreateHeader(groupIndicator, "Nameplates")
 local nameplateCastbar = F.CreateCheckbox(h3, "Nameplate Castbar", M.NameplateCastbar, nil, "Show cast bars on nameplates")
 local nameplateClass   = F.CreateCheckbox(nameplateCastbar, "Classification Icons", M.NameplateClassification, COL2, "Show elite/rare icons on nameplates")
 
--- Icons
-local h4              = F.CreateHeader(nameplateClass, "Icons")
-local iconBorderChoice = F.CreateDropdown(h4, "Icon Border", M.IconBorder, {
-	{ label = "Blizzard", value = "blizzard" },
-	{ label = "Tooltip", value = "Interface\\Tooltips\\UI-Tooltip-Border" },
-	{ label = "Dialog", value = "Interface\\DialogFrame\\UI-DialogBox-Border" },
-}, "Choose icon border style")
-local iconZoom    = F.CreateCheckbox(iconBorderChoice, "Icon Zoom", M.IconZoom, nil, "Crop icon edges on action bars and auras")
-local castbarIcon = F.CreateCheckbox(iconZoom, "Player Castbar Icon", M.CastbarPlayerIcon, COL2, "Show spell icon on player cast bar")
+-- Castbar
+local castbarIcon = F.CreateCheckbox(nameplateClass, "Player Castbar Icon", M.CastbarPlayerIcon, nil, "Show spell icon on player cast bar")
 
 -- Pet
 local h5            = F.CreateHeader(castbarIcon, "Pet")
@@ -63,7 +52,6 @@ local petLevel      = F.CreateCheckbox(h5, "Pet Level", M.PetLevel, nil, "Show p
 local petXpBar      = F.CreateCheckbox(petLevel, "Pet XP Bar", M.PetXpBar, COL2, "Show pet experience bar")
 local petName       = F.CreateCheckbox(petLevel, "Pet Name", M.PetName, nil, "Reposition pet name above health bar")
 local petDebuffs    = F.CreateCheckbox(petName, "Pet Debuffs", M.PetDebuffs, COL2, "Show debuff icons on pet frame")
-local petStatusText = F.CreateCheckbox(petName, "Pet Status Text", M.PetStatusText, nil, "Smaller text on pet health/mana bars")
 
 -- Register
 local category = Settings.RegisterCanvasLayoutCategory(panel, panel.name, panel.name)

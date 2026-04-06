@@ -1,21 +1,16 @@
-EventUtil.ContinueOnAddOnLoaded("cfFrames", function()
-	local M = cff.MODULES
-	local d = cff.DEFAULTS
-	local subcategory = Settings.RegisterVerticalLayoutSubcategory(cff.category, "Dark Mode")
+local M = cff.MODULES
 
-	local function refreshDarkMode()
-		if cfFramesDB[M.DarkMode] then
-			cff.DisableDarkMode()
-			cff.EnableDarkMode()
-		end
+local function refreshDarkMode()
+	if cfFramesDB[M.DarkMode] then
+		cff.DisableDarkMode()
+		cff.EnableDarkMode()
 	end
+end
 
-	local setting = Settings.RegisterAddOnSetting(
-		subcategory, M.DarkMode, M.DarkMode, cfFramesDB,
-		Settings.VarType.Boolean, "Dark Mode", d[M.DarkMode]
-	)
-	Settings.CreateCheckbox(subcategory, setting, "Darken UI frame textures")
-	Settings.SetOnValueChangedCallback(M.DarkMode, function()
+EventUtil.ContinueOnAddOnLoaded("cfFrames", function()
+	local sub = Settings.RegisterVerticalLayoutSubcategory(cff.category, "Dark Mode")
+
+	cff.Checkbox(sub, M.DarkMode, "Dark Mode", "Darken UI frame textures", function()
 		if cfFramesDB[M.DarkMode] then
 			cff.EnableDarkMode()
 		else
@@ -30,12 +25,8 @@ EventUtil.ContinueOnAddOnLoaded("cfFrames", function()
 	for _, key in ipairs(M) do
 		local sl = sliders[key]
 		if sl then
-			local s = Settings.RegisterAddOnSetting(subcategory, key, key, cfFramesDB, Settings.VarType.Number, sl.name, d[key])
-			local opts = Settings.CreateSliderOptions(0, 1, 0.05)
-			opts:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right, function(value) return format("%.2f", value) end)
-			local slider = Settings.CreateSlider(subcategory, s, opts, sl.tooltip)
+			local slider = cff.Slider(sub, key, sl.name, sl.tooltip, 0, 1, 0.05, refreshDarkMode)
 			slider:AddShownPredicate(function() return cfFramesDB[M.DarkMode] end)
-			Settings.SetOnValueChangedCallback(key, refreshDarkMode)
 		end
 	end
 
@@ -50,11 +41,29 @@ EventUtil.ContinueOnAddOnLoaded("cfFrames", function()
 	for _, key in ipairs(M) do
 		local toggle = toggles[key]
 		if toggle then
-			local s = Settings.RegisterAddOnSetting(subcategory, key, key, cfFramesDB, Settings.VarType.Boolean, toggle.name, d[key])
-			local cb = Settings.CreateCheckbox(subcategory, s, toggle.tooltip)
+			local cb = cff.Checkbox(sub, key, toggle.name, toggle.tooltip, refreshDarkMode)
 			cb:AddShownPredicate(function() return cfFramesDB[M.DarkMode] end)
-			Settings.SetOnValueChangedCallback(key, refreshDarkMode)
 		end
 	end
 
+	local function refreshIcons()
+		cff.DisableDarkModeIcons()
+		if cfFramesDB[M.DarkMode] then
+			cff.EnableDarkModeIcons()
+		end
+	end
+
+	cff.Header(sub, "Icons")
+
+	local iconToggles = {
+		[M.DarkModeIconBuffs]      = { name = "Buffs",       tooltip = "Borders on player, target, pet, and compact raid buff icons" },
+		[M.DarkModeIconActionBars] = { name = "Action Bars",  tooltip = "Borders on action bar, pet bar, stance bar, and bag icons" },
+	}
+	for _, key in ipairs(M) do
+		local toggle = iconToggles[key]
+		if toggle then
+			local cb = cff.Checkbox(sub, key, toggle.name, toggle.tooltip, refreshIcons)
+			cb:AddShownPredicate(function() return cfFramesDB[M.DarkMode] end)
+		end
+	end
 end)

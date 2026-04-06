@@ -5,6 +5,7 @@ local RARE    = MEDIA .. "UI-TargetingFrame-Rare"
 local RELITE  = MEDIA .. "UI-TargetingFrame-Rare-Elite"
 local STATUS  = MEDIA .. "UI-Player-Status"
 
+local M = cff.MODULES
 local hooked = false
 local origPoint = {}
 local origHeight = {}
@@ -46,7 +47,7 @@ local function HookTargetFrame()
 	if hooked then return end
 	hooked = true
 	hooksecurefunc("TargetFrame_CheckClassification", function(frame)
-		if not cfFramesDB.BiggerHealthbar or not frame or not frame.unit then return end
+		if not cfFramesDB[M.BiggerHealthbar] or not frame or not frame.unit then return end
 		SaveAndTexture(TargetFrameTextureFrameTexture, NORMAL)
 		SaveAndHeight(TargetFrameHealthBar, 27)
 		SaveAndMove(TargetFrameHealthBar, 18)
@@ -69,7 +70,7 @@ local function HookTargetFrame()
 end
 
 function cff.EnableBiggerHealthbar()
-	if not cfFramesDB.BiggerHealthbar then return end
+	if not cfFramesDB[M.BiggerHealthbar] then return end
 
 	SetPlayerFrame()
 	HookTargetFrame()

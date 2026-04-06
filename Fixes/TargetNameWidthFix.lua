@@ -1,5 +1,5 @@
 function cff.InitTargetNameWidthFix()
-	if not cfFramesDB.TargetNameWidthFix then return end
+	if not cfFramesDB[cff.MODULES.TargetNameWidthFix] then return end
 	local nameText = TargetFrame and TargetFrame.name
 	if not nameText then return end
 

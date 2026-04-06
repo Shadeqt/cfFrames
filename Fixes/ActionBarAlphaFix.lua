@@ -1,5 +1,5 @@
 function cff.InitActionBarAlphaFix()
-	if not cfFramesDB.ActionBarAlphaFix then return end
+	if not cfFramesDB[cff.MODULES.ActionBarAlphaFix] then return end
 	for i = 1, NUM_ACTIONBAR_BUTTONS do
 		local btn = _G["ActionButton" .. i]
 		if btn then

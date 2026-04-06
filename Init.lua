@@ -6,6 +6,7 @@ cff.MODULES = {
 	"StatusBar",
 	"BiggerHealthbar",
 	"HealthbarColor",
+	"PlayerCastbarIcon",
 	-- Dark Mode
 	"DarkMode",
 	"DarkModeColor",
@@ -16,13 +17,19 @@ cff.MODULES = {
 	"DarkModeChat",
 	"DarkModeCastbars",
 	"DarkModeNameplates",
+	"NameplateCastbar",
+	"DarkModeIconBuffs",
+	"DarkModeIconActionBars",
 	-- Fixes
 	"ActionBarAlphaFix",
 	"ToTPortraitFix",
+	"ToTBackgroundFix",
 	"TargetCastbarBorderFix",
 	"TargetNameWidthFix",
 	"TargetCastbarIconFix",
 	"NameplateLevelPositionFix",
+	"ActionBarIconPositionFix",
+	"PetActionBarCheckedFix",
 }
 
 cff.DEFAULTS = {}
@@ -58,14 +65,20 @@ EventUtil.ContinueOnAddOnLoaded("cfFrames", function()
 		cff.EnableStatusBar()
 		cff.EnableBiggerHealthbar()
 		cff.EnableHealthbarColor()
+		cff.EnablePlayerCastbarIcon()
+		cff.EnableNameplateCastbar()
 		cff.EnableDarkMode()
+		cff.EnableDarkModeIcons()
 
 		-- Fixes
 		cff.InitActionBarAlphaFix()
 		cff.InitToTPortraitFix()
+		cff.InitToTBackgroundFix()
 		cff.InitTargetCastbarBorderFix()
 		cff.InitTargetNameWidthFix()
 		cff.InitTargetCastbarIconFix()
 		cff.InitNameplateLevelPositionFix()
+		cff.InitActionBarIconPositionFix()
+		cff.InitPetActionBarCheckedFix()
 	end)
 end)

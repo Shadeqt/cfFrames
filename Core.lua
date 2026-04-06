@@ -1,48 +1,21 @@
--- Style registries — features register their styling functions during init,
--- other features call these without knowing who registered them.
+local callbacks = {}
 
-local textureStyles = {}
-local iconStyles = {}
-local regionStyles = {}
-local barTextSetups = {}
-local barTexture = nil
-
-function cfFrames.registerTextureStyle(fn)
-	table.insert(textureStyles, fn)
+function cff.RegisterCallback(key, fn)
+	if not callbacks[key] then callbacks[key] = {} end
+	table.insert(callbacks[key], fn)
 end
 
-function cfFrames.registerIconStyle(fn)
-	table.insert(iconStyles, fn)
+function cff.RunCallbacks(key)
+	if not callbacks[key] then return end
+	for _, fn in ipairs(callbacks[key]) do
+		fn()
+	end
 end
 
-function cfFrames.registerRegionStyle(fn)
-	table.insert(regionStyles, fn)
-end
+local BLIZZARD_STATUSBAR = "Interface\\TargetingFrame\\UI-StatusBar"
 
-function cfFrames.registerBarTextSetup(fn)
-	table.insert(barTextSetups, fn)
-end
-
-function cfFrames.styleTexture(texture)
-	for _, fn in ipairs(textureStyles) do fn(texture) end
-end
-
-function cfFrames.styleIcon(icon)
-	for _, fn in ipairs(iconStyles) do fn(icon) end
-end
-
-function cfFrames.styleRegions(frame)
-	for _, fn in ipairs(regionStyles) do fn(frame) end
-end
-
-function cfFrames.setupBarText(bar, parent)
-	for _, fn in ipairs(barTextSetups) do fn(bar, parent) end
-end
-
-function cfFrames.registerBarTexture(texture)
-	barTexture = texture
-end
-
-function cfFrames.getBarTexture()
-	return barTexture or "Interface\\TargetingFrame\\UI-StatusBar"
+function cff.GetStatusBarTexture()
+	local tex = cfFramesDB[cff.MODULES.StatusBar]
+	if not tex or tex == true or tex == BLIZZARD_STATUSBAR then return nil end
+	return tex
 end

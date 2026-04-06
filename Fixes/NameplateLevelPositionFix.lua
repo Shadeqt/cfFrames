@@ -1,5 +1,5 @@
 function cff.InitNameplateLevelPositionFix()
-	if not cfFramesDB.NameplateLevelPositionFix then return end
+	if not cfFramesDB[cff.MODULES.NameplateLevelPositionFix] then return end
 
 	local function AdjustLevel(frame)
 		local levelText = frame.LevelFrame and frame.LevelFrame.levelText

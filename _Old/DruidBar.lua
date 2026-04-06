@@ -24,7 +24,6 @@ local function CreateBorder(bar)
 	border:SetPoint("TOPLEFT", bar, -2, 2)
 	border:SetPoint("BOTTOMRIGHT", bar, 3, -2)
 	border:SetBackdrop({ edgeFile = cfFramesDB.DruidBar, edgeSize = 8 })
-	cfFrames.styleRegions(border)
 
 	return border
 end
@@ -33,13 +32,13 @@ local function SetupText(bar, border)
 	local textFrame = CreateFrame("Frame", nil, bar)
 	textFrame:SetAllPoints(bar)
 	textFrame:SetFrameLevel(10)
-	cfFrames.setupBarText(bar, textFrame)
-	if bar.LeftText then
-		bar.LeftText:SetPoint("LEFT", bar, "LEFT", 3, 0)
-	end
-	if bar.RightText then
-		bar.RightText:SetPoint("RIGHT", bar, "RIGHT", -2, 0)
-	end
+
+	bar.TextString = textFrame:CreateFontString(nil, "OVERLAY", "TextStatusBarText")
+	bar.TextString:SetPoint("CENTER", bar)
+	bar.LeftText = textFrame:CreateFontString(nil, "OVERLAY", "TextStatusBarText")
+	bar.LeftText:SetPoint("LEFT", bar, "LEFT", 3, 0)
+	bar.RightText = textFrame:CreateFontString(nil, "OVERLAY", "TextStatusBarText")
+	bar.RightText:SetPoint("RIGHT", bar, "RIGHT", -2, 0)
 end
 
 local function OnEvent(self, event, _, powerType)
@@ -49,7 +48,7 @@ local function OnEvent(self, event, _, powerType)
 		self:SetValue(UnitPower("player", MANA))
 		if self.lockShow then TextStatusBar_UpdateTextString(self) end
 	else
-		self.lockShow = C_CVar.GetCVarBool("statusText")
+		self.lockShow = C_CVar.GetCVarBool("statusText") and 1 or 0
 		self:SetMinMaxValues(0, UnitPowerMax("player", MANA))
 		self:SetValue(UnitPower("player", MANA))
 		if self.lockShow then TextStatusBar_UpdateTextString(self) end

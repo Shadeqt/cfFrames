@@ -6,16 +6,23 @@
 ## SavedVariablesPerCharacter: cfFramesDB
 
 Init.lua
+Core.lua
 Fixes\ActionBarAlphaFix.lua
 Fixes\ToTPortraitFix.lua
+Fixes\ToTBackgroundFix.lua
 Fixes\TargetCastbarBorderFix.lua
 Fixes\TargetNameWidthFix.lua
 Fixes\TargetCastbarIconFix.lua
 Fixes\NameplateLevelPositionFix.lua
+Fixes\ActionBarIconPositionFix.lua
+Fixes\PetActionBarCheckedFix.lua
 StatusBarTexture.lua
 BiggerHealthbar.lua
 HealthbarColor.lua
+PlayerCastbarIcon.lua
+NameplateCastbar.lua
 DarkMode.lua
+DarkModeIcons.lua
+Settings\_Factory.lua
 Settings\Main.lua
 Settings\DarkMode.lua
-Settings\_Register.lua

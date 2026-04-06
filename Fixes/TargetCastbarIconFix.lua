@@ -1,5 +1,5 @@
 function cff.InitTargetCastbarIconFix()
-	if not cfFramesDB.TargetCastbarIconFix then return end
+	if not cfFramesDB[cff.MODULES.TargetCastbarIconFix] then return end
 	local icon = TargetFrameSpellBar and TargetFrameSpellBar.Icon
 	if not icon then return end
 

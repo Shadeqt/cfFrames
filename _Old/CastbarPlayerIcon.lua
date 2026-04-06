@@ -43,7 +43,6 @@ local function CreateIcon()
 	icon:SetSize(defaultSize, defaultSize)
 	icon:SetPoint("RIGHT", CastingBarFrame, "LEFT", DEFAULT_X, DEFAULT_Y)
 	icon:Hide()
-	cfFrames.styleIcon(icon)
 	cfFrames.playerCastbarIcon = icon
 end
 
