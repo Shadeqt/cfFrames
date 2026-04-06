@@ -21,8 +21,10 @@ function cff.SetupDarkModeSettings()
 	cff.Checkbox(cat, M.DarkMode, "Dark Mode", "Darken UI frame textures", function()
 		if cfFramesDB[M.DarkMode] then
 			cff.EnableDarkMode()
+			cff.EnableDarkModeIcons()
 		else
 			cff.DisableDarkMode()
+			cff.DisableDarkModeIcons()
 		end
 	end)
 
