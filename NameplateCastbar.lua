@@ -32,6 +32,11 @@ local function CreateCastbar(unitFrame, unit)
 		cff.SaveAndDarken(bar.Border)
 	end
 
+	cff.StyleNameplateCastbarIcon(bar)
+	hooksecurefunc(bar, "Show", function(self)
+		cff.StyleNameplateCastbarIcon(self)
+	end)
+
 	return bar
 end
 

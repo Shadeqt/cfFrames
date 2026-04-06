@@ -50,8 +50,9 @@ function cff.SetupDarkModeSettings()
 	cff.Header(cat, "Icons", function() return cfFramesDB[M.DarkMode] end)
 
 	local iconToggles = {
-		[M.DarkModeIconBuffs]      = { name = "Buffs",       tooltip = "Borders on player, target, pet, and compact raid buff icons" },
+		[M.DarkModeIconBuffs]      = { name = "Buffs",        tooltip = "Borders on player, target, pet, and compact raid buff icons" },
 		[M.DarkModeIconActionBars] = { name = "Action Bars",  tooltip = "Borders on action bar, pet bar, stance bar, and bag icons" },
+		[M.DarkModeIconCastbars]   = { name = "Castbars",     tooltip = "Borders on player, target, pet, and nameplate castbar icons" },
 	}
 	for _, key in ipairs(M) do
 		local toggle = iconToggles[key]

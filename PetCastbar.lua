@@ -38,6 +38,11 @@ local function CreatePetCastbar()
 		cff.SaveAndDarken(bar.Border)
 	end
 
+	cff.StylePetCastbarIcon(bar)
+	hooksecurefunc(bar, "Show", function(self)
+		cff.StylePetCastbarIcon(self)
+	end)
+
 	return bar
 end
 

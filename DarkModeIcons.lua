@@ -140,6 +140,52 @@ local function StyleActionBars()
 	if MainMenuBarBackpackButton then StyleIcon(MainMenuBarBackpackButton) end
 end
 
+-- Castbar Icons
+
+local function StyleCastbarIcon(bar)
+	if not bar or not bar.Icon then return end
+	local icon = bar.Icon
+	if not bar.cffZoom then
+		bar.cffZoom = true
+		icon:SetTexCoord(unpack(ZOOM))
+	end
+	local border = AddBorder(icon, bar)
+	ColorBorder(border)
+end
+
+local function StyleCastbarIcons()
+	StyleCastbarIcon(CastingBarFrame)
+	StyleCastbarIcon(TargetFrameSpellBar)
+
+	if CastingBarFrame and not CastingBarFrame.cffIconBorderHooked then
+		CastingBarFrame.cffIconBorderHooked = true
+		hooksecurefunc(CastingBarFrame, "Show", function(self)
+			if cfFramesDB[M.DarkMode] and cfFramesDB[M.DarkModeIconCastbars] then
+				StyleCastbarIcon(self)
+			end
+		end)
+	end
+
+	if TargetFrameSpellBar and not TargetFrameSpellBar.cffIconBorderHooked then
+		TargetFrameSpellBar.cffIconBorderHooked = true
+		hooksecurefunc(TargetFrameSpellBar, "Show", function(self)
+			if cfFramesDB[M.DarkMode] and cfFramesDB[M.DarkModeIconCastbars] then
+				StyleCastbarIcon(self)
+			end
+		end)
+	end
+end
+
+function cff.StylePetCastbarIcon(bar)
+	if not cfFramesDB[M.DarkMode] or not cfFramesDB[M.DarkModeIconCastbars] then return end
+	StyleCastbarIcon(bar)
+end
+
+function cff.StyleNameplateCastbarIcon(bar)
+	if not cfFramesDB[M.DarkMode] or not cfFramesDB[M.DarkModeIconCastbars] then return end
+	StyleCastbarIcon(bar)
+end
+
 -- Enable / Disable
 
 function cff.EnableDarkModeIcons()
@@ -152,6 +198,9 @@ function cff.EnableDarkModeIcons()
 	end
 	if cfFramesDB[M.DarkModeIconActionBars] then
 		StyleActionBars()
+	end
+	if cfFramesDB[M.DarkModeIconCastbars] then
+		StyleCastbarIcons()
 	end
 end
 

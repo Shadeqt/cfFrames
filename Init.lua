@@ -24,6 +24,7 @@ cff.MODULES = {
 	"DarkModeNameplates",
 	"DarkModeIconBuffs",
 	"DarkModeIconActionBars",
+	"DarkModeIconCastbars",
 	-- Fixes
 	"ActionBarAlphaFix",
 	"ToTPortraitFix",
