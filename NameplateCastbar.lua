@@ -1,4 +1,5 @@
 local M = cff.MODULES
+local V = cff.VALUES
 local hooked = false
 
 local function CreateCastbar(unitFrame, unit)
@@ -8,7 +9,8 @@ local function CreateCastbar(unitFrame, unit)
 	CastingBarFrame_OnLoad(bar, unit)
 	if cfFramesDB[M.StatusBar] then bar:SetStatusBarTexture(cff.GetStatusBarTexture()) end
 	bar:ClearAllPoints()
-	bar:SetPoint("TOP", hp, "BOTTOM", 0, -5)
+	bar:SetPoint("TOP", hp, "BOTTOM", cfFramesDB[V.NameplateCastbarX], -5 + cfFramesDB[V.NameplateCastbarY])
+	bar:SetScale(cfFramesDB[V.NameplateCastbarScale])
 	bar:SetSize(hp:GetWidth(), hp:GetHeight())
 
 	bar.Border:ClearAllPoints()
@@ -18,8 +20,10 @@ local function CreateCastbar(unitFrame, unit)
 	bar.Flash:SetPoint("TOPLEFT", bar, -17.5, 16)
 	bar.Flash:SetPoint("BOTTOMRIGHT", bar, 17.5, -15.5)
 	bar.Icon:ClearAllPoints()
-	bar.Icon:SetPoint("LEFT", bar, "RIGHT", 3, 0)
+	bar.Icon:SetPoint("LEFT", bar, "RIGHT", 3 + cfFramesDB[V.NameplateCastbarIconX], cfFramesDB[V.NameplateCastbarIconY])
+	bar.Icon:SetScale(cfFramesDB[V.NameplateCastbarIconScale])
 	bar.Icon:SetSize(15.5, 15.5)
+	if not cfFramesDB[M.NameplateCastbarIcon] then bar.Icon:Hide() end
 	if bar.Text then bar.Text:ClearAllPoints(); bar.Text:SetPoint("CENTER") end
 
 	bar:HookScript("OnEvent", function(self, event)
@@ -35,6 +39,7 @@ local function CreateCastbar(unitFrame, unit)
 	cff.StyleNameplateCastbarIcon(bar)
 	hooksecurefunc(bar, "Show", function(self)
 		cff.StyleNameplateCastbarIcon(self)
+		if not cfFramesDB[M.NameplateCastbarIcon] then self.Icon:Hide() end
 	end)
 
 	return bar

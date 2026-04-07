@@ -26,14 +26,6 @@ function cff.SetupSettings()
 		end
 	end)
 
-	cff.Checkbox(cat, M.NameplateCastbar, "Nameplate Castbars", "Show cast bars on enemy nameplates", function()
-		if cfFramesDB[M.NameplateCastbar] then
-			cff.EnableNameplateCastbar()
-		else
-			cff.DisableNameplateCastbar()
-		end
-	end)
-
 	cff.Header(cat, "Class Health Colors")
 
 	cff.Checkbox(cat, M.HealthbarColor, "Unit Frames", "Color player, target, party health bars by class", function()
@@ -64,6 +56,7 @@ function cff.SetupSettings()
 	cff.playerCategory = Settings.RegisterVerticalLayoutSubcategory(cat, "Player")
 	cff.petCategory = Settings.RegisterVerticalLayoutSubcategory(cat, "Pet")
 	cff.targetCategory = Settings.RegisterVerticalLayoutSubcategory(cat, "Target")
+	cff.nameplateCategory = Settings.RegisterVerticalLayoutSubcategory(cat, "Nameplates")
 
 	cff.Header(fixes, "Fixes (requires reload)")
 

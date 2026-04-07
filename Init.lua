@@ -13,6 +13,8 @@ cff.MODULES = {
 	"PetCastbar",
 	"PetCastbarIcon",
 	"NameplateCastbar",
+	"NameplateCastbarIcon",
+	"NameplateClassification",
 	"TargetCastbarStatic",
 	-- Dark Mode
 	"DarkMode",
@@ -75,6 +77,13 @@ cff.VALUES = {
 	"TargetFrameScale",
 	"TargetFrameX",
 	"TargetFrameY",
+	"NameplateScale",
+	"NameplateCastbarScale",
+	"NameplateCastbarX",
+	"NameplateCastbarY",
+	"NameplateCastbarIconScale",
+	"NameplateCastbarIconX",
+	"NameplateCastbarIconY",
 }
 for _, key in ipairs(cff.VALUES) do
 	cff.VALUES[key] = key
@@ -108,9 +117,16 @@ cff.DEFAULTS.PetCastbarY            = 0
 cff.DEFAULTS.PetCastbarIconScale    = 1
 cff.DEFAULTS.PetCastbarIconX        = 0
 cff.DEFAULTS.PetCastbarIconY        = 0
-cff.DEFAULTS.TargetFrameScale       = 1
-cff.DEFAULTS.TargetFrameX           = 0
-cff.DEFAULTS.TargetFrameY           = 0
+cff.DEFAULTS.TargetFrameScale              = 1
+cff.DEFAULTS.TargetFrameX                  = 0
+cff.DEFAULTS.TargetFrameY                  = 0
+cff.DEFAULTS.NameplateScale                = 1
+cff.DEFAULTS.NameplateCastbarScale         = 1
+cff.DEFAULTS.NameplateCastbarX             = 0
+cff.DEFAULTS.NameplateCastbarY             = 0
+cff.DEFAULTS.NameplateCastbarIconScale     = 1
+cff.DEFAULTS.NameplateCastbarIconX         = 0
+cff.DEFAULTS.NameplateCastbarIconY         = 0
 
 EventUtil.ContinueOnAddOnLoaded("cfFrames", function()
 	local fresh = not cfFramesDB
@@ -151,7 +167,10 @@ EventUtil.ContinueOnAddOnLoaded("cfFrames", function()
 		cff.EnablePlayerCastbarIcon()
 		cff.EnablePetCastbar()
 		cff.EnablePetCastbarIcon()
+		cff.ApplyNameplateScale()
 		cff.EnableNameplateCastbar()
+		cff.EnableNameplateCastbarIcon()
+		cff.EnableNameplateClassification()
 		cff.ApplyPlayerCastbar()
 		cff.ApplyPlayerCastbarIcon()
 		cff.ApplyTargetCastbar()

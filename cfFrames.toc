@@ -25,7 +25,9 @@ PetCastbar.lua
 Frames\PlayerFrame.lua
 Frames\PetFrame.lua
 Frames\TargetFrame.lua
+Frames\Nameplates.lua
 NameplateCastbar.lua
+NameplateClassification.lua
 DarkMode.lua
 DarkModeIcons.lua
 Settings\_Factory.lua
@@ -34,3 +36,4 @@ Settings\DarkMode.lua
 Settings\Player.lua
 Settings\Pet.lua
 Settings\Target.lua
+Settings\Nameplate.lua
