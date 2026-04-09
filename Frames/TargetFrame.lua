@@ -1,22 +1,30 @@
 local M = cff.MODULES
 local V = cff.VALUES
 
--- TargetFrame: store raw Blizzard args and inject offset
-local tfRaw = {}
-tfRaw.point, tfRaw.relativeTo, tfRaw.relativePoint, tfRaw.x, tfRaw.y = TargetFrame:GetPoint()
-tfRaw.x = tfRaw.x or 0
-tfRaw.y = tfRaw.y or 0
+-- Save position on drag stop
+TargetFrame:HookScript("OnDragStop", function(self)
+	local p, _, rp, x, y = self:GetPoint()
+	cfFramesDB.TargetFramePos = { p, rp, x, y }
+end)
 
-local origTFSetPoint = TargetFrame.SetPoint
-TargetFrame.SetPoint = function(self, point, relativeTo, relativePoint, x, y, ...)
-	tfRaw.point, tfRaw.relativeTo, tfRaw.relativePoint, tfRaw.x, tfRaw.y = point, relativeTo, relativePoint, x or 0, y or 0
-	origTFSetPoint(self, point, relativeTo, relativePoint, tfRaw.x + cfFramesDB[V.TargetFrameX], tfRaw.y + cfFramesDB[V.TargetFrameY], ...)
-end
+-- Clear saved position on reset
+hooksecurefunc("TargetFrame_ResetUserPlacedPosition", function()
+	cfFramesDB.TargetFramePos = false
+end)
 
 function cff.ApplyTargetFrame()
 	TargetFrame:SetScale(cfFramesDB[V.TargetFrameScale])
-	if tfRaw.point then
-		TargetFrame:SetPoint(tfRaw.point, tfRaw.relativeTo, tfRaw.relativePoint, tfRaw.x, tfRaw.y)
+	local pos = cfFramesDB.TargetFramePos
+	if pos then
+		TargetFrame:ClearAllPoints()
+		TargetFrame:SetPoint(pos[1], UIParent, pos[2], pos[3] + cfFramesDB[V.TargetFrameX], pos[4] + cfFramesDB[V.TargetFrameY])
+		TargetFrame:SetUserPlaced(true)
+	elseif cfFramesDB[V.TargetFrameX] ~= 0 or cfFramesDB[V.TargetFrameY] ~= 0 then
+		local p, _, rp, x, y = TargetFrame:GetPoint()
+		if p then
+			TargetFrame:ClearAllPoints()
+			TargetFrame:SetPoint(p, UIParent, rp, (x or 0) + cfFramesDB[V.TargetFrameX], (y or 0) + cfFramesDB[V.TargetFrameY])
+		end
 	end
 end
 
@@ -64,4 +72,3 @@ function cff.ApplyTargetCastbar()
 		Target_Spellbar_AdjustPosition(TargetFrameSpellBar)
 	end
 end
-

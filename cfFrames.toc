@@ -26,6 +26,7 @@ Frames\PlayerFrame.lua
 Frames\PetFrame.lua
 Frames\TargetFrame.lua
 Frames\Nameplates.lua
+PartyCastbar.lua
 NameplateCastbar.lua
 NameplateClassification.lua
 DarkMode.lua

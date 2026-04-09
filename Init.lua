@@ -14,6 +14,8 @@ cff.MODULES = {
 	"PetCastbarIcon",
 	"NameplateCastbar",
 	"NameplateCastbarIcon",
+	"PartyCastbar",
+	"PartyCastbarIcon",
 	"NameplateClassification",
 	"TargetCastbarStatic",
 	-- Dark Mode
@@ -77,6 +79,12 @@ cff.VALUES = {
 	"TargetFrameScale",
 	"TargetFrameX",
 	"TargetFrameY",
+	"PartyCastbarScale",
+	"PartyCastbarX",
+	"PartyCastbarY",
+	"PartyCastbarIconScale",
+	"PartyCastbarIconX",
+	"PartyCastbarIconY",
 	"NameplateScale",
 	"NameplateCastbarScale",
 	"NameplateCastbarX",
@@ -105,6 +113,7 @@ cff.DEFAULTS.PlayerCastbarIconY     = 0
 cff.DEFAULTS.TargetCastbarScale     = 1
 cff.DEFAULTS.TargetCastbarX         = 0
 cff.DEFAULTS.TargetCastbarY         = 0
+cff.DEFAULTS.PlayerFramePos         = false
 cff.DEFAULTS.PlayerFrameScale       = 1
 cff.DEFAULTS.PlayerFrameX           = 0
 cff.DEFAULTS.PlayerFrameY           = 0
@@ -117,9 +126,16 @@ cff.DEFAULTS.PetCastbarY            = 0
 cff.DEFAULTS.PetCastbarIconScale    = 1
 cff.DEFAULTS.PetCastbarIconX        = 0
 cff.DEFAULTS.PetCastbarIconY        = 0
+cff.DEFAULTS.TargetFramePos                = false
 cff.DEFAULTS.TargetFrameScale              = 1
 cff.DEFAULTS.TargetFrameX                  = 0
 cff.DEFAULTS.TargetFrameY                  = 0
+cff.DEFAULTS.PartyCastbarScale         = 1
+cff.DEFAULTS.PartyCastbarX             = 0
+cff.DEFAULTS.PartyCastbarY             = 0
+cff.DEFAULTS.PartyCastbarIconScale     = 1
+cff.DEFAULTS.PartyCastbarIconX         = 0
+cff.DEFAULTS.PartyCastbarIconY         = 0
 cff.DEFAULTS.NameplateScale                = 1
 cff.DEFAULTS.NameplateCastbarScale         = 1
 cff.DEFAULTS.NameplateCastbarX             = 0
@@ -168,6 +184,7 @@ EventUtil.ContinueOnAddOnLoaded("cfFrames", function()
 		cff.EnablePetCastbar()
 		cff.EnablePetCastbarIcon()
 		cff.ApplyNameplateScale()
+		cff.EnablePartyCastbar()
 		cff.EnableNameplateCastbar()
 		cff.EnableNameplateCastbarIcon()
 		cff.EnableNameplateClassification()

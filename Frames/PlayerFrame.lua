@@ -1,21 +1,29 @@
 local V = cff.VALUES
 
--- PlayerFrame: store raw Blizzard args and inject offset
-local pfRaw = {}
-pfRaw.point, pfRaw.relativeTo, pfRaw.relativePoint, pfRaw.x, pfRaw.y = PlayerFrame:GetPoint()
-pfRaw.x = pfRaw.x or 0
-pfRaw.y = pfRaw.y or 0
+-- Save position on drag stop
+PlayerFrame:HookScript("OnDragStop", function(self)
+	local p, _, rp, x, y = self:GetPoint()
+	cfFramesDB.PlayerFramePos = { p, rp, x, y }
+end)
 
-local origPFSetPoint = PlayerFrame.SetPoint
-PlayerFrame.SetPoint = function(self, point, relativeTo, relativePoint, x, y, ...)
-	pfRaw.point, pfRaw.relativeTo, pfRaw.relativePoint, pfRaw.x, pfRaw.y = point, relativeTo, relativePoint, x or 0, y or 0
-	origPFSetPoint(self, point, relativeTo, relativePoint, pfRaw.x + cfFramesDB[V.PlayerFrameX], pfRaw.y + cfFramesDB[V.PlayerFrameY], ...)
-end
+-- Clear saved position on reset
+hooksecurefunc("PlayerFrame_ResetUserPlacedPosition", function()
+	cfFramesDB.PlayerFramePos = false
+end)
 
 function cff.ApplyPlayerFrame()
 	PlayerFrame:SetScale(cfFramesDB[V.PlayerFrameScale])
-	if pfRaw.point then
-		PlayerFrame:SetPoint(pfRaw.point, pfRaw.relativeTo, pfRaw.relativePoint, pfRaw.x, pfRaw.y)
+	local pos = cfFramesDB.PlayerFramePos
+	if pos then
+		PlayerFrame:ClearAllPoints()
+		PlayerFrame:SetPoint(pos[1], UIParent, pos[2], pos[3] + cfFramesDB[V.PlayerFrameX], pos[4] + cfFramesDB[V.PlayerFrameY])
+		PlayerFrame:SetUserPlaced(true)
+	elseif cfFramesDB[V.PlayerFrameX] ~= 0 or cfFramesDB[V.PlayerFrameY] ~= 0 then
+		local p, _, rp, x, y = PlayerFrame:GetPoint()
+		if p then
+			PlayerFrame:ClearAllPoints()
+			PlayerFrame:SetPoint(p, UIParent, rp, (x or 0) + cfFramesDB[V.PlayerFrameX], (y or 0) + cfFramesDB[V.PlayerFrameY])
+		end
 	end
 end
 
@@ -41,4 +49,3 @@ function cff.ApplyPlayerCastbarIcon()
 	icon:ClearAllPoints()
 	icon:SetPoint("RIGHT", CastingBarFrame, "LEFT", -10 + cfFramesDB[V.PlayerCastbarIconX], 2 + cfFramesDB[V.PlayerCastbarIconY])
 end
-

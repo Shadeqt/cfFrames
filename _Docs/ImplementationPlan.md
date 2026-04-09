@@ -48,15 +48,33 @@ Separate settings toggles: `DarkModeIconBuffs`, `DarkModeIconActionBars`. Full d
 
 #### 3.1 Nameplate Castbars — `NameplateCastbar.lua` ✓
 
-Cast bars on enemy nameplates using `SmallCastingBarFrameTemplate`. Lazy-created per plate, cached on `plate.cffCastBar`. Border, flash, icon, text repositioned. Registered callbacks for DarkMode (darken border) and StatusBar (update texture).
+Cast bars on enemy nameplates using `SmallCastingBarFrameTemplate`. Lazy-created per plate, cached on `plate.cffCastBar`. Border, flash, icon, text repositioned. Registered callbacks for DarkMode (darken border) and StatusBar (update texture). Castbar icon has separate show/hide toggle (`NameplateCastbarIcon` module).
 
 #### 3.2 Player Castbar Icon — `PlayerCastbarIcon.lua` ✓
 
 Shows the existing hidden `CastingBarFrame.Icon`, sized to match bar height, positioned left of the bar.
 
-#### 3.3 Core Callback System — `Core.lua` ✓
+#### 3.3 Pet Castbar — `PetCastbar.lua` ✓
+
+Cast bar for pet frame with icon support, scale/position settings.
+
+#### 3.4 Core Callback System — `Core.lua` ✓
 
 Generic callback registry: `cff.RegisterCallback(key, fn)` / `cff.RunCallbacks(key)` using module keys. Shared `cff.GetStatusBarTexture()` getter with Blizzard fallback.
+
+### Phase 4 — Nameplate Enhancements ✓
+
+#### 4.1 Nameplate Classification Icons — `NameplateClassification.lua` ✓
+
+Elite/rare dragon icons on nameplates. On `NAME_PLATE_UNIT_ADDED`: check `UnitClassification(unit)`, create overlay texture (64x32) at health bar right edge. Elite/worldboss → `EliteNameplateIcon`, rare/rareelite → `RareEliteNameplateIcon`. Enable/disable works on existing and new nameplates.
+
+#### 4.2 Nameplate Settings — `Settings/Nameplate.lua`, `Frames/Nameplates.lua` ✓
+
+Nameplates settings subcategory with: classification toggle, global scale (CVar-based), castbar scale/X/Y, castbar icon show/hide + scale/X/Y. Sliders conditionally hidden when parent feature is off. Apply functions in `Frames/Nameplates.lua`.
+
+### Phase 5 — Frame Positioning ✓
+
+Scale and X/Y offset sliders for player, pet, target frames and their castbars/icons. Each in `Frames/<Name>.lua` with SetPoint hook pattern to preserve Blizzard offsets. Settings in subcategory pages (`Settings/Player.lua`, `Settings/Pet.lua`, `Settings/Target.lua`).
 
 ### Fixes ✓
 
@@ -71,29 +89,13 @@ Generic callback registry: `cff.RegisterCallback(key, fn)` / `cff.RunCallbacks(k
 | NameplateLevelPositionFix | `Fixes/NameplateLevelPositionFix.lua` | Centers level text on compact nameplates |
 | ActionBarIconPositionFix | `Fixes/ActionBarIconPositionFix.lua` | Centers action bar icon textures in buttons |
 | PetActionBarCheckedFix | `Fixes/PetActionBarCheckedFix.lua` | Aligns pet button checked texture with icon |
+| UnitFrameResetFix | `Fixes/UnitFrameResetFix.lua` | Makes reset-to-default position persist on reload |
 
 ---
 
 ## Remaining
 
-### Phase 4 — Nameplate Enhancements
-
-#### 4.1 Nameplate Classification Icons — `NameplateClassification.lua`
-
-**What:** Show elite/rare icons on nameplates.
-
-**Reference:** `_Old/NameplateClassification.lua`
-
-**Implementation:**
-- On `NAME_PLATE_UNIT_ADDED`: check `UnitClassification(unit)`
-- Create overlay texture (64x32) at health bar right edge
-- elite/worldboss → `Interface\Tooltips\EliteNameplateIcon`
-- rare/rareelite → `Interface\Tooltips\RareEliteNameplateIcon`
-- Desaturate border for rares
-
----
-
-### Phase 5 — Pet Features
+### Phase 6 — Pet Features
 
 | Feature | File | Reference | Description |
 |---------|------|-----------|-------------|
@@ -104,7 +106,7 @@ Generic callback registry: `cff.RegisterCallback(key, fn)` / `cff.RunCallbacks(k
 
 ---
 
-### Phase 6 — Buff & Aura Features
+### Phase 7 — Buff & Aura Features
 
 | Feature | File | Reference | Description |
 |---------|------|-----------|-------------|
@@ -113,7 +115,7 @@ Generic callback registry: `cff.RegisterCallback(key, fn)` / `cff.RunCallbacks(k
 
 ---
 
-### Phase 7 — UI Tweaks (Simple Toggles)
+### Phase 8 — UI Tweaks (Simple Toggles)
 
 | Feature | File | Reference | Description |
 |---------|------|-----------|-------------|
@@ -124,7 +126,7 @@ Generic callback registry: `cff.RegisterCallback(key, fn)` / `cff.RunCallbacks(k
 
 ---
 
-### Phase 8 — Druid & Class Features
+### Phase 9 — Druid & Class Features
 
 | Feature | File | Reference | Description |
 |---------|------|-----------|-------------|
@@ -132,18 +134,14 @@ Generic callback registry: `cff.RegisterCallback(key, fn)` / `cff.RunCallbacks(k
 
 ---
 
-### Phase 9 — Frame Positioning (Low Priority)
+### Phase 10 — Remaining Frame Positioning
 
-The old version had a movability system for repositioning UI frames. This is a large feature that may not be needed if other addons handle frame positioning.
+Most frame positioning is done (Player, Pet, Target, all castbars). Remaining:
 
 | Feature | File | Reference | Description |
 |---------|------|-----------|-------------|
 | Movable Frames | `Frames/_Movable.lua` | `_Old/Frames/_Movable.lua` | Drag-to-reposition system |
-| Player Frame | `Frames/PlayerFrame.lua` | `_Old/Frames/PlayerFrame.lua` | Player frame positioning |
-| Target Frame | `Frames/TargetFrame.lua` | `_Old/Frames/TargetFrame.lua` | Target frame positioning |
 | Target of Target | `Frames/TargetOfTarget.lua` | `_Old/Frames/TargetOfTarget.lua` | ToT frame positioning |
-| Player Castbar | `Frames/PlayerCastbar.lua` | `_Old/Frames/PlayerCastbar.lua` | Player castbar positioning |
-| Target Castbar | `Frames/TargetCastbar.lua` | `_Old/Frames/TargetCastbar.lua` | Target castbar positioning |
 
 ---
 
@@ -154,13 +152,15 @@ cfFrames/
 ├── cfFrames.toc
 ├── Init.lua
 ├── Core.lua
-├── DarkMode.lua
-├── DarkModeIcons.lua
 ├── StatusBarTexture.lua
 ├── BiggerHealthbar.lua
 ├── HealthbarColor.lua
 ├── PlayerCastbarIcon.lua
+├── PetCastbar.lua
 ├── NameplateCastbar.lua
+├── NameplateClassification.lua
+├── DarkMode.lua
+├── DarkModeIcons.lua
 ├── Fixes/
 │   ├── ActionBarAlphaFix.lua
 │   ├── ToTPortraitFix.lua
@@ -170,11 +170,21 @@ cfFrames/
 │   ├── TargetCastbarIconFix.lua
 │   ├── NameplateLevelPositionFix.lua
 │   ├── ActionBarIconPositionFix.lua
-│   └── PetActionBarCheckedFix.lua
+│   ├── PetActionBarCheckedFix.lua
+│   └── UnitFrameResetFix.lua
+├── Frames/
+│   ├── PlayerFrame.lua
+│   ├── PetFrame.lua
+│   ├── TargetFrame.lua
+│   └── Nameplates.lua
 ├── Settings/
 │   ├── _Factory.lua
 │   ├── Main.lua
-│   └── DarkMode.lua
+│   ├── DarkMode.lua
+│   ├── Player.lua
+│   ├── Pet.lua
+│   ├── Target.lua
+│   └── Nameplate.lua
 ├── Media/
 │   ├── StatusBar/
 │   │   ├── BlizzardRetailBarCrop2.tga
@@ -206,19 +216,30 @@ Fixes\TargetCastbarIconFix.lua
 Fixes\NameplateLevelPositionFix.lua
 Fixes\ActionBarIconPositionFix.lua
 Fixes\PetActionBarCheckedFix.lua
+Fixes\UnitFrameResetFix.lua
 StatusBarTexture.lua
 BiggerHealthbar.lua
 HealthbarColor.lua
 PlayerCastbarIcon.lua
+PetCastbar.lua
+Frames\PlayerFrame.lua
+Frames\PetFrame.lua
+Frames\TargetFrame.lua
+Frames\Nameplates.lua
 NameplateCastbar.lua
+NameplateClassification.lua
 DarkMode.lua
 DarkModeIcons.lua
 Settings\_Factory.lua
 Settings\Main.lua
 Settings\DarkMode.lua
+Settings\Player.lua
+Settings\Pet.lua
+Settings\Target.lua
+Settings\Nameplate.lua
 ```
 
-Init first, Core second. Fixes before features (they run at PLAYER_ENTERING_WORLD). Features in dependency order. DarkMode after features that register callbacks. Settings last so all modules are defined.
+Init first, Core second. Fixes before features (they run at PLAYER_ENTERING_WORLD). Features in dependency order. Frames before feature files that reference Apply functions. DarkMode after features that register callbacks. Settings last so all modules are defined.
 
 ---
 

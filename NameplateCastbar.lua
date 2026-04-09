@@ -4,33 +4,15 @@ local hooked = false
 
 local function CreateCastbar(unitFrame, unit)
 	local hp = unitFrame.healthBar
-	local bar = CreateFrame("StatusBar", nil, unitFrame, "SmallCastingBarFrameTemplate")
-	bar:Hide()
-	CastingBarFrame_OnLoad(bar, unit)
-	if cfFramesDB[M.StatusBar] then bar:SetStatusBarTexture(cff.GetStatusBarTexture()) end
-	bar:ClearAllPoints()
+	local bar = cff.CreateCastbar(unitFrame, unit, hp:GetWidth(), hp:GetHeight())
 	bar:SetPoint("TOP", hp, "BOTTOM", cfFramesDB[V.NameplateCastbarX], -5 + cfFramesDB[V.NameplateCastbarY])
 	bar:SetScale(cfFramesDB[V.NameplateCastbarScale])
-	bar:SetSize(hp:GetWidth(), hp:GetHeight())
 
-	bar.Border:ClearAllPoints()
-	bar.Border:SetPoint("TOPLEFT", bar, -17.5, 16)
-	bar.Border:SetPoint("BOTTOMRIGHT", bar, 17.5, -15.5)
-	bar.Flash:ClearAllPoints()
-	bar.Flash:SetPoint("TOPLEFT", bar, -17.5, 16)
-	bar.Flash:SetPoint("BOTTOMRIGHT", bar, 17.5, -15.5)
 	bar.Icon:ClearAllPoints()
 	bar.Icon:SetPoint("LEFT", bar, "RIGHT", 3 + cfFramesDB[V.NameplateCastbarIconX], cfFramesDB[V.NameplateCastbarIconY])
 	bar.Icon:SetScale(cfFramesDB[V.NameplateCastbarIconScale])
-	bar.Icon:SetSize(15.5, 15.5)
 	if not cfFramesDB[M.NameplateCastbarIcon] then bar.Icon:Hide() end
-	if bar.Text then bar.Text:ClearAllPoints(); bar.Text:SetPoint("CENTER") end
-
-	bar:HookScript("OnEvent", function(self, event)
-		if event == "UNIT_SPELLCAST_START" or event == "UNIT_SPELLCAST_CHANNEL_START" then
-			CastingBarFrame_OnEvent(self, "PLAYER_ENTERING_WORLD")
-		end
-	end)
+	print("Icon w:", bar.Icon:GetWidth(), "h:", bar.Icon:GetHeight(), "scale:", bar.Icon:GetScale(), "shown:", bar.Icon:IsShown(), "layer:", bar.Icon:GetDrawLayer())
 
 	if cfFramesDB[M.DarkModeNameplates] then
 		cff.SaveAndDarken(bar.Border)
@@ -106,3 +88,19 @@ function cff.DisableNameplateCastbar()
 		end
 	end
 end
+
+-- TEST: show nameplate castbars permanently at full (remove later)
+local testFrame = CreateFrame("Frame")
+testFrame:RegisterEvent("NAME_PLATE_UNIT_ADDED")
+testFrame:SetScript("OnEvent", function(_, _, unit)
+	local plate = C_NamePlate.GetNamePlateForUnit(unit)
+	if not plate or not plate.UnitFrame then return end
+	local testBar = GetCastbar(plate, unit)
+	testBar:SetScript("OnUpdate", nil)
+	testBar:SetMinMaxValues(0, 1)
+	testBar:SetValue(1)
+	testBar:SetStatusBarColor(1, 0.7, 0)
+	testBar.Icon:SetTexture("Interface\\Icons\\Spell_Nature_Lightning")
+	testBar.Icon:Show()
+	testBar:Show()
+end)
