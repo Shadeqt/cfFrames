@@ -93,3 +93,4 @@ function cff.DisableBiggerHealthbar()
 		TargetFrame_CheckFaction(TargetFrame)
 	end
 end
+

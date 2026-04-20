@@ -233,15 +233,6 @@ local function DarkenChat()
 	end
 end
 
-local function DarkenCastbars()
-	if TargetFrameSpellBar and TargetFrameSpellBar.Border then
-		cff.SaveAndDarken(TargetFrameSpellBar.Border)
-	end
-	if CastingBarFrame and CastingBarFrame.Border then
-		cff.SaveAndDarken(CastingBarFrame.Border)
-	end
-end
-
 local function DarkenNameplate(_, unit)
 	local plate = C_NamePlate.GetNamePlateForUnit(unit)
 	if not plate then return end
@@ -294,7 +285,6 @@ function cff.EnableDarkMode()
 		end
 	end
 	if cfFramesDB[M.DarkModeChat] then DarkenChat() end
-	if cfFramesDB[M.DarkModeCastbars] then DarkenCastbars() end
 	if cfFramesDB[M.DarkModeNameplates] then DarkenNameplates() end
 	cff.RunCallbacks(M.DarkMode)
 end

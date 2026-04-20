@@ -26,26 +26,3 @@ function cff.ApplyPlayerFrame()
 		end
 	end
 end
-
--- PlayerCastbar: store raw Blizzard args and inject offset
-local cbRaw = {}
-local origCBSetPoint = CastingBarFrame.SetPoint
-CastingBarFrame.SetPoint = function(self, point, relativeTo, relativePoint, x, y, ...)
-	cbRaw.point, cbRaw.relativeTo, cbRaw.relativePoint, cbRaw.x, cbRaw.y = point, relativeTo, relativePoint, x or 0, y or 0
-	origCBSetPoint(self, point, relativeTo, relativePoint, cbRaw.x + cfFramesDB[V.PlayerCastbarX], cbRaw.y + cfFramesDB[V.PlayerCastbarY], ...)
-end
-
-function cff.ApplyPlayerCastbar()
-	CastingBarFrame:SetScale(cfFramesDB[V.PlayerCastbarScale])
-	if cbRaw.point then
-		CastingBarFrame:SetPoint(cbRaw.point, cbRaw.relativeTo, cbRaw.relativePoint, cbRaw.x, cbRaw.y)
-	end
-end
-
-function cff.ApplyPlayerCastbarIcon()
-	if not CastingBarFrame or not CastingBarFrame.Icon then return end
-	local icon = CastingBarFrame.Icon
-	icon:SetScale(cfFramesDB[V.PlayerCastbarIconScale])
-	icon:ClearAllPoints()
-	icon:SetPoint("RIGHT", CastingBarFrame, "LEFT", -10 + cfFramesDB[V.PlayerCastbarIconX], 2 + cfFramesDB[V.PlayerCastbarIconY])
-end

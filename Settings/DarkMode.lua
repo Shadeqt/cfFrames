@@ -38,7 +38,6 @@ function cff.SetupDarkModeSettings()
 		[M.DarkModeActionBars] = { name = "Action Bars", tooltip = "Action buttons, bag slots, menu bar" },
 		[M.DarkModeMinimap]    = { name = "Minimap",     tooltip = "Minimap borders, zoom buttons, addon icons" },
 		[M.DarkModeChat]       = { name = "Chat",        tooltip = "Chat edit box and tab textures" },
-		[M.DarkModeCastbars]   = { name = "Castbars",    tooltip = "Player and target castbar borders" },
 		[M.DarkModeNameplates] = { name = "Nameplates",  tooltip = "Nameplate health bar borders" },
 	}
 	for _, key in ipairs(M) do
@@ -54,7 +53,6 @@ function cff.SetupDarkModeSettings()
 	local iconToggles = {
 		[M.DarkModeIconBuffs]      = { name = "Buffs",        tooltip = "Borders on player, target, pet, and compact raid buff icons" },
 		[M.DarkModeIconActionBars] = { name = "Action Bars",  tooltip = "Borders on action bar, pet bar, stance bar, and bag icons" },
-		[M.DarkModeIconCastbars]   = { name = "Castbars",     tooltip = "Borders on player, target, pet, and nameplate castbar icons" },
 	}
 	for _, key in ipairs(M) do
 		local toggle = iconToggles[key]

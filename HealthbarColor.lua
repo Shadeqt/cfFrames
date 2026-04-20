@@ -94,3 +94,4 @@ end
 function cff.DisableHealthbarColor()
 	RefreshUnitFrames()
 end
+

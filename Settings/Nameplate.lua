@@ -13,41 +13,34 @@ function cff.SetupNameplateSettings()
 		end
 	end)
 
-	cff.Header(cat, "Nameplates")
-	cff.Slider(cat, V.NameplateScale, "Scale", "Global nameplate scale", 0.5, 3, 0.05, cff.ApplyNameplateScale)
+	cff.Header(cat, "Scale")
+	cff.Slider(cat, V.NameplateScale, "Scale", "Global nameplate scale (cfFrames)", 0.5, 3, 0.05, cff.ApplyNameplateScale)
+	cff.CVarSlider(cat, "nameplateSelectedScale", "Target Scale", "Scale of the selected target's nameplate", 0.5, 3, 0.05)
+	cff.CVarSlider(cat, "nameplateMinScale", "Non-Target Scale", "Scale of non-selected nameplates", 0.1, 3, 0.05)
 
-	local castbarHeader = cff.Header(cat, "Castbar")
-	cff.Checkbox(cat, M.NameplateCastbar, "Show Castbars", "Show cast bars on enemy nameplates", function()
-		if cfFramesDB[M.NameplateCastbar] then
-			cff.EnableNameplateCastbar()
-		else
-			cff.DisableNameplateCastbar()
-		end
-	end)
-	local castbarSliders = {
-		cff.Slider(cat, V.NameplateCastbarScale, "Scale", "Nameplate castbar scale", 0.5, 3, 0.05, cff.ApplyNameplateCastbar),
-		cff.Slider(cat, V.NameplateCastbarX, "X Offset", "Horizontal offset", -100, 100, 1, cff.ApplyNameplateCastbar),
-		cff.Slider(cat, V.NameplateCastbarY, "Y Offset", "Vertical offset", -100, 100, 1, cff.ApplyNameplateCastbar),
-	}
-	for _, s in ipairs(castbarSliders) do
-		s:AddShownPredicate(function() return cfFramesDB[M.NameplateCastbar] end)
-	end
+	cff.Header(cat, "Alpha")
+	cff.CVarSlider(cat, "nameplateNotSelectedAlpha", "Non-Target Alpha", "Alpha of non-selected nameplates", 0, 1, 0.05)
+	cff.CVarSlider(cat, "nameplateOccludedAlphaMult", "Behind Geometry Alpha", "Alpha multiplier when nameplate is behind walls/objects", 0, 1, 0.05)
 
-	local iconHeader = cff.Header(cat, "Castbar Icon", function() return cfFramesDB[M.NameplateCastbar] end)
-	local iconCheckbox = cff.Checkbox(cat, M.NameplateCastbarIcon, "Show Castbar Icon", "Show spell icon on nameplate castbars", function()
-		if cfFramesDB[M.NameplateCastbarIcon] then
-			cff.EnableNameplateCastbarIcon()
-		else
-			cff.DisableNameplateCastbarIcon()
-		end
+	cff.Header(cat, "Visibility")
+	cff.CVarCheckbox(cat, "nameplateShowAll", "Show All Nameplates", "Show nameplates at all times")
+	cff.CVarCheckbox(cat, "nameplateShowEnemies", "Show Enemies", "Show enemy nameplates")
+	cff.CVarCheckbox(cat, "nameplateShowFriends", "Show Friends", "Show friendly nameplates")
+	cff.CVarCheckbox(cat, "nameplateShowEnemyPets", "Show Enemy Pets", "Show enemy pet nameplates")
+	cff.CVarCheckbox(cat, "nameplateShowEnemyGuardians", "Show Enemy Guardians", "Show enemy guardian nameplates")
+	cff.CVarCheckbox(cat, "nameplateShowEnemyTotems", "Show Enemy Totems", "Show enemy totem nameplates")
+	cff.CVarCheckbox(cat, "nameplateShowEnemyMinions", "Show Enemy Minions", "Show enemy minion nameplates")
+	cff.CVarCheckbox(cat, "nameplateShowFriendlyPets", "Show Friendly Pets", "Show friendly pet nameplates")
+	cff.CVarCheckbox(cat, "nameplateShowFriendlyGuardians", "Show Friendly Guardians", "Show friendly guardian nameplates")
+	cff.CVarCheckbox(cat, "nameplateShowFriendlyTotems", "Show Friendly Totems", "Show friendly totem nameplates")
+	cff.CVarCheckbox(cat, "nameplateShowFriendlyMinions", "Show Friendly Minions", "Show friendly minion nameplates")
+	cff.CVarCheckbox(cat, "nameplateShowFriendlyNPCs", "Show Friendly NPCs", "Always show friendly NPC nameplates")
+
+	cff.Header(cat, "Class Colors")
+	cff.Checkbox(cat, M.HealthbarColorNameplateEnemy, "Enemy Nameplates", "Color enemy nameplate health bars by class", function()
+		cff.SyncHealthbarCVars()
 	end)
-	iconCheckbox:AddShownPredicate(function() return cfFramesDB[M.NameplateCastbar] end)
-	local iconSliders = {
-		cff.Slider(cat, V.NameplateCastbarIconScale, "Scale", "Castbar icon scale", 0.5, 3, 0.05, cff.ApplyNameplateCastbarIcon),
-		cff.Slider(cat, V.NameplateCastbarIconX, "X Offset", "Horizontal offset", -100, 100, 1, cff.ApplyNameplateCastbarIcon),
-		cff.Slider(cat, V.NameplateCastbarIconY, "Y Offset", "Vertical offset", -100, 100, 1, cff.ApplyNameplateCastbarIcon),
-	}
-	for _, s in ipairs(iconSliders) do
-		s:AddShownPredicate(function() return cfFramesDB[M.NameplateCastbar] and cfFramesDB[M.NameplateCastbarIcon] end)
-	end
+	cff.Checkbox(cat, M.HealthbarColorNameplateFriendly, "Friendly Nameplates", "Color friendly nameplate health bars by class", function()
+		cff.SyncHealthbarCVars()
+	end)
 end

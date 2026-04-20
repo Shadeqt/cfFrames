@@ -53,6 +53,49 @@ function cff.Header(cat, text, shownPredicate)
 	layout:AddInitializer(init)
 end
 
+-- Proxy table that reads/writes a CVar instead of cfFramesDB
+local function CVarProxy(key, cvar, isNumber)
+	local proxy = {}
+	local mt = {
+		__index = function(_, k)
+			if k ~= key then return nil end
+			local val = GetCVar(cvar)
+			if isNumber then
+				return tonumber(val) or tonumber(GetCVarDefault(cvar)) or 0
+			else
+				return val == "1"
+			end
+		end,
+		__newindex = function(_, k, value)
+			if k ~= key then return end
+			SetCVar(cvar, isNumber and tostring(value) or (value and "1" or "0"))
+		end,
+	}
+	setmetatable(proxy, mt)
+	return proxy
+end
+
+local cvarCounter = 0
+function cff.CVarCheckbox(cat, cvar, name, tooltip)
+	cvarCounter = cvarCounter + 1
+	local key = "cff_cvar_" .. cvarCounter
+	local proxy = CVarProxy(key, cvar, false)
+	local default = GetCVarBool(cvar)
+	local s = Settings.RegisterAddOnSetting(cat, key, key, proxy, Settings.VarType.Boolean, name, default)
+	Settings.CreateCheckbox(cat, s, tooltip)
+end
+
+function cff.CVarSlider(cat, cvar, name, tooltip, min, max, step)
+	cvarCounter = cvarCounter + 1
+	local key = "cff_cvar_" .. cvarCounter
+	local proxy = CVarProxy(key, cvar, true)
+	local default = tonumber(GetCVar(cvar)) or tonumber(GetCVarDefault(cvar)) or 0
+	local s = Settings.RegisterAddOnSetting(cat, key, key, proxy, Settings.VarType.Number, name, default)
+	local opts = Settings.CreateSliderOptions(min, max, step)
+	opts:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right, function(value) return format("%.2f", value) end)
+	Settings.CreateSlider(cat, s, opts, tooltip)
+end
+
 StaticPopupDialogs["CFF_RELOAD_UI"] = {
 	text = "This setting requires a UI reload to take effect.\nReload now?",
 	button1 = "Reload",

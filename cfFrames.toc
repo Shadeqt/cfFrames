@@ -10,9 +10,7 @@ Core.lua
 Fixes\ActionBarAlphaFix.lua
 Fixes\ToTPortraitFix.lua
 Fixes\ToTBackgroundFix.lua
-Fixes\TargetCastbarBorderFix.lua
 Fixes\TargetNameWidthFix.lua
-Fixes\TargetCastbarIconFix.lua
 Fixes\NameplateLevelPositionFix.lua
 Fixes\ActionBarIconPositionFix.lua
 Fixes\PetActionBarCheckedFix.lua
@@ -20,14 +18,10 @@ Fixes\UnitFrameResetFix.lua
 StatusBarTexture.lua
 BiggerHealthbar.lua
 HealthbarColor.lua
-PlayerCastbarIcon.lua
-PetCastbar.lua
 Frames\PlayerFrame.lua
 Frames\PetFrame.lua
 Frames\TargetFrame.lua
 Frames\Nameplates.lua
-PartyCastbar.lua
-NameplateCastbar.lua
 NameplateClassification.lua
 DarkMode.lua
 DarkModeIcons.lua

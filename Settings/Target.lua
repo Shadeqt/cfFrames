@@ -13,15 +13,4 @@ function cff.SetupTargetSettings()
 		local y = math.floor(TargetFrame:GetTop() - UIParent:GetTop() + 0.5)
 		return format("Position: %d, %d", x, y)
 	end)
-
-	cff.Header(cat, "Castbar")
-	cff.Checkbox(cat, M.TargetCastbarStatic, "Static Position", "Lock castbar position, ignore buff/debuff repositioning", cff.ApplyTargetCastbar)
-	cff.Slider(cat, V.TargetCastbarScale, "Scale", "Target castbar scale", 0.5, 2, 0.05, cff.ApplyTargetCastbar)
-	cff.Slider(cat, V.TargetCastbarX, "X Offset", "Horizontal offset", -500, 500, 1, cff.ApplyTargetCastbar)
-	cff.Slider(cat, V.TargetCastbarY, "Y Offset", "Vertical offset", -500, 500, 1, cff.ApplyTargetCastbar)
-
-	cff.Header(cat, "Castbar Icon")
-	cff.Slider(cat, V.TargetCastbarIconScale, "Scale", "Target castbar icon scale", 0.5, 2, 0.05, cff.ApplyTargetCastbarIcon)
-	cff.Slider(cat, V.TargetCastbarIconX, "X Offset", "Horizontal offset", -500, 500, 1, cff.ApplyTargetCastbarIcon)
-	cff.Slider(cat, V.TargetCastbarIconY, "Y Offset", "Vertical offset", -500, 500, 1, cff.ApplyTargetCastbarIcon)
 end
