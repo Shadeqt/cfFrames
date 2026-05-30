@@ -27,10 +27,11 @@ local function SetStaticBars()
 	if ExhaustionLevelFillBar then ExhaustionLevelFillBar:SetTexture(tex) end
 	if ReputationWatchBar then SetStatusBarTexture(ReputationWatchBar.StatusBar) end
 	for i = 1, MAX_PARTY_MEMBERS do
-		local party = _G["PartyMemberFrame" .. i]
-		if party then
-			SetStatusBarTexture(party.healthBar)
-			SetStatusBarTexture(party.manaBar)
+		local name = "PartyMemberFrame" .. i
+		if _G[name] then
+			-- Use the global bar refs; the .healthBar/.manaBar fields are nil-cased in Era.
+			SetStatusBarTexture(_G[name .. "HealthBar"])
+			SetStatusBarTexture(_G[name .. "ManaBar"])
 		end
 	end
 	for i = 1, MEMBERS_PER_RAID_GROUP do
