@@ -1,111 +1,54 @@
-cff = cff or {}
-cff.SENTINEL = "cff"
+local addonName, addon = ...
 
-cff.MODULES = {
+-- DB schema (the single source of truth for cfFramesDB keys).
+-- All module bools default true; StatusBarTexture is the one stored value.
+-- Frame-move/scale keys and DarkMode sub-toggles/colors were cut in the rebuild
+-- (frame moving removed; DarkMode is one toggle with hardcoded colors), so they
+-- are absent here and InitDB() prunes them from any existing saved DB.
+addon.defaults = {
 	-- General
-	"StatusBar",
-	"BiggerHealthbar",
-	"NameplateClassification",
-	-- Dark Mode
-	"DarkMode",
-	"DarkModeFrames",
-	"DarkModeActionBars",
-	"DarkModeMinimap",
-	"DarkModeChat",
-	"DarkModeNameplates",
-	"DarkModeIconBuffs",
-	"DarkModeIconActionBars",
+	BiggerHealthbar           = true,
+	DarkMode                  = true,
+	NameplateClassification   = true,
+	-- Class Colors (one master for the 5 absorbed cfClassColors features)
+	ClassColors               = true,
 	-- Fixes
-	"ActionBarAlphaFix",
-	"ToTPortraitFix",
-	"ToTBackgroundFix",
-	"TargetNameWidthFix",
-	"NameplateLevelPositionFix",
-	"ActionBarIconPositionFix",
-	"PetActionBarCheckedFix",
-	"UnitFrameResetFix",
+	ActionBarAlphaFix         = true,
+	ToTPortraitFix            = true,
+	ToTBackgroundFix          = true,
+	TargetNameWidthFix        = true,
+	NameplateLevelPositionFix = true,
+	ActionBarIconPositionFix  = true,
+	PetActionBarCheckedFix    = true,
+	UnitFrameResetFix         = true,
+	-- Stored value: chosen status-bar texture (StatusBar on/off is encoded here;
+	-- the GUI's "Blizzard Default" dropdown entry = feature off).
+	StatusBarTexture = "Interface\\AddOns\\cfFrames\\Media\\StatusBar\\BlizzardRetailBarCrop2",
 }
 
-cff.DEFAULTS = {}
-for _, key in ipairs(cff.MODULES) do
-	cff.DEFAULTS[key] = true
-	cff.MODULES[key] = key
-end
-
-cff.VALUES = {
-	"StatusBarTexture",
-	"DarkModeColor",
-	"DarkModeColorSecondary",
-	"PlayerFrameScale",
-	"PlayerFrameX",
-	"PlayerFrameY",
-	"PetFrameScale",
-	"PetFrameX",
-	"PetFrameY",
-	"TargetFrameScale",
-	"TargetFrameX",
-	"TargetFrameY",
-	"NameplateScale",
-}
-for _, key in ipairs(cff.VALUES) do
-	cff.VALUES[key] = key
-end
-
-cff.DEFAULTS.StatusBarTexture       = "Interface\\AddOns\\cfFrames\\Media\\StatusBar\\BlizzardRetailBarCrop2"
-cff.DEFAULTS.DarkModeColor          = 0.25
-cff.DEFAULTS.DarkModeColorSecondary = 0.75
-cff.DEFAULTS.PlayerFramePos         = false
-cff.DEFAULTS.PlayerFrameScale       = 1
-cff.DEFAULTS.PlayerFrameX           = 0
-cff.DEFAULTS.PlayerFrameY           = 0
-cff.DEFAULTS.PetFrameScale          = 1
-cff.DEFAULTS.PetFrameX              = 0
-cff.DEFAULTS.PetFrameY              = 0
-cff.DEFAULTS.TargetFramePos                = false
-cff.DEFAULTS.TargetFrameScale              = 1
-cff.DEFAULTS.TargetFrameX                  = 0
-cff.DEFAULTS.TargetFrameY                  = 0
-cff.DEFAULTS.NameplateScale                = 1
-
-cfFramesDB = cfFramesDB or {}
-
--- Add new keys
-for key, value in pairs(cff.DEFAULTS) do
-	if cfFramesDB[key] == nil then
-		cfFramesDB[key] = value
+function addon.InitDB()
+	cfFramesDB = cfFramesDB or {}
+	-- Merge newly-added defaults.
+	for key, value in pairs(addon.defaults) do
+		if cfFramesDB[key] == nil then
+			cfFramesDB[key] = value
+		end
+	end
+	-- Prune keys no longer in the schema (e.g. cut frame-move / DarkMode-color keys).
+	for key in pairs(cfFramesDB) do
+		if addon.defaults[key] == nil then
+			cfFramesDB[key] = nil
+		end
 	end
 end
 
--- Remove stale keys
-for key in pairs(cfFramesDB) do
-	if cff.DEFAULTS[key] == nil then
-		cfFramesDB[key] = nil
-	end
-end
-
-EventUtil.ContinueOnAddOnLoaded("cfFrames", function()
-	local f = CreateFrame("Frame")
-	f:RegisterEvent("PLAYER_ENTERING_WORLD")
-	f:SetScript("OnEvent", function(self)
+EventUtil.ContinueOnAddOnLoaded(addonName, function()
+	addon.InitDB()
+	-- Defer feature setup to PLAYER_ENTERING_WORLD (nameplates / compact-raid exist there).
+	local frame = CreateFrame("Frame")
+	frame:RegisterEvent("PLAYER_ENTERING_WORLD")
+	frame:SetScript("OnEvent", function(self)
 		self:UnregisterAllEvents()
-		cff.EnableStatusBar()
-		cff.EnableBiggerHealthbar()
-		cff.ApplyPlayerFrame()
-		cff.ApplyPetFrame()
-		cff.ApplyTargetFrame()
-		cff.ApplyNameplateScale()
-		cff.EnableNameplateClassification()
-		cff.EnableDarkMode()
-		cff.EnableDarkModeIcons()
-
-		-- Fixes
-		cff.InitActionBarAlphaFix()
-		cff.InitToTPortraitFix()
-		cff.InitToTBackgroundFix()
-		cff.InitTargetNameWidthFix()
-		cff.InitNameplateLevelPositionFix()
-		cff.InitActionBarIconPositionFix()
-		cff.InitPetActionBarCheckedFix()
-		cff.InitUnitFrameResetFix()
+		-- Setup* calls are appended here, one per feature step (explicit order, B1).
 	end)
 end)
