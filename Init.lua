@@ -50,5 +50,6 @@ EventUtil.ContinueOnAddOnLoaded(addonName, function()
 	frame:SetScript("OnEvent", function(self)
 		self:UnregisterAllEvents()
 		-- Setup* calls are appended here, one per feature step (explicit order, B1).
+		addon.SetupStatusBar()
 	end)
 end)

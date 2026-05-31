@@ -7,3 +7,4 @@
 
 Init.lua
 ClassColors\Core.lua
+StatusBarTexture.lua
