@@ -1,5 +1,7 @@
-function cff.InitPetActionBarCheckedFix()
-	if not cfFramesDB[cff.MODULES.PetActionBarCheckedFix] then return end
+local _, addon = ...
+
+function addon.SetupPetActionBarCheckedFix()
+	if not cfFramesDB.PetActionBarCheckedFix then return end
 
 	for i = 1, NUM_PET_ACTION_SLOTS do
 		local btn = _G["PetActionButton" .. i]

@@ -1,5 +1,7 @@
-function cff.InitToTBackgroundFix()
-	if not cfFramesDB[cff.MODULES.ToTBackgroundFix] then return end
+local _, addon = ...
+
+function addon.SetupToTBackgroundFix()
+	if not cfFramesDB.ToTBackgroundFix then return end
 	if not TargetFrameToTBackground then return end
 
 	TargetFrameToTBackground:ClearAllPoints()

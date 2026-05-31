@@ -17,3 +17,11 @@ BiggerHealthbar.lua
 NameplateClassification.lua
 DarkMode.lua
 DarkModeIcons.lua
+Fixes\ActionBarAlphaFix.lua
+Fixes\ToTPortraitFix.lua
+Fixes\ToTBackgroundFix.lua
+Fixes\TargetNameWidthFix.lua
+Fixes\NameplateLevelPositionFix.lua
+Fixes\ActionBarIconPositionFix.lua
+Fixes\PetActionBarCheckedFix.lua
+Fixes\UnitFrameResetFix.lua

@@ -1,8 +1,10 @@
-function cff.InitTargetNameWidthFix()
-	if not cfFramesDB[cff.MODULES.TargetNameWidthFix] then return end
+local _, addon = ...
+
+function addon.SetupTargetNameWidthFix()
+	if not cfFramesDB.TargetNameWidthFix then return end
 	local nameText = TargetFrame and TargetFrame.name
 	if not nameText then return end
 
-	local width = nameText:GetWidth()
-	nameText:SetWidth(width * 1.15)
+	-- Load-once: scales the current width; re-running would compound, but Setup runs once.
+	nameText:SetWidth(nameText:GetWidth() * 1.15)
 end

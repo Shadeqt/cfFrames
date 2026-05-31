@@ -1,5 +1,7 @@
-function cff.InitActionBarIconPositionFix()
-	if not cfFramesDB[cff.MODULES.ActionBarIconPositionFix] then return end
+local _, addon = ...
+
+function addon.SetupActionBarIconPositionFix()
+	if not cfFramesDB.ActionBarIconPositionFix then return end
 
 	local bars = { "ActionButton", "MultiBarBottomLeftButton", "MultiBarBottomRightButton", "MultiBarRightButton", "MultiBarLeftButton" }
 	for _, bar in ipairs(bars) do

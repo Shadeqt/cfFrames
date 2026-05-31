@@ -1,18 +1,20 @@
-local function saveDefaultPosition(frame)
-	local p, rt, rp, x, y = frame:GetPoint()
+local _, addon = ...
+
+local function SaveDefaultPosition(frame)
+	local point, relativeTo, relativePoint, x, y = frame:GetPoint()
 	frame:SetUserPlaced(true)
 	frame:ClearAllPoints()
-	frame:SetPoint(p, rt, rp, x, y)
+	frame:SetPoint(point, relativeTo, relativePoint, x, y)
 end
 
-function cff.InitUnitFrameResetFix()
-	if not cfFramesDB[cff.MODULES.UnitFrameResetFix] then return end
+function addon.SetupUnitFrameResetFix()
+	if not cfFramesDB.UnitFrameResetFix then return end
 
 	hooksecurefunc("PlayerFrame_ResetUserPlacedPosition", function()
-		saveDefaultPosition(PlayerFrame)
+		SaveDefaultPosition(PlayerFrame)
 	end)
 
 	hooksecurefunc("TargetFrame_ResetUserPlacedPosition", function()
-		saveDefaultPosition(TargetFrame)
+		SaveDefaultPosition(TargetFrame)
 	end)
 end
