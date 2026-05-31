@@ -1,5 +1,11 @@
 local addonName, addon = ...
 
+-- Shared re-entrancy marker, passed as the trailing arg to SetVertexColor. DarkMode and
+-- ActionBarAlphaFix both hook SetVertexColor on the same ActionButton textures; each skips
+-- writes carrying this flag so they recognize their own (and each other's) writes and don't
+-- loop. The value must be shared between those features, hence the namespace.
+addon.SENTINEL = "cff"
+
 -- DB schema (the single source of truth for cfFramesDB keys).
 -- All module bools default true; StatusBarTexture is the one stored value.
 -- Frame-move/scale keys and DarkMode sub-toggles/colors were cut in the rebuild
@@ -52,5 +58,8 @@ EventUtil.ContinueOnAddOnLoaded(addonName, function()
 		-- Setup* calls are appended here, one per feature step (explicit order, B1).
 		addon.SetupStatusBar()
 		addon.SetupBiggerHealthbar()
+		addon.SetupNameplateClassification()
+		addon.SetupDarkMode()
+		addon.SetupDarkModeIcons()
 	end)
 end)

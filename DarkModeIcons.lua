@@ -1,6 +1,6 @@
-local M = cff.MODULES
-local V = cff.VALUES
-local borders = {}
+local _, addon = ...
+
+local PRIMARY = 0.25  -- icon border darkness, matches DarkMode's main color
 
 -- zoom: left, right, top, bottom
 local ZOOM = { 0.02, 0.98, 0.02, 0.98 }
@@ -24,15 +24,12 @@ local function AddBorder(icon, button)
 	border:SetPoint("TOPLEFT", icon, OFFSET[1], OFFSET[2])
 	border:SetPoint("BOTTOMRIGHT", icon, OFFSET[3], OFFSET[4])
 	button.cffBorder = border
-	borders[#borders + 1] = border
 	return border
 end
 
 local function ColorBorder(border)
 	if not border then return end
-	local c = cfFramesDB[V.DarkModeColor]
-	border:SetBackdropBorderColor(c, c, c, 1)
-	--border:SetBackdropBorderColor(1, 0, 0, 1)
+	border:SetBackdropBorderColor(PRIMARY, PRIMARY, PRIMARY, 1)
 	border:Show()
 end
 
@@ -58,7 +55,6 @@ local function StylePlayerBuffs()
 
 	if AuraButton_Update then
 		hooksecurefunc("AuraButton_Update", function(buttonName, index)
-			if not cfFramesDB[M.DarkMode] or not cfFramesDB[M.DarkModeIconBuffs] then return end
 			if buttonName == "DebuffButton" then return end
 			local btn = _G[buttonName .. index]
 			if not btn then return end
@@ -76,7 +72,6 @@ local function StyleTargetBuffs()
 
 	if TargetFrame_UpdateAuras then
 		hooksecurefunc("TargetFrame_UpdateAuras", function()
-			if not cfFramesDB[M.DarkMode] or not cfFramesDB[M.DarkModeIconBuffs] then return end
 			for i = 1, MAX_TARGET_BUFFS do
 				local btn = _G["TargetFrameBuff" .. i]
 				if btn and btn:IsShown() then StyleIcon(btn) end
@@ -95,7 +90,6 @@ local function StylePetBuffs()
 	local f = CreateFrame("Frame")
 	f:RegisterUnitEvent("UNIT_AURA", "pet")
 	f:SetScript("OnEvent", function()
-		if not cfFramesDB[M.DarkMode] or not cfFramesDB[M.DarkModeIconBuffs] then return end
 		for i = 1, 16 do
 			local btn = _G["PetFrameBuff" .. i]
 			if not btn then break end
@@ -108,7 +102,6 @@ local function StyleCompactBuffs()
 	EventUtil.ContinueOnAddOnLoaded("Blizzard_UnitFrame", function()
 		if CompactUnitFrame_UtilSetBuff then
 			hooksecurefunc("CompactUnitFrame_UtilSetBuff", function(buffFrame)
-				if not cfFramesDB[M.DarkMode] or not cfFramesDB[M.DarkModeIconBuffs] then return end
 				StyleIcon(buffFrame)
 			end)
 		end
@@ -140,26 +133,11 @@ local function StyleActionBars()
 	if MainMenuBarBackpackButton then StyleIcon(MainMenuBarBackpackButton) end
 end
 
--- Enable / Disable
-
-function cff.EnableDarkModeIcons()
-	if not cfFramesDB[M.DarkMode] then return end
-	if cfFramesDB[M.DarkModeIconBuffs] then
-		StylePlayerBuffs()
-		StyleTargetBuffs()
-		StylePetBuffs()
-		StyleCompactBuffs()
-	end
-	if cfFramesDB[M.DarkModeIconActionBars] then
-		StyleActionBars()
-	end
-end
-
-function cff.DisableDarkModeIcons()
-	for _, border in ipairs(borders) do
-		border:Hide()
-		local icon = GetIcon(border:GetParent())
-		if icon then icon:SetTexCoord(0, 1, 0, 1) end
-		border:GetParent().cffZoom = nil
-	end
+function addon.SetupDarkModeIcons()
+	if not cfFramesDB.DarkMode then return end
+	StylePlayerBuffs()
+	StyleTargetBuffs()
+	StylePetBuffs()
+	StyleCompactBuffs()
+	StyleActionBars()
 end

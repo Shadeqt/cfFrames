@@ -1,4 +1,4 @@
-local M = cff.MODULES
+local _, addon = ...
 local hooked = false
 
 local RARE_ELITE_ICON = "Interface\\Tooltips\\RareEliteNameplateIcon"
@@ -6,16 +6,16 @@ local ELITE_ICON      = "Interface\\Tooltips\\EliteNameplateIcon"
 
 local function UpdateClassification(nameplate, unit)
 	if not nameplate.cfClassIcon then
-		local holder = CreateFrame("Frame", nil, nameplate.UnitFrame.healthBar)
-		local icon = holder:CreateTexture(nil, "OVERLAY", nil, 7)
+		local healthBar = nameplate.UnitFrame.healthBar
+		local icon = healthBar:CreateTexture(nil, "OVERLAY", nil, 7)
 		icon:SetSize(64, 32)
-		icon:SetPoint("LEFT", nameplate.UnitFrame.healthBar, "RIGHT", -6, -3)
+		icon:SetPoint("LEFT", healthBar, "RIGHT", -6, -3)
 		nameplate.cfClassIcon = icon
 	end
 
-	local c = UnitClassification(unit)
-	local isElite = c == "worldboss" or c == "elite" or c == "rareelite"
-	local isRare = c == "rare" or c == "rareelite"
+	local classification = UnitClassification(unit)
+	local isElite = classification == "worldboss" or classification == "elite" or classification == "rareelite"
+	local isRare = classification == "rare" or classification == "rareelite"
 
 	if isElite or isRare then
 		nameplate.cfClassIcon:SetTexture(isRare and RARE_ELITE_ICON or ELITE_ICON)
@@ -31,8 +31,8 @@ local function HideClassification(nameplate)
 	end
 end
 
-function cff.EnableNameplateClassification()
-	if not cfFramesDB[M.NameplateClassification] then return end
+function addon.SetupNameplateClassification()
+	if not cfFramesDB.NameplateClassification then return end
 
 	for _, plate in ipairs(C_NamePlate.GetNamePlates()) do
 		local unit = plate.namePlateUnitToken
@@ -42,11 +42,11 @@ function cff.EnableNameplateClassification()
 	if hooked then return end
 	hooked = true
 
+	-- Installed only when enabled; off is reload-gated, so no in-handler enabled check is needed.
 	local frame = CreateFrame("Frame")
 	frame:RegisterEvent("NAME_PLATE_UNIT_ADDED")
 	frame:RegisterEvent("NAME_PLATE_UNIT_REMOVED")
 	frame:SetScript("OnEvent", function(_, event, unit)
-		if not cfFramesDB[M.NameplateClassification] then return end
 		local plate = C_NamePlate.GetNamePlateForUnit(unit)
 		if not plate then return end
 		if event == "NAME_PLATE_UNIT_ADDED" then
@@ -55,10 +55,4 @@ function cff.EnableNameplateClassification()
 			HideClassification(plate)
 		end
 	end)
-end
-
-function cff.DisableNameplateClassification()
-	for _, plate in ipairs(C_NamePlate.GetNamePlates()) do
-		HideClassification(plate)
-	end
 end

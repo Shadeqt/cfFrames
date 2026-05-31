@@ -1,67 +1,48 @@
-local M = cff.MODULES
-local V = cff.VALUES
-local originalState = {}
+local _, addon = ...
+
+-- Hardcoded darkness (the old DarkModeColor / DarkModeColorSecondary sliders, locked).
+local PRIMARY = 0.25    -- main frames, borders, action bars, chat, nameplate borders
+local SECONDARY = 0.75  -- small borderless elements (exhaustion, scroll/micro/keyring/zoom, clock)
+
 local compactHooked = false
 local nameplateHooked = false
 local ldbIconHooked = false
 local lodFrame = nil
 
 local function ApplyDark(texture, color, desaturate, alpha)
-	local c = color or cfFramesDB[V.DarkModeColor]
+	local c = color or PRIMARY
 	local d = desaturate ~= false
 	local _, _, _, a = texture:GetVertexColor()
-	texture:SetVertexColor(c, c, c, alpha or a, cff.SENTINEL)
+	texture:SetVertexColor(c, c, c, alpha or a, addon.SENTINEL)
 	texture:SetDesaturated(d)
 end
 
-function cff.SaveAndDarken(texture, color, desaturate, alpha)
-	if not cfFramesDB[M.DarkMode] then return end
+-- Off is reload-gated, so no save-original/restore path is kept. Darkening sets an absolute color,
+-- so it is idempotent and safe to re-run from the SetVertexColor hooks.
+local function Darken(texture, color, desaturate, alpha)
 	if not texture then return end
 	if not texture:IsObjectType("Texture") then return end
-
-	if not originalState[texture] then
-		local r, g, b, a = texture:GetVertexColor()
-		local d = texture:IsDesaturated()
-		originalState[texture] = { r = r, g = g, b = b, a = a, d = d }
-	end
-
 	ApplyDark(texture, color, desaturate, alpha)
 end
 
-local function SaveAndDarkenRegions(frame, color, desaturate, alpha)
+local function DarkenRegions(frame, color, desaturate, alpha)
 	if not frame then return end
 	for _, region in pairs({ frame:GetRegions() }) do
-		cff.SaveAndDarken(region, color, desaturate, alpha)
+		Darken(region, color, desaturate, alpha)
 	end
 end
 
-local function SaveAndDarkenHook(texture, dbKey)
+-- Darken now, then re-darken whenever Blizzard repaints the texture. The hook skips its own writes
+-- (SENTINEL) so DarkMode and ActionBarAlphaFix don't ping-pong on the shared ActionButton textures.
+local function DarkenHook(texture)
 	if not texture then return end
-	cff.SaveAndDarken(texture)
+	Darken(texture)
 	if texture.cffHooked then return end
 	texture.cffHooked = true
 	hooksecurefunc(texture, "SetVertexColor", function(self, _, _, _, _, flag)
-		if flag == cff.SENTINEL then return end
-		if not cfFramesDB[M.DarkMode] then return end
-		if dbKey and not cfFramesDB[dbKey] then return end
+		if flag == addon.SENTINEL then return end
 		ApplyDark(self)
 	end)
-end
-
-local function IsMainBarTexture(texture)
-	local name = texture:GetName()
-	return name and name:match("^ActionButton%d+NormalTexture$")
-end
-
-local function Restore(texture)
-	if not texture then return end
-	local s = originalState[texture]
-	if not s then return end
-
-	local a = IsMainBarTexture(texture) and 0.5 or s.a
-	texture:SetVertexColor(s.r, s.g, s.b, a, cff.SENTINEL)
-	texture:SetDesaturated(s.d)
-	originalState[texture] = nil
 end
 
 local function DarkenCompactMember(member)
@@ -69,25 +50,25 @@ local function DarkenCompactMember(member)
 	for _, region in pairs({ member:GetRegions() }) do
 		local name = region:GetName()
 		if name and (name:find("Border") or name:find("Divider") or name:find("Background")) then
-			cff.SaveAndDarken(region)
+			Darken(region)
 		end
 	end
-	cff.SaveAndDarken(member.horizDivider)
-	cff.SaveAndDarken(member.horizTopBorder)
-	cff.SaveAndDarken(member.horizBottomBorder)
-	cff.SaveAndDarken(member.vertLeftBorder)
-	cff.SaveAndDarken(member.vertRightBorder)
+	Darken(member.horizDivider)
+	Darken(member.horizTopBorder)
+	Darken(member.horizBottomBorder)
+	Darken(member.vertLeftBorder)
+	Darken(member.vertRightBorder)
 end
 
 local function DarkenCompactFrames()
-	SaveAndDarkenRegions(CompactPartyFrameBorderFrame)
-	SaveAndDarkenRegions(CompactRaidFrameContainerBorderFrame)
+	DarkenRegions(CompactPartyFrameBorderFrame)
+	DarkenRegions(CompactRaidFrameContainerBorderFrame)
 	for m = 1, MEMBERS_PER_RAID_GROUP do
 		DarkenCompactMember(_G["CompactPartyFrameMember" .. m])
 		DarkenCompactMember(_G["CompactRaidFrame" .. m])
 	end
 	for g = 1, NUM_RAID_GROUPS do
-		SaveAndDarkenRegions(_G["CompactRaidGroup" .. g .. "BorderFrame"])
+		DarkenRegions(_G["CompactRaidGroup" .. g .. "BorderFrame"])
 		for m = 1, MEMBERS_PER_RAID_GROUP do
 			DarkenCompactMember(_G["CompactRaidGroup" .. g .. "Member" .. m])
 		end
@@ -95,12 +76,12 @@ local function DarkenCompactFrames()
 end
 
 local function DarkenFrames()
-	cff.SaveAndDarken(PlayerFrameTexture)
-	cff.SaveAndDarken(TargetFrameTextureFrameTexture)
-	cff.SaveAndDarken(TargetFrameToTTextureFrameTexture)
-	cff.SaveAndDarken(PetFrameTexture)
+	Darken(PlayerFrameTexture)
+	Darken(TargetFrameTextureFrameTexture)
+	Darken(TargetFrameToTTextureFrameTexture)
+	Darken(PetFrameTexture)
 	for i = 1, MAX_PARTY_MEMBERS do
-		cff.SaveAndDarken(_G["PartyMemberFrame" .. i .. "Texture"])
+		Darken(_G["PartyMemberFrame" .. i .. "Texture"])
 	end
 
 	-- Compact party/raid frames (LoD)
@@ -114,63 +95,61 @@ local function DarkenFrames()
 end
 
 local function DarkenActionBars()
-	local sc = cfFramesDB[V.DarkModeColorSecondary]
 	for i = 0, 3 do
-		cff.SaveAndDarken(_G["MainMenuXPBarTexture" .. i])
-		cff.SaveAndDarken(_G["MainMenuBarTexture" .. i])
-		cff.SaveAndDarken(_G["MainMenuMaxLevelBar" .. i])
+		Darken(_G["MainMenuXPBarTexture" .. i])
+		Darken(_G["MainMenuBarTexture" .. i])
+		Darken(_G["MainMenuMaxLevelBar" .. i])
 		if ReputationWatchBar and ReputationWatchBar.StatusBar then
-			cff.SaveAndDarken(ReputationWatchBar.StatusBar["WatchBarTexture" .. i])
-			cff.SaveAndDarken(ReputationWatchBar.StatusBar["XPBarTexture" .. i])
+			Darken(ReputationWatchBar.StatusBar["WatchBarTexture" .. i])
+			Darken(ReputationWatchBar.StatusBar["XPBarTexture" .. i])
 		end
 	end
 
-	cff.SaveAndDarken(MainMenuBarLeftEndCap)
-	cff.SaveAndDarken(MainMenuBarRightEndCap)
-	cff.SaveAndDarken(ExhaustionTickNormal, sc, false)
-	cff.SaveAndDarken(ExhaustionTickHighlight, sc, false)
+	Darken(MainMenuBarLeftEndCap)
+	Darken(MainMenuBarRightEndCap)
+	Darken(ExhaustionTickNormal, SECONDARY, false)
+	Darken(ExhaustionTickHighlight, SECONDARY, false)
 
 	local barNames = { "ActionButton", "MultiBarBottomLeftButton", "MultiBarBottomRightButton", "MultiBarRightButton", "MultiBarLeftButton" }
 	for _, barName in ipairs(barNames) do
 		for i = 1, NUM_ACTIONBAR_BUTTONS do
 			local btn = _G[barName .. i]
 			if btn then
-				SaveAndDarkenHook(btn:GetNormalTexture(), M.DarkModeActionBars)
+				DarkenHook(btn:GetNormalTexture())
 			end
 		end
 	end
 
-	cff.SaveAndDarken(SlidingActionBarTexture0)
-	cff.SaveAndDarken(SlidingActionBarTexture1)
+	Darken(SlidingActionBarTexture0)
+	Darken(SlidingActionBarTexture1)
 
 	for i = 1, NUM_PET_ACTION_SLOTS do
 		local btn = _G["PetActionButton" .. i]
 		if btn then
-			cff.SaveAndDarken(btn:GetNormalTexture())
-			--cff.SaveAndDarken(_G["PetActionButton" .. i .. "NormalTexture2"])
+			Darken(btn:GetNormalTexture())
 		end
 	end
 
 	for i = 1, NUM_STANCE_SLOTS do
 		local btn = _G["StanceButton" .. i]
-		if btn then cff.SaveAndDarken(btn:GetNormalTexture()) end
+		if btn then Darken(btn:GetNormalTexture()) end
 	end
 
 	for i = 0, 3 do
-		SaveAndDarkenHook(_G["CharacterBag" .. i .. "SlotNormalTexture"], M.DarkModeActionBars)
+		DarkenHook(_G["CharacterBag" .. i .. "SlotNormalTexture"])
 	end
-	SaveAndDarkenHook(MainMenuBarBackpackButtonNormalTexture, M.DarkModeActionBars)
+	DarkenHook(MainMenuBarBackpackButtonNormalTexture)
 
-	SaveAndDarkenRegions(ActionBarUpButton, sc, false)
-	SaveAndDarkenRegions(ActionBarDownButton, sc, false)
+	DarkenRegions(ActionBarUpButton, SECONDARY, false)
+	DarkenRegions(ActionBarDownButton, SECONDARY, false)
 
 	if MICRO_BUTTONS then
 		for _, btnName in ipairs(MICRO_BUTTONS) do
-			SaveAndDarkenRegions(_G[btnName], sc, false)
+			DarkenRegions(_G[btnName], SECONDARY, false)
 		end
 	end
 
-	SaveAndDarkenRegions(KeyRingButton, sc, false)
+	DarkenRegions(KeyRingButton, SECONDARY, false)
 end
 
 local function DarkenLibDBIcon()
@@ -179,36 +158,34 @@ local function DarkenLibDBIcon()
 	for _, name in ipairs(LDBIcon:GetButtonList()) do
 		local button = LDBIcon:GetMinimapButton(name)
 		if button and button.border then
-			cff.SaveAndDarken(button.border)
+			Darken(button.border)
 		end
 	end
 	if not ldbIconHooked then
 		ldbIconHooked = true
-		LDBIcon.RegisterCallback(cff, "LibDBIcon_IconCreated", function(_, button)
-			if not cfFramesDB[M.DarkMode] then return end
-			if button.border then cff.SaveAndDarken(button.border) end
+		LDBIcon.RegisterCallback(addon, "LibDBIcon_IconCreated", function(_, button)
+			if button.border then Darken(button.border) end
 		end)
 	end
 end
 
 local function DarkenMinimap()
-	local sc = cfFramesDB[V.DarkModeColorSecondary]
-	cff.SaveAndDarken(MinimapBorder)
-	cff.SaveAndDarken(MinimapBorderTop)
-	cff.SaveAndDarken(MiniMapTrackingBorder)
-	SaveAndDarkenRegions(MinimapZoomIn, sc, false)
-	SaveAndDarkenRegions(MinimapZoomOut, sc, false)
-	if GameTimeFrame then SaveAndDarkenRegions(GameTimeFrame, sc, false) end
-	if LFGMinimapFrameBorder then cff.SaveAndDarken(LFGMinimapFrameBorder) end
-	if TimeManagerClockButton then SaveAndDarkenRegions(TimeManagerClockButton) end
+	Darken(MinimapBorder)
+	Darken(MinimapBorderTop)
+	Darken(MiniMapTrackingBorder)
+	DarkenRegions(MinimapZoomIn, SECONDARY, false)
+	DarkenRegions(MinimapZoomOut, SECONDARY, false)
+	if GameTimeFrame then DarkenRegions(GameTimeFrame, SECONDARY, false) end
+	if LFGMinimapFrameBorder then Darken(LFGMinimapFrameBorder) end
+	if TimeManagerClockButton then DarkenRegions(TimeManagerClockButton) end
 	DarkenLibDBIcon()
 end
 
-local function DarkenMinimapAddons(_, _, addon)
-	if addon == "Blizzard_GroupFinder_VanillaStyle" then
-		cff.SaveAndDarken(LFGMinimapFrameBorder)
-	elseif addon == "Blizzard_TimeManager" then
-		SaveAndDarkenRegions(TimeManagerClockButton)
+local function DarkenMinimapAddons(_, _, loadedAddon)
+	if loadedAddon == "Blizzard_GroupFinder_VanillaStyle" then
+		Darken(LFGMinimapFrameBorder)
+	elseif loadedAddon == "Blizzard_TimeManager" then
+		DarkenRegions(TimeManagerClockButton)
 	end
 	DarkenLibDBIcon()
 end
@@ -216,7 +193,7 @@ end
 local function DarkenChat()
 	for _, region in pairs({ ChatFrame1EditBox:GetRegions() }) do
 		if region:GetName() then
-			cff.SaveAndDarken(region)
+			Darken(region)
 		end
 	end
 
@@ -226,7 +203,7 @@ local function DarkenChat()
 			for _, region in pairs({ tab:GetRegions() }) do
 				local name = region:GetName()
 				if name and not name:match("Highlight") and not name:match("Glow") then
-					cff.SaveAndDarken(region)
+					Darken(region)
 				end
 			end
 		end
@@ -241,12 +218,7 @@ local function DarkenNameplate(_, unit)
 	if not border then return end
 	for _, region in pairs({ border:GetRegions() }) do
 		if region:IsObjectType("Texture") then
-			if not region.cffHooked then
-				region.cffHooked = true
-				SaveAndDarkenHook(region, M.DarkModeNameplates)
-			else
-				cff.SaveAndDarken(region)
-			end
+			DarkenHook(region)
 		end
 	end
 
@@ -269,28 +241,19 @@ local function DarkenNameplates()
 	end
 end
 
-function cff.EnableDarkMode()
-	if not cfFramesDB[M.DarkMode] then return end
-	if cfFramesDB[M.DarkModeFrames] then DarkenFrames() end
-	if cfFramesDB[M.DarkModeActionBars] then DarkenActionBars() end
-	if cfFramesDB[M.DarkModeMinimap] then
-		DarkenMinimap()
-		if not lodFrame then
-			lodFrame = CreateFrame("Frame")
-			lodFrame:RegisterEvent("ADDON_LOADED")
-			lodFrame:SetScript("OnEvent", function(...)
-				if not cfFramesDB[M.DarkMode] or not cfFramesDB[M.DarkModeMinimap] then return end
-				DarkenMinimapAddons(...)
-			end)
-		end
-	end
-	if cfFramesDB[M.DarkModeChat] then DarkenChat() end
-	if cfFramesDB[M.DarkModeNameplates] then DarkenNameplates() end
-	cff.RunCallbacks(M.DarkMode)
-end
+function addon.SetupDarkMode()
+	if not cfFramesDB.DarkMode then return end
 
-function cff.DisableDarkMode()
-	for texture in pairs(originalState) do
-		Restore(texture)
+	DarkenFrames()
+	DarkenActionBars()
+	DarkenMinimap()
+	DarkenChat()
+	DarkenNameplates()
+
+	-- Catch minimap-button addons that load on demand after us.
+	if not lodFrame then
+		lodFrame = CreateFrame("Frame")
+		lodFrame:RegisterEvent("ADDON_LOADED")
+		lodFrame:SetScript("OnEvent", DarkenMinimapAddons)
 	end
 end
