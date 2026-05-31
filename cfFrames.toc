@@ -7,6 +7,11 @@
 
 Init.lua
 ClassColors\Core.lua
+ClassColors\ChatColors.lua
+ClassColors\ClassNames.lua
+ClassColors\NameColors.lua
+ClassColors\LevelColors.lua
+ClassColors\Healthbars.lua
 StatusBarTexture.lua
 BiggerHealthbar.lua
 NameplateClassification.lua

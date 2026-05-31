@@ -17,3 +17,14 @@ end
 for token, name in pairs(LOCALIZED_CLASS_NAMES_FEMALE or {}) do
 	addon.classNameToToken[name] = token
 end
+
+-- One gated entry for all 5 class-color sub-features (the single ClassColors master toggle).
+-- This is the only enable check; each SetupX below installs its hooks unguarded.
+function addon.SetupClassColors()
+	if not cfFramesDB.ClassColors then return end
+	addon.SetupChatColors()
+	addon.SetupClassNames()
+	addon.SetupNameColors()
+	addon.SetupLevelColors()
+	addon.SetupHealthbars()
+end
