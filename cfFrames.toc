@@ -17,7 +17,6 @@ Fixes\PetActionBarCheckedFix.lua
 Fixes\UnitFrameResetFix.lua
 StatusBarTexture.lua
 BiggerHealthbar.lua
-HealthbarColor.lua
 Frames\PlayerFrame.lua
 Frames\PetFrame.lua
 Frames\TargetFrame.lua

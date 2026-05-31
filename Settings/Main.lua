@@ -32,21 +32,6 @@ function cff.SetupSettings()
 		end
 	end)
 
-	cff.Header(cat, "Class Health Colors")
-
-	cff.Checkbox(cat, M.HealthbarColor, "Unit Frames", "Color player, target, party health bars by class", function()
-		if cfFramesDB[M.HealthbarColor] then
-			cff.EnableHealthbarColor()
-		else
-			cff.DisableHealthbarColor()
-		end
-	end)
-
-	cff.Checkbox(cat, M.HealthbarColorRaid, "Raid Frames", "Color compact raid frame health bars by class", function()
-		cff.SyncHealthbarCVars()
-	end)
-
-
 	-- Subcategories
 	cff.darkModeCategory = Settings.RegisterVerticalLayoutSubcategory(cat, "Dark Mode")
 	local fixes = Settings.RegisterVerticalLayoutSubcategory(cat, "Fixes")

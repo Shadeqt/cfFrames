@@ -1,25 +1,28 @@
 local d = cff.DEFAULTS
 
 function cff.Checkbox(cat, key, name, tooltip, callback)
-	local s = Settings.RegisterAddOnSetting(cat, key, key, cfFramesDB, Settings.VarType.Boolean, name, d[key])
+	local var = "cfFrames_" .. key
+	local s = Settings.RegisterAddOnSetting(cat, var, key, cfFramesDB, Settings.VarType.Boolean, name, d[key])
 	local cb = Settings.CreateCheckbox(cat, s, tooltip)
-	if callback then Settings.SetOnValueChangedCallback(key, callback) end
+	if callback then Settings.SetOnValueChangedCallback(var, callback) end
 	return cb
 end
 
 function cff.Slider(cat, key, name, tooltip, min, max, step, callback)
-	local s = Settings.RegisterAddOnSetting(cat, key, key, cfFramesDB, Settings.VarType.Number, name, d[key])
+	local var = "cfFrames_" .. key
+	local s = Settings.RegisterAddOnSetting(cat, var, key, cfFramesDB, Settings.VarType.Number, name, d[key])
 	local opts = Settings.CreateSliderOptions(min, max, step)
 	opts:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right, function(value) return format("%.2f", value) end)
 	local slider = Settings.CreateSlider(cat, s, opts, tooltip)
-	if callback then Settings.SetOnValueChangedCallback(key, callback) end
+	if callback then Settings.SetOnValueChangedCallback(var, callback) end
 	return slider
 end
 
 function cff.Dropdown(cat, key, name, tooltip, options, callback)
-	local s = Settings.RegisterAddOnSetting(cat, key, key, cfFramesDB, Settings.VarType.String, name, d[key])
+	local var = "cfFrames_" .. key
+	local s = Settings.RegisterAddOnSetting(cat, var, key, cfFramesDB, Settings.VarType.String, name, d[key])
 	local dd = Settings.CreateDropdown(cat, s, options, tooltip)
-	if callback then Settings.SetOnValueChangedCallback(key, callback) end
+	if callback then Settings.SetOnValueChangedCallback(var, callback) end
 	return dd
 end
 

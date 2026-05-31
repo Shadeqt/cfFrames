@@ -35,12 +35,4 @@ function cff.SetupNameplateSettings()
 	cff.CVarCheckbox(cat, "nameplateShowFriendlyTotems", "Show Friendly Totems", "Show friendly totem nameplates")
 	cff.CVarCheckbox(cat, "nameplateShowFriendlyMinions", "Show Friendly Minions", "Show friendly minion nameplates")
 	cff.CVarCheckbox(cat, "nameplateShowFriendlyNPCs", "Show Friendly NPCs", "Always show friendly NPC nameplates")
-
-	cff.Header(cat, "Class Colors")
-	cff.Checkbox(cat, M.HealthbarColorNameplateEnemy, "Enemy Nameplates", "Color enemy nameplate health bars by class", function()
-		cff.SyncHealthbarCVars()
-	end)
-	cff.Checkbox(cat, M.HealthbarColorNameplateFriendly, "Friendly Nameplates", "Color friendly nameplate health bars by class", function()
-		cff.SyncHealthbarCVars()
-	end)
 end
