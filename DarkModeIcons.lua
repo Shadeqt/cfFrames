@@ -133,6 +133,13 @@ local function StyleActionBars()
 	if MainMenuBarBackpackButton then StyleIcon(MainMenuBarBackpackButton) end
 end
 
+-- Target castbar icon (zoom + dark backdrop, like every other dark-mode icon). The player castbar
+-- icon is cfCastbars' job -- it resizes that icon, so it owns its styling. The pet/party/nameplate
+-- castbar icons are cfCastbars' own frames. Both follow by observing CastingBarFrame.Border's tint.
+local function StyleCastbarIcons()
+	if TargetFrameSpellBar then StyleIcon(TargetFrameSpellBar) end
+end
+
 function addon.SetupDarkModeIcons()
 	if not cfFramesDB.DarkMode then return end
 	StylePlayerBuffs()
@@ -140,4 +147,5 @@ function addon.SetupDarkModeIcons()
 	StylePetBuffs()
 	StyleCompactBuffs()
 	StyleActionBars()
+	StyleCastbarIcons()
 end

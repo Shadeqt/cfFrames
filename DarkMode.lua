@@ -94,6 +94,19 @@ local function DarkenFrames()
 	end
 end
 
+-- Native castbar borders -- never darkened before. CastingBarFrame.Border doubles as the surface
+-- cfCastbars observes (reads its vertex color) to follow dark mode on its own pet/party/nameplate
+-- bars and the player castbar icon. DarkenHook re-applies if Blizzard repaints, so the observed
+-- value stays stable. BorderShield (non-interruptible casts) is darkened too; nil-safe.
+local function DarkenCastbars()
+	DarkenHook(CastingBarFrame.Border)
+	DarkenHook(CastingBarFrame.BorderShield)
+	if TargetFrameSpellBar then
+		DarkenHook(TargetFrameSpellBar.Border)
+		DarkenHook(TargetFrameSpellBar.BorderShield)
+	end
+end
+
 local function DarkenActionBars()
 	for i = 0, 3 do
 		Darken(_G["MainMenuXPBarTexture" .. i])
@@ -245,6 +258,7 @@ function addon.SetupDarkMode()
 	if not cfFramesDB.DarkMode then return end
 
 	DarkenFrames()
+	DarkenCastbars()
 	DarkenActionBars()
 	DarkenMinimap()
 	DarkenChat()
