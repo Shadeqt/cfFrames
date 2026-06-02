@@ -15,6 +15,7 @@ ClassColors\Healthbars.lua
 StatusBarTexture.lua
 BiggerHealthbar.lua
 NameplateClassification.lua
+HideNative.lua
 DarkMode.lua
 DarkModeIcons.lua
 Fixes\ActionBarAlphaFix.lua
@@ -25,3 +26,4 @@ Fixes\NameplateLevelPositionFix.lua
 Fixes\ActionBarIconPositionFix.lua
 Fixes\PetActionBarCheckedFix.lua
 Fixes\UnitFrameResetFix.lua
+Settings\Settings.lua

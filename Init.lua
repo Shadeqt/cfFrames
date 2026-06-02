@@ -16,6 +16,7 @@ addon.defaults = {
 	BiggerHealthbar           = true,
 	DarkMode                  = true,
 	NameplateClassification   = true,
+	HideNative                = true,
 	-- Class Colors (one master for the 5 absorbed cfClassColors features)
 	ClassColors               = true,
 	-- Fixes
@@ -29,7 +30,7 @@ addon.defaults = {
 	UnitFrameResetFix         = true,
 	-- Stored value: chosen status-bar texture (StatusBar on/off is encoded here;
 	-- the GUI's "Blizzard Default" dropdown entry = feature off).
-	StatusBarTexture = "Interface\\AddOns\\cfFrames\\Media\\StatusBar\\BlizzardRetailBarCrop2",
+	StatusBarTexture = "Interface\\AddOns\\cfFrames\\Media\\StatusBar\\smooth",
 }
 
 function addon.InitDB()
@@ -59,6 +60,7 @@ EventUtil.ContinueOnAddOnLoaded(addonName, function()
 		addon.SetupStatusBar()
 		addon.SetupBiggerHealthbar()
 		addon.SetupNameplateClassification()
+		addon.SetupHideNative()
 		addon.SetupDarkMode()
 		addon.SetupDarkModeIcons()
 		addon.SetupClassColors()

@@ -4,6 +4,9 @@ local _, addon = ...
 -- which is how the feature is turned off: selecting it repaints bars with Blizzard's own texture
 -- and skips the dynamic hooks.
 local BLIZZARD_DEFAULT = "Interface\\TargetingFrame\\UI-StatusBar"
+-- Exposed so Settings.lua's "Blizzard Default" dropdown entry stores the exact same path
+-- IsEnabled() compares against. They must match or off-detection silently breaks.
+addon.BLIZZARD_DEFAULT = BLIZZARD_DEFAULT
 local hooked = false
 
 local function GetTexture()
