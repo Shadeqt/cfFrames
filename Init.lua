@@ -16,9 +16,12 @@ addon.defaults = {
 	BiggerHealthbar           = true,
 	DarkMode                  = true,
 	NameplateClassification   = true,
-	HideNative                = true,
 	-- Class Colors (one master for the 5 absorbed cfClassColors features)
 	ClassColors               = true,
+	-- Hide (one bool per native element; was the single HideNative master, now split)
+	HidePortraitGlow          = true,
+	HidePetCombatFlash        = true,
+	HideGroupIndicator        = true,
 	-- Fixes
 	ActionBarAlphaFix         = true,
 	ToTPortraitFix            = true,

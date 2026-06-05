@@ -15,7 +15,10 @@ ClassColors\Healthbars.lua
 StatusBarTexture.lua
 BiggerHealthbar.lua
 NameplateClassification.lua
-HideNative.lua
+Hide\Core.lua
+Hide\PortraitGlow.lua
+Hide\PetCombatFlash.lua
+Hide\GroupIndicator.lua
 DarkMode.lua
 DarkModeIcons.lua
 Fixes\ActionBarAlphaFix.lua

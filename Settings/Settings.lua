@@ -62,7 +62,6 @@ EventUtil.ContinueOnAddOnLoaded("cfFrames", function()
 	Checkbox("BiggerHealthbar", "Bigger Health Bars", "Enlarge player and target health bars")
 	Checkbox("DarkMode", "Dark Mode", "Darken Blizzard frame and icon textures")
 	Checkbox("NameplateClassification", "Nameplate Classification", "Show elite and rare icons on nameplates")
-	Checkbox("HideNative", "Hide Native Elements", "Hides native Blizzard UI elements:\n- Player portrait glow (combat and rested)\n- Pet portrait combat flash")
 
 	-- Class Colors
 	Header("Class Colors")
@@ -70,6 +69,12 @@ EventUtil.ContinueOnAddOnLoaded("cfFrames", function()
 	CVarCheckbox("raidFramesDisplayClassColor", "Raid Frame Class Colors", "Color compact raid frames by class")
 	CVarCheckbox("ShowClassColorInNameplate", "Enemy Nameplate Class Colors", "Color enemy player nameplates by class")
 	CVarCheckbox("ShowClassColorInFriendlyNameplate", "Friendly Nameplate Class Colors", "Color friendly player nameplates by class")
+
+	-- Hide
+	Header("Hide")
+	Checkbox("HidePortraitGlow", "Player Portrait Glow", "Hide the pulsing combat/rested glow on the player portrait")
+	Checkbox("HidePetCombatFlash", "Pet Combat Flash", "Hide the pet portrait combat flash and attack-mode texture")
+	Checkbox("HideGroupIndicator", "Player Group Indicator", "Hide the group/role badge above the player frame in a party")
 
 	-- Fixes
 	Header("Fixes")

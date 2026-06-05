@@ -7,22 +7,29 @@ local STATUS  = MEDIA .. "UI-Player-Status"
 
 local _, addon = ...
 local hooked = false
+local guarding = false  -- re-entrancy guard: skip the SetPoint we issue from KeepOffset's own hook
 
 -- Off is reload-gated: Blizzard's untouched defaults return on /reload, so no Disable/restore path
 -- (or module save-state table) is kept.
 --
--- OffsetY must re-assert (original base point + dy), not (current point + dy): the target
--- classification hook fires on every new target, so computing from the current point would compound
--- and the bar would creep upward each time. The base point is cached on the frame, keeping it
--- idempotent without a module-level table.
+-- Nudge a region's Y by dy, self-correcting against Blizzard's repeated layout resets. We can't
+-- cache a "base" once and trust it forever: if that capture ever lands on a non-default Y (a
+-- transient layout pass, a different art context, the frame having been moved) the offset is wrong
+-- for good. Instead we remember the exact Y we last set; on each call, if the region is no longer
+-- there, Blizzard re-laid it out, so we re-baseline from its current (default) Y; if it's still
+-- where we left it, we keep the baseline. We always end at baseline+dy -- never compounding (the
+-- old upward creep), never stuck on a stale base. Re-read the anchor each time too, in case
+-- Blizzard re-anchors to a different relative point.
 local function OffsetY(frame, dy)
 	if not frame then return end
-	if not frame.cffBasePoint then
-		frame.cffBasePoint = { frame:GetPoint() }
+	local point, relTo, relPoint, x, y = frame:GetPoint()
+	if not y then return end
+	if not frame.cffAppliedY or math.abs(frame.cffAppliedY - y) > 0.5 then
+		frame.cffBaseY = y  -- Blizzard's current default; re-baseline off it
 	end
-	local p = frame.cffBasePoint
 	frame:ClearAllPoints()
-	frame:SetPoint(p[1], p[2], p[3], p[4], (p[5] or 0) + dy)
+	frame:SetPoint(point, relTo, relPoint, x, frame.cffBaseY + dy)
+	frame.cffAppliedY = frame.cffBaseY + dy
 end
 
 local function SetBarHeight(frame, height)
@@ -33,14 +40,35 @@ local function SetFrameTexture(frame, texture)
 	if frame then frame:SetTexture(texture) end
 end
 
+-- Apply OffsetY now and keep it applied. Blizzard re-anchors the player health bar / name on a
+-- deferred layout pass after loading screens -- it lands AFTER any event hook (PlayerFrame_OnEvent
+-- etc.) fires, so re-applying from an event loses the race and the offset reverts to default while
+-- our texture/height stay (the "half-styled" result). Instead we hook the region's own SetPoint:
+-- the instant anything (Blizzard's deferred layout, a frame mover) repositions it, we re-assert the
+-- offset, making our write the last one -- no matter which function does it or when. The guard
+-- skips the SetPoint we issue ourselves, so there's no recursion; OffsetY is self-correcting, so
+-- re-asserting from a reset default lands on default+dy without compounding.
+local function KeepOffset(frame, dy)
+	if not frame then return end
+	OffsetY(frame, dy)
+	if frame.cffKept then return end
+	frame.cffKept = true
+	hooksecurefunc(frame, "SetPoint", function()
+		if guarding then return end
+		guarding = true
+		OffsetY(frame, dy)
+		guarding = false
+	end)
+end
+
 local function SetPlayerFrame()
 	SetFrameTexture(PlayerFrameTexture, NORMAL)
 	SetBarHeight(PlayerFrameHealthBar, 27)
-	OffsetY(PlayerFrameHealthBar, 18)
-	OffsetY(PlayerName, 17)
-	OffsetY(PlayerFrameHealthBar.RightText, 10)
-	OffsetY(PlayerFrameHealthBar.LeftText, 10)
-	OffsetY(PlayerFrameHealthBar.TextString, 10)
+	KeepOffset(PlayerFrameHealthBar, 18)
+	KeepOffset(PlayerName, 17)
+	KeepOffset(PlayerFrameHealthBar.RightText, 10)
+	KeepOffset(PlayerFrameHealthBar.LeftText, 10)
+	KeepOffset(PlayerFrameHealthBar.TextString, 10)
 	SetFrameTexture(PlayerStatusTexture, STATUS)
 	SetBarHeight(PlayerStatusTexture, 69)
 end

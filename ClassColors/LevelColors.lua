@@ -48,6 +48,8 @@ function addon.SetupLevelColors()
 		end
 	end)
 
-	-- A target persists across /reload, so color its level immediately at setup.
+	-- If a target somehow already exists at setup, color its level now; normally there's
+	-- none (the target is cleared on reload/login), so this is a guarded no-op and the
+	-- CheckLevel hook above handles every target acquired afterward.
 	if UnitExists("target") then TargetFrame_CheckLevel() end
 end

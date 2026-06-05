@@ -19,7 +19,9 @@ local function ColorBar(bar, unit)
 	if r then bar:SetStatusBarColor(r, g, b) end
 end
 
--- A target/party persists across /reload, so color the visible bars immediately at setup.
+-- Color whatever bars are already present at setup. The player always exists, and party
+-- members persist across /reload, so those get colored now; target/tot are cleared on
+-- reload, so those checks are guarded no-ops until one is acquired (handled by hooks).
 local function ColorExistingBars()
 	if UnitExists("player") then ColorBar(PlayerFrameHealthBar, "player") end
 	if UnitExists("target") then ColorBar(TargetFrameHealthBar, "target") end

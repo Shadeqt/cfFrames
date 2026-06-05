@@ -65,6 +65,11 @@ local function DarkenCompactFrames()
 	DarkenRegions(CompactRaidFrameContainerBorderFrame)
 	for m = 1, MEMBERS_PER_RAID_GROUP do
 		DarkenCompactMember(_G["CompactPartyFrameMember" .. m])
+	end
+	-- The flat (unsorted) raid list uses CompactRaidFrame1..MAX_RAID_MEMBERS, not just one
+	-- group's worth -- looping only to MEMBERS_PER_RAID_GROUP left frames 6..40 (and the
+	-- borders between them) un-darkened.
+	for m = 1, MAX_RAID_MEMBERS do
 		DarkenCompactMember(_G["CompactRaidFrame" .. m])
 	end
 	for g = 1, NUM_RAID_GROUPS do
