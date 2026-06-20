@@ -6,6 +6,27 @@ local function ColorByLevel(fontString, level)
 	fontString:SetTextColor(c.r, c.g, c.b)
 end
 
+-- Friends tooltip: difficulty-color the level number Blizzard prints as "<LEVEL> <n>". Covers WoW
+-- friends and the same-region BNet tooltip (both show that bare form). The cross-region BNet name
+-- line is decorated by ClassNames, which inserts its own already-colored level, so its number never
+-- appears as a bare "Level <n>" and is left alone. Idempotent: once colored, a color escape sits
+-- between "Level " and the digits, so the pattern no longer matches on the next OnUpdate frame.
+local levelWordPattern = "(" .. LEVEL:gsub("(%p)", "%%%1") .. " )(%d+)"
+local function ColorTooltipLevels()
+	if not FriendsTooltip:IsShown() then return end
+	for _, region in ipairs({ FriendsTooltip:GetRegions() }) do
+		if region.GetText then
+			local text = region:GetText()
+			if text and text:find(levelWordPattern) then
+				region:SetText((text:gsub(levelWordPattern, function(label, number)
+					local c = GetQuestDifficultyColor(tonumber(number))
+					return label .. CreateColor(c.r, c.g, c.b):WrapTextInColorCode(number)
+				end)))
+			end
+		end
+	end
+end
+
 function addon.SetupLevelColors()
 	-- Target frame
 	hooksecurefunc("TargetFrame_CheckLevel", function()
@@ -47,6 +68,12 @@ function addon.SetupLevelColors()
 			button.name:SetText(text)
 		end
 	end)
+
+	-- Friends tooltip level number (WoW friends + same-region BNet; cross-region is colored by
+	-- ClassNames). OnShow paints it; OnUpdate re-paints because Blizzard rebuilds the text each
+	-- frame for friends broadcasting a status.
+	FriendsTooltip:HookScript("OnShow", ColorTooltipLevels)
+	FriendsTooltip:HookScript("OnUpdate", ColorTooltipLevels)
 
 	-- If a target somehow already exists at setup, color its level now; normally there's
 	-- none (the target is cleared on reload/login), so this is a guarded no-op and the

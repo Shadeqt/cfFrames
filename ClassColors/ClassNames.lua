@@ -31,6 +31,84 @@ local function ColorByClass(fontString, class)
 	if c then fontString:SetTextColor(c.r, c.g, c.b) end
 end
 
+-- Battle.net friends carry no class *word* in their row/tooltip text, so ColorClassInText finds
+-- nothing to color. We resolve the friend's class directly and color the character-name substring,
+-- append the level (difficulty-colored, like LevelColors does for server friends), and -- in the
+-- tooltip -- add race+class and zone lines.
+
+-- Resolve (gameInfo, classColor, characterName) for a BNet friend, or nil unless they're online in a
+-- WoW client with a known class.
+local function ResolveBNetClass(friendIndex)
+	local accountInfo = C_BattleNet.GetFriendAccountInfo(friendIndex)
+	local gameInfo = accountInfo and accountInfo.gameAccountInfo
+	if not gameInfo or not gameInfo.isOnline or gameInfo.clientProgram ~= BNET_CLIENT_WOW then return end
+	local charName = gameInfo.characterName
+	local token = charName and classNameToToken[gameInfo.className or ""]
+	local color = token and RAID_CLASS_COLORS[token]
+	if not color then return end
+	return gameInfo, color, charName
+end
+
+-- Class-color the character-name substring of `fontString` and append ", Level XX" (number in
+-- quest-difficulty color). Idempotent: bails once the wrapped name is already present.
+local function ApplyNameAndLevel(fontString, gameInfo, color, charName)
+	local text = fontString:GetText()
+	if not text then return end
+	local wrapped = color:WrapTextInColorCode(charName)
+	if text:find(wrapped, 1, true) then return end -- already decorated
+	if not text:find(charName, 1, true) then return end
+	local replacement = wrapped
+	local level = gameInfo.characterLevel
+	if level and level > 0 then
+		local d = GetQuestDifficultyColor(level)
+		replacement = wrapped
+			.. GRAY_FONT_COLOR:WrapTextInColorCode(", " .. LEVEL .. " ")  -- grey ", Level " label
+			.. CreateColor(d.r, d.g, d.b):WrapTextInColorCode(tostring(level)) -- difficulty-colored number
+	end
+	fontString:SetText((text:gsub(charName, replacement, 1)))
+end
+
+-- Friend-row entry point (button.name = "Account (Character)").
+local function ColorBNetName(fontString, friendIndex)
+	local gameInfo, color, charName = ResolveBNetClass(friendIndex)
+	if gameInfo then ApplyNameAndLevel(fontString, gameInfo, color, charName) end
+end
+
+-- Tooltip entry point: color name + level on the name line, then add "Race Class" and zone lines
+-- above the existing rich-presence/realm line. Only the cross-region tooltip is touched -- its name
+-- line is the bare character name; the same-region tooltip already shows "Level X Race Class" (its
+-- class word handled by ColorClassInText). Runs every frame the tooltip is shown so it survives the
+-- per-frame rebuild Blizzard does for friends with a broadcast; idempotent otherwise.
+local function DecorateBNetTooltip()
+	if not FriendsTooltip:IsShown() then return end
+	local button = FriendsTooltip.button
+	if not (button and button.buttonType == FRIENDS_BUTTON_TYPE_BNET) then return end
+	local gameInfo, color, charName = ResolveBNetClass(button.id)
+	if not gameInfo then return end
+
+	local nameFS = FriendsTooltipGameAccount1Name
+	local nameText = nameFS:GetText()
+	if not (nameText and nameText:find(charName, 1, true)) then return end -- cross-region only
+
+	ApplyNameAndLevel(nameFS, gameInfo, color, charName)
+
+	local extra = {}
+	local raceClass = (gameInfo.raceName and (gameInfo.raceName .. " ") or "") .. (gameInfo.className or "")
+	if (raceClass:gsub("%s+", "")) ~= "" then extra[#extra + 1] = raceClass end
+	if gameInfo.areaName and gameInfo.areaName ~= "" then extra[#extra + 1] = gameInfo.areaName end
+	if #extra == 0 then return end
+
+	local infoFS = FriendsTooltipGameAccount1Info
+	local keep = gameInfo.richPresence
+	local target = table.concat(extra, "|n")
+	if keep and keep ~= "" then target = target .. "|n" .. keep end
+	if infoFS:GetText() == target then return end -- already extended (idempotent; no repeated grow)
+	local before = infoFS:GetStringHeight()
+	infoFS:SetText(target)
+	local delta = infoFS:GetStringHeight() - before
+	if delta > 0 then FriendsTooltip:SetHeight(FriendsTooltip:GetHeight() + delta) end
+end
+
 function addon.SetupClassNames()
 	-- Character frame
 	hooksecurefunc("PaperDollFrame_SetLevel", function()
@@ -66,16 +144,24 @@ function addon.SetupClassNames()
 
 	-- Friends list
 	hooksecurefunc("FriendsFrame_UpdateFriendButton", function(button)
-		if button.buttonType ~= FRIENDS_BUTTON_TYPE_WOW then return end
-		local info = C_FriendList.GetFriendInfoByIndex(button.id)
-		if not info or not info.className or not info.connected then return end
-		ColorClassInText(button.name)
+		if button.buttonType == FRIENDS_BUTTON_TYPE_WOW then
+			local info = C_FriendList.GetFriendInfoByIndex(button.id)
+			if not info or not info.className or not info.connected then return end
+			ColorClassInText(button.name)
+		elseif button.buttonType == FRIENDS_BUTTON_TYPE_BNET then
+			ColorBNetName(button.name, button.id)
+		end
 	end)
 
-	-- Friends tooltip
+	-- Friends tooltip: same-region class word (once on show) + full BNet decoration. The decoration
+	-- runs every frame the tooltip is shown so it survives the per-frame rebuild Blizzard does for
+	-- friends with a broadcast (its OnUpdate calls button:OnEnter while hasBroadcast); it also picks up
+	-- class data that arrives a beat after a friend logs in. DecorateBNetTooltip is idempotent.
 	FriendsTooltip:HookScript("OnShow", function()
 		ColorClassInText(FriendsTooltipGameAccount1Name)
+		DecorateBNetTooltip()
 	end)
+	FriendsTooltip:HookScript("OnUpdate", DecorateBNetTooltip)
 
 	-- GameTooltip
 	GameTooltip:HookScript("OnTooltipSetUnit", function(self)

@@ -17,8 +17,10 @@ BiggerHealthbar.lua
 NameplateClassification.lua
 Hide\Core.lua
 Hide\PortraitGlow.lua
+Hide\PlayerAttackGlow.lua
 Hide\PetCombatFlash.lua
 Hide\GroupIndicator.lua
+Hide\StatusIconPosition.lua
 DarkMode.lua
 DarkModeIcons.lua
 Fixes\ActionBarAlphaFix.lua
@@ -29,4 +31,6 @@ Fixes\NameplateLevelPositionFix.lua
 Fixes\ActionBarIconPositionFix.lua
 Fixes\PetActionBarCheckedFix.lua
 Fixes\UnitFrameResetFix.lua
+Fixes\TargetCastbarBorderFix.lua
 Settings\Settings.lua
+Preview.lua

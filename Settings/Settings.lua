@@ -3,7 +3,7 @@ local _, addon = ...
 -- The producer's settings page: one flat vertical-layout category under three section headers
 -- (General / Class Colors / Fixes). No runtime lifecycle — checkboxes write a cfFramesDB bool
 -- applied at the next reload (the Setup* reads it at load); the only live controls are the
--- texture dropdown and the three class-color CVar toggles.
+-- texture dropdown and the two nameplate class-color CVar toggles.
 
 local TEXTURE_FOLDER = "Interface\\AddOns\\cfFrames\\Media\\StatusBar\\"
 
@@ -16,7 +16,11 @@ local function CVarProxy(cvar)
 	})
 end
 
-EventUtil.ContinueOnAddOnLoaded("cfFrames", function()
+-- Build the settings page. Called explicitly from Init's ADDON_LOADED handler, after InitDB(),
+-- so cfFramesDB is fully populated before any RegisterAddOnSetting reads cfFramesDB[key]. A
+-- freshly-created character has no saved DB yet, and registering a setting against a nil backing
+-- value hands back an unusable setting object (the GetVariableType crash seen on new characters).
+function addon.SetupSettings()
 	local category = Settings.RegisterVerticalLayoutCategory("cfFrames")
 	local layout = SettingsPanel:GetLayout(category)
 
@@ -66,13 +70,13 @@ EventUtil.ContinueOnAddOnLoaded("cfFrames", function()
 	-- Class Colors
 	Header("Class Colors")
 	Checkbox("ClassColors", "Class Colors", "Color names, chat, levels and unit-frame health bars by class")
-	CVarCheckbox("raidFramesDisplayClassColor", "Raid Frame Class Colors", "Color compact raid frames by class")
 	CVarCheckbox("ShowClassColorInNameplate", "Enemy Nameplate Class Colors", "Color enemy player nameplates by class")
 	CVarCheckbox("ShowClassColorInFriendlyNameplate", "Friendly Nameplate Class Colors", "Color friendly player nameplates by class")
 
 	-- Hide
 	Header("Hide")
 	Checkbox("HidePortraitGlow", "Player Portrait Glow", "Hide the pulsing combat/rested glow on the player portrait")
+	Checkbox("HidePlayerAttackGlow", "Player Attack Glow", "Hide the red attack/combat glow behind the player frame")
 	Checkbox("HidePetCombatFlash", "Pet Combat Flash", "Hide the pet portrait combat flash and attack-mode texture")
 	Checkbox("HideGroupIndicator", "Player Group Indicator", "Hide the group/role badge above the player frame in a party")
 
@@ -86,6 +90,7 @@ EventUtil.ContinueOnAddOnLoaded("cfFrames", function()
 	Checkbox("ActionBarIconPositionFix", "Action Bar Icon Position Fix", "Center action bar icons within their border")
 	Checkbox("PetActionBarCheckedFix", "Pet Action Bar Checked Fix", "Align pet button checked textures with their icon")
 	Checkbox("UnitFrameResetFix", "Unit Frame Reset Fix", "Persist reset-to-default frame positions across reload")
+	Checkbox("TargetCastbarBorderFix", "Target Castbar Border Fix", "Widen the target cast bar border so the fill doesn't spill past its left edge")
 
 	Settings.RegisterAddOnCategory(category)
 
@@ -103,4 +108,4 @@ EventUtil.ContinueOnAddOnLoaded("cfFrames", function()
 
 	SLASH_CFF1 = "/cff"
 	SlashCmdList.CFF = function() Settings.OpenToCategory(category:GetID()) end
-end)
+end

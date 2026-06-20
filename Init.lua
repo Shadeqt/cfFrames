@@ -20,6 +20,7 @@ addon.defaults = {
 	ClassColors               = true,
 	-- Hide (one bool per native element; was the single HideNative master, now split)
 	HidePortraitGlow          = true,
+	HidePlayerAttackGlow      = true,
 	HidePetCombatFlash        = true,
 	HideGroupIndicator        = true,
 	-- Fixes
@@ -31,6 +32,7 @@ addon.defaults = {
 	ActionBarIconPositionFix  = true,
 	PetActionBarCheckedFix    = true,
 	UnitFrameResetFix         = true,
+	TargetCastbarBorderFix    = true,
 	-- Stored value: chosen status-bar texture (StatusBar on/off is encoded here;
 	-- the GUI's "Blizzard Default" dropdown entry = feature off).
 	StatusBarTexture = "Interface\\AddOns\\cfFrames\\Media\\StatusBar\\smooth",
@@ -54,6 +56,7 @@ end
 
 EventUtil.ContinueOnAddOnLoaded(addonName, function()
 	addon.InitDB()
+	addon.SetupSettings()   -- register the GUI now that the DB is populated (explicit order, B1)
 	-- Defer feature setup to PLAYER_ENTERING_WORLD (nameplates / compact-raid exist there).
 	local frame = CreateFrame("Frame")
 	frame:RegisterEvent("PLAYER_ENTERING_WORLD")
@@ -77,5 +80,6 @@ EventUtil.ContinueOnAddOnLoaded(addonName, function()
 		addon.SetupActionBarIconPositionFix()
 		addon.SetupPetActionBarCheckedFix()
 		addon.SetupUnitFrameResetFix()
+		addon.SetupTargetCastbarBorderFix()
 	end)
 end)

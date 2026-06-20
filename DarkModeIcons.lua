@@ -133,11 +133,23 @@ local function StyleActionBars()
 	if MainMenuBarBackpackButton then StyleIcon(MainMenuBarBackpackButton) end
 end
 
--- Target castbar icon (zoom + dark backdrop, like every other dark-mode icon). The player castbar
--- icon is cfCastbars' job -- it resizes that icon, so it owns its styling. The pet/party/nameplate
--- castbar icons are cfCastbars' own frames. Both follow by observing CastingBarFrame.Border's tint.
+-- Target castbar icon. Unlike static icons (action bars/buffs), a castbar icon is dynamic: it
+-- changes every cast and is empty on textureless casts (loot/herb/open), so its border must be
+-- re-evaluated per cast -- the same thing cfCastbars does for the other four castbars. We reuse
+-- the shared StyleIcon (idempotent: zoom once, border once) then correct icon + border visibility
+-- off the live texture. The player castbar icon is cfCastbars' job (it resizes that icon); the
+-- pet/party/nameplate castbar icons are cfCastbars' own frames.
 local function StyleCastbarIcons()
-	if TargetFrameSpellBar then StyleIcon(TargetFrameSpellBar) end
+	if not TargetFrameSpellBar then return end
+	local function update(self)
+		StyleIcon(self)
+		local icon = GetIcon(self)
+		local hasIcon = icon and icon:GetTexture() ~= nil
+		if icon then icon:SetShown(hasIcon) end
+		if self.cffBorder then self.cffBorder:SetShown(hasIcon) end
+	end
+	update(TargetFrameSpellBar)                        -- a cast already in progress at login
+	TargetFrameSpellBar:HookScript("OnShow", update)  -- re-evaluate on every cast
 end
 
 function addon.SetupDarkModeIcons()

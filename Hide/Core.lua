@@ -22,6 +22,9 @@ end
 -- One entry for all hidden elements; each gated by its own checkbox.
 function addon.SetupHideNative()
 	if cfFramesDB.HidePortraitGlow then addon.HidePortraitGlow() end
+	if cfFramesDB.HidePlayerAttackGlow then addon.HidePlayerAttackGlow() end
 	if cfFramesDB.HidePetCombatFlash then addon.HidePetCombatFlash() end
 	if cfFramesDB.HideGroupIndicator then addon.HideGroupIndicator() end
+	-- Not a hide but a move; bundled here for now, no GUI gate yet.
+	addon.MovePlayerStatusIcons()
 end
