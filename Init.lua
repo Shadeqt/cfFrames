@@ -6,6 +6,40 @@ local addonName, addon = ...
 -- loop. The value must be shared between those features, hence the namespace.
 addon.SENTINEL = "cff"
 
+-- Shared layout helpers (used by BiggerUnitFrames and the PetManaBarOverlap fix). Promoted here from
+-- the per-feature file so both can reach them. Raise a region's Y by dy, self-correcting against
+-- Blizzard's repeated layout resets: re-baseline from the current default Y whenever it moves, so the
+-- offset never compounds and never sticks to a stale base. Re-reads the anchor each call in case
+-- Blizzard re-anchors to a new point.
+local isReapplying = false  -- re-entrancy guard for the SetPoint hooks below
+function addon.ApplyOffset(region, dy)
+	if not region then return end
+	local point, relativeTo, relativePoint, x, y = region:GetPoint()
+	if not y then return end
+	if not region.cfAppliedY or math.abs(region.cfAppliedY - y) > 0.5 then
+		region.cfBaselineY = y  -- Blizzard's current default; re-baseline off it
+	end
+	region:ClearAllPoints()
+	region:SetPoint(point, relativeTo, relativePoint, x, region.cfBaselineY + dy)
+	region.cfAppliedY = region.cfBaselineY + dy
+end
+
+-- Apply addon.ApplyOffset and keep it applied past Blizzard's deferred layout by hooking the region's
+-- own SetPoint and re-asserting -- making our write the last one. The guard skips the SetPoint we issue
+-- ourselves; ApplyOffset is self-correcting, so re-asserting lands on default+dy without compounding.
+function addon.KeepOffset(region, dy)
+	if not region then return end
+	addon.ApplyOffset(region, dy)
+	if region.cfOffsetHookInstalled then return end
+	region.cfOffsetHookInstalled = true
+	hooksecurefunc(region, "SetPoint", function()
+		if isReapplying then return end
+		isReapplying = true
+		addon.ApplyOffset(region, dy)
+		isReapplying = false
+	end)
+end
+
 -- DB schema (the single source of truth for cfFramesDB keys).
 -- All module bools default true; StatusBarTexture is the one stored value.
 -- Frame-move/scale keys and DarkMode sub-toggles/colors were cut in the rebuild
@@ -33,6 +67,7 @@ addon.defaults = {
 	PetActionBarCheckedFix    = true,
 	UnitFrameResetFix         = true,
 	TargetCastbarBorderFix    = true,
+	PetManaBarOverlapFix      = true,
 	-- Stored value: chosen status-bar texture (StatusBar on/off is encoded here;
 	-- the GUI's "Blizzard Default" dropdown entry = feature off).
 	StatusBarTexture = "Interface\\AddOns\\cfFrames\\Media\\StatusBar\\smooth",
@@ -81,5 +116,6 @@ EventUtil.ContinueOnAddOnLoaded(addonName, function()
 		addon.SetupPetActionBarCheckedFix()
 		addon.SetupUnitFrameResetFix()
 		addon.SetupTargetCastbarBorderFix()
+		addon.SetupPetManaBarOverlapFix()
 	end)
 end)

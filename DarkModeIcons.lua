@@ -1,6 +1,14 @@
 local _, addon = ...
 
-local PRIMARY = 0.25  -- icon border darkness, matches DarkMode's main color
+-- DarkModeIcons (cfFramesTest's newest implementation): add dark borders + a slight zoom to action-bar
+-- and buff icons, completing the dark look from DarkMode.lua. Reload-gated on cfFramesDB.DarkMode; run
+-- once from Init's PLAYER_ENTERING_WORLD pass via SetupDarkModeIcons (so the aura hooks don't stack).
+-- Castbar icons are NOT handled here -- cfCastbars owns its own (player/target/pet/party/nameplate) icon
+-- borders via surface observation.
+
+local PRIMARY = 0.25  -- icon border darkness
+local ACTION_BAR_NAMES = addon.DarkMode.ACTION_BAR_NAMES  -- shared bar list (DarkMode.lua loads first)
+local PET_BUFF_MAX = 16  -- PetFrameBuff slots (no Blizzard *_MAX constant for these)
 
 -- zoom: left, right, top, bottom
 local ZOOM = { 0.02, 0.98, 0.02, 0.98 }
@@ -33,25 +41,31 @@ local function ColorBorder(border)
 	border:Show()
 end
 
+-- Idempotent: zoom once, border once. The cffStyled flag short-circuits repeat calls so the frequently-
+-- fired aura hooks stop re-running SetBackdropBorderColor/Show on already-styled buttons every aura tick.
+-- The flag is only set after a successful style, so a button whose icon isn't ready yet is retried.
 local function StyleIcon(button)
+	if button.cffStyled then return end
 	local icon = GetIcon(button)
 	if not icon then return end
-	if not button.cffZoom then
-		button.cffZoom = true
-		icon:SetTexCoord(unpack(ZOOM))
+	icon:SetTexCoord(unpack(ZOOM))
+	ColorBorder(AddBorder(icon, button))
+	button.cffStyled = true
+end
+
+-- Style each shown button in a contiguous _G[prefix..i] block (buff buttons are created contiguously).
+local function StyleShownButtons(prefix, count)
+	for i = 1, count do
+		local btn = _G[prefix .. i]
+		if not btn then break end
+		if btn:IsShown() then StyleIcon(btn) end
 	end
-	local border = AddBorder(icon, button)
-	ColorBorder(border)
 end
 
 -- Buffs
 
 local function StylePlayerBuffs()
-	for i = 1, BUFF_MAX_DISPLAY do
-		local btn = _G["BuffButton" .. i]
-		if not btn then break end
-		if btn:IsShown() then StyleIcon(btn) end
-	end
+	StyleShownButtons("BuffButton", BUFF_MAX_DISPLAY)
 
 	if AuraButton_Update then
 		hooksecurefunc("AuraButton_Update", function(buttonName, index)
@@ -64,37 +78,22 @@ local function StylePlayerBuffs()
 end
 
 local function StyleTargetBuffs()
-	for i = 1, MAX_TARGET_BUFFS do
-		local btn = _G["TargetFrameBuff" .. i]
-		if not btn then break end
-		if btn:IsShown() then StyleIcon(btn) end
-	end
+	StyleShownButtons("TargetFrameBuff", MAX_TARGET_BUFFS)
 
 	if TargetFrame_UpdateAuras then
 		hooksecurefunc("TargetFrame_UpdateAuras", function()
-			for i = 1, MAX_TARGET_BUFFS do
-				local btn = _G["TargetFrameBuff" .. i]
-				if btn and btn:IsShown() then StyleIcon(btn) end
-			end
+			StyleShownButtons("TargetFrameBuff", MAX_TARGET_BUFFS)
 		end)
 	end
 end
 
 local function StylePetBuffs()
-	for i = 1, 16 do
-		local btn = _G["PetFrameBuff" .. i]
-		if not btn then break end
-		if btn:IsShown() then StyleIcon(btn) end
-	end
+	StyleShownButtons("PetFrameBuff", PET_BUFF_MAX)
 
 	local f = CreateFrame("Frame")
 	f:RegisterUnitEvent("UNIT_AURA", "pet")
 	f:SetScript("OnEvent", function()
-		for i = 1, 16 do
-			local btn = _G["PetFrameBuff" .. i]
-			if not btn then break end
-			if btn:IsShown() then StyleIcon(btn) end
-		end
+		StyleShownButtons("PetFrameBuff", PET_BUFF_MAX)
 	end)
 end
 
@@ -111,8 +110,7 @@ end
 -- Action Bars
 
 local function StyleActionBars()
-	local bars = { "ActionButton", "MultiBarBottomLeftButton", "MultiBarBottomRightButton", "MultiBarRightButton", "MultiBarLeftButton" }
-	for _, bar in ipairs(bars) do
+	for _, bar in ipairs(ACTION_BAR_NAMES) do
 		for i = 1, NUM_ACTIONBAR_BUTTONS do
 			local btn = _G[bar .. i]
 			if btn then StyleIcon(btn) end
@@ -133,25 +131,8 @@ local function StyleActionBars()
 	if MainMenuBarBackpackButton then StyleIcon(MainMenuBarBackpackButton) end
 end
 
--- Target castbar icon. Unlike static icons (action bars/buffs), a castbar icon is dynamic: it
--- changes every cast and is empty on textureless casts (loot/herb/open), so its border must be
--- re-evaluated per cast -- the same thing cfCastbars does for the other four castbars. We reuse
--- the shared StyleIcon (idempotent: zoom once, border once) then correct icon + border visibility
--- off the live texture. The player castbar icon is cfCastbars' job (it resizes that icon); the
--- pet/party/nameplate castbar icons are cfCastbars' own frames.
-local function StyleCastbarIcons()
-	if not TargetFrameSpellBar then return end
-	local function update(self)
-		StyleIcon(self)
-		local icon = GetIcon(self)
-		local hasIcon = icon and icon:GetTexture() ~= nil
-		if icon then icon:SetShown(hasIcon) end
-		if self.cffBorder then self.cffBorder:SetShown(hasIcon) end
-	end
-	update(TargetFrameSpellBar)                        -- a cast already in progress at login
-	TargetFrameSpellBar:HookScript("OnShow", update)  -- re-evaluate on every cast
-end
-
+-- Reload-gated; called once from Init's PLAYER_ENTERING_WORLD pass so the hooksecurefunc installs above
+-- happen exactly once and don't stack.
 function addon.SetupDarkModeIcons()
 	if not cfFramesDB.DarkMode then return end
 	StylePlayerBuffs()
@@ -159,5 +140,4 @@ function addon.SetupDarkModeIcons()
 	StylePetBuffs()
 	StyleCompactBuffs()
 	StyleActionBars()
-	StyleCastbarIcons()
 end

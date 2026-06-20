@@ -91,6 +91,7 @@ function addon.SetupSettings()
 	Checkbox("PetActionBarCheckedFix", "Pet Action Bar Checked Fix", "Align pet button checked textures with their icon")
 	Checkbox("UnitFrameResetFix", "Unit Frame Reset Fix", "Persist reset-to-default frame positions across reload")
 	Checkbox("TargetCastbarBorderFix", "Target Castbar Border Fix", "Widen the target cast bar border so the fill doesn't spill past its left edge")
+	Checkbox("PetManaBarOverlapFix", "Pet Mana Bar Overlap Fix", "Drop the pet mana bar 1px so it no longer overlaps the pet health bar")
 
 	Settings.RegisterAddOnCategory(category)
 

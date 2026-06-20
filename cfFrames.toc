@@ -2,7 +2,7 @@
 ## Title: cfFrames
 ## Notes: UI tweaks with live settings
 ## Author: Cowfoot
-## Version: 0.3
+## Version: 0.4
 ## SavedVariablesPerCharacter: cfFramesDB
 
 Init.lua
@@ -13,7 +13,9 @@ ClassColors\NameColors.lua
 ClassColors\LevelColors.lua
 ClassColors\Healthbars.lua
 StatusBarTexture.lua
-BiggerHealthbar.lua
+BiggerUnitFrames\Core.lua
+BiggerUnitFrames\Player.lua
+BiggerUnitFrames\Target.lua
 NameplateClassification.lua
 Hide\Core.lua
 Hide\PortraitGlow.lua
@@ -32,5 +34,6 @@ Fixes\ActionBarIconPositionFix.lua
 Fixes\PetActionBarCheckedFix.lua
 Fixes\UnitFrameResetFix.lua
 Fixes\TargetCastbarBorderFix.lua
+Fixes\PetManaBarOverlap.lua
 Settings\Settings.lua
 Preview.lua

@@ -1,8 +1,29 @@
 local _, addon = ...
 
+-- DarkMode (cfFramesTest's newest implementation): darken UI chrome (unit-frame borders, action bars,
+-- XP/rep chrome, minimap, chat, nameplate borders) by reducing their vertex color toward black.
+-- Reload-gated on cfFramesDB.DarkMode; run once from Init's PLAYER_ENTERING_WORLD pass via SetupDarkMode.
+--
+-- Darkens frame CHROME/border art, not the health-bar fill -- so it doesn't fight HealthbarColor (fill
+-- color) or StatusBarTexture (fill texture). It DOES tint BiggerUnitFrames' custom frame art (SetTexture
+-- + SetVertexColor are independent layers).
+
 -- Hardcoded darkness (the old DarkModeColor / DarkModeColorSecondary sliders, locked).
-local PRIMARY = 0.25    -- main frames, borders, action bars, chat, nameplate borders
+-- PRIMARY is shared with DarkModeIcons via the feature table (addon.DarkMode); DarkMode.lua loads first,
+-- so it exists before DarkModeIcons reads it.
+addon.DarkMode = {}
+addon.DarkMode.PRIMARY = 0.5
+local PRIMARY = addon.DarkMode.PRIMARY  -- main frames, borders, action bars, chat, nameplate borders
 local SECONDARY = 0.75  -- small borderless elements (exhaustion, scroll/micro/keyring/zoom, clock)
+
+-- The five standard action bars whose buttons get darkened. Shared with DarkModeIcons (loads after us).
+addon.DarkMode.ACTION_BAR_NAMES = { "ActionButton", "MultiBarBottomLeftButton", "MultiBarBottomRightButton", "MultiBarRightButton", "MultiBarLeftButton" }
+local ACTION_BAR_NAMES = addon.DarkMode.ACTION_BAR_NAMES
+
+-- Re-entrancy marker, passed as the trailing arg to SetVertexColor so DarkenHook recognizes its own
+-- writes and doesn't loop. Shared (addon.SENTINEL) with ActionBarAlphaFix, which hooks the same
+-- ActionButton textures -- each skips writes carrying this flag so they don't ping-pong.
+local SENTINEL = addon.SENTINEL
 
 local compactHooked = false
 local nameplateHooked = false
@@ -13,12 +34,14 @@ local function ApplyDark(texture, color, desaturate, alpha)
 	local c = color or PRIMARY
 	local d = desaturate ~= false
 	local _, _, _, a = texture:GetVertexColor()
-	texture:SetVertexColor(c, c, c, alpha or a, addon.SENTINEL)
+	-- texture.cfPinAlpha (set on action-button borders below) overrides the live alpha so a transient
+	-- ActionButton_ShowGrid alpha (0.5, set when an action is picked up) can't get latched permanently.
+	texture:SetVertexColor(c, c, c, alpha or texture.cfPinAlpha or a, SENTINEL)
 	texture:SetDesaturated(d)
 end
 
--- Off is reload-gated, so no save-original/restore path is kept. Darkening sets an absolute color,
--- so it is idempotent and safe to re-run from the SetVertexColor hooks.
+-- Off is reload-gated, so no save-original/restore path is kept. Darkening sets an absolute color, so
+-- it is idempotent and safe to re-run from the SetVertexColor hooks.
 local function Darken(texture, color, desaturate, alpha)
 	if not texture then return end
 	if not texture:IsObjectType("Texture") then return end
@@ -32,17 +55,20 @@ local function DarkenRegions(frame, color, desaturate, alpha)
 	end
 end
 
--- Darken now, then re-darken whenever Blizzard repaints the texture. The hook skips its own writes
--- (SENTINEL) so DarkMode and ActionBarAlphaFix don't ping-pong on the shared ActionButton textures.
+-- Shared SetVertexColor post-hook. One file-local closure reused for every hooked texture instead of
+-- allocating a fresh one per texture. Skips its own writes (SENTINEL).
+local function OnSetVertexColor(self, _, _, _, _, flag)
+	if flag == SENTINEL then return end
+	ApplyDark(self)
+end
+
+-- Darken now, then re-darken whenever Blizzard repaints the texture.
 local function DarkenHook(texture)
 	if not texture then return end
 	Darken(texture)
-	if texture.cffHooked then return end
-	texture.cffHooked = true
-	hooksecurefunc(texture, "SetVertexColor", function(self, _, _, _, _, flag)
-		if flag == addon.SENTINEL then return end
-		ApplyDark(self)
-	end)
+	if texture.cfDarkHooked then return end
+	texture.cfDarkHooked = true
+	hooksecurefunc(texture, "SetVertexColor", OnSetVertexColor)
 end
 
 local function DarkenCompactMember(member)
@@ -66,9 +92,8 @@ local function DarkenCompactFrames()
 	for m = 1, MEMBERS_PER_RAID_GROUP do
 		DarkenCompactMember(_G["CompactPartyFrameMember" .. m])
 	end
-	-- The flat (unsorted) raid list uses CompactRaidFrame1..MAX_RAID_MEMBERS, not just one
-	-- group's worth -- looping only to MEMBERS_PER_RAID_GROUP left frames 6..40 (and the
-	-- borders between them) un-darkened.
+	-- The flat (unsorted) raid list uses CompactRaidFrame1..MAX_RAID_MEMBERS, not just one group's
+	-- worth -- looping only to MEMBERS_PER_RAID_GROUP left frames 6..40 (and their borders) un-darkened.
 	for m = 1, MAX_RAID_MEMBERS do
 		DarkenCompactMember(_G["CompactRaidFrame" .. m])
 	end
@@ -80,9 +105,16 @@ local function DarkenCompactFrames()
 	end
 end
 
+-- The target frame art is darkened, but ELITE targets keep their color (not desaturated); every other
+-- classification is desaturated. Re-evaluated on every target change (Blizzard re-sets the frame texture
+-- in TargetFrame_CheckClassification). Idempotent (no last-state guard).
+local function DarkenTargetFrameTexture()
+	if not TargetFrameTextureFrameTexture then return end
+	ApplyDark(TargetFrameTextureFrameTexture, nil, UnitClassification("target") ~= "elite")
+end
+
 local function DarkenFrames()
 	Darken(PlayerFrameTexture)
-	Darken(TargetFrameTextureFrameTexture)
 	Darken(TargetFrameToTTextureFrameTexture)
 	Darken(PetFrameTexture)
 	for i = 1, MAX_PARTY_MEMBERS do
@@ -99,10 +131,9 @@ local function DarkenFrames()
 	end
 end
 
--- Native castbar borders -- never darkened before. CastingBarFrame.Border doubles as the surface
--- cfCastbars observes (reads its vertex color) to follow dark mode on its own pet/party/nameplate
--- bars and the player castbar icon. DarkenHook re-applies if Blizzard repaints, so the observed
--- value stays stable. BorderShield (non-interruptible casts) is darkened too; nil-safe.
+-- Native castbar borders. CastingBarFrame.Border doubles as the surface cfCastbars observes (reads its
+-- vertex color) to follow dark mode. DarkenHook re-applies if Blizzard repaints, so the observed value
+-- stays stable. BorderShield (non-interruptible casts) is darkened too; nil-safe.
 local function DarkenCastbars()
 	DarkenHook(CastingBarFrame.Border)
 	DarkenHook(CastingBarFrame.BorderShield)
@@ -128,12 +159,16 @@ local function DarkenActionBars()
 	Darken(ExhaustionTickNormal, SECONDARY, false)
 	Darken(ExhaustionTickHighlight, SECONDARY, false)
 
-	local barNames = { "ActionButton", "MultiBarBottomLeftButton", "MultiBarBottomRightButton", "MultiBarRightButton", "MultiBarLeftButton" }
-	for _, barName in ipairs(barNames) do
+	-- Pin each border's baseline alpha (captured now, before any drag) so ApplyDark keeps re-asserting it.
+	-- Otherwise picking up an action fires ActionButton_ShowGrid -> SetVertexColor(1,1,1,0.5); our hook
+	-- captures that 0.5 and latches it permanently, leaving the border dimmed after a move.
+	for _, barName in ipairs(ACTION_BAR_NAMES) do
 		for i = 1, NUM_ACTIONBAR_BUTTONS do
 			local btn = _G[barName .. i]
 			if btn then
-				DarkenHook(btn:GetNormalTexture())
+				local tex = btn:GetNormalTexture()
+				if tex then tex.cfPinAlpha = select(4, tex:GetVertexColor()) end
+				DarkenHook(tex)
 			end
 		end
 	end
@@ -187,6 +222,16 @@ local function DarkenLibDBIcon()
 	end
 end
 
+-- These two live in load-on-demand Blizzard addons, so they're darkened both at setup (if already
+-- loaded) and from the ADDON_LOADED handler below.
+local function DarkenLFGBorder()
+	if LFGMinimapFrameBorder then Darken(LFGMinimapFrameBorder) end
+end
+
+local function DarkenClock()
+	if TimeManagerClockButton then DarkenRegions(TimeManagerClockButton) end
+end
+
 local function DarkenMinimap()
 	Darken(MinimapBorder)
 	Darken(MinimapBorderTop)
@@ -194,16 +239,16 @@ local function DarkenMinimap()
 	DarkenRegions(MinimapZoomIn, SECONDARY, false)
 	DarkenRegions(MinimapZoomOut, SECONDARY, false)
 	if GameTimeFrame then DarkenRegions(GameTimeFrame, SECONDARY, false) end
-	if LFGMinimapFrameBorder then Darken(LFGMinimapFrameBorder) end
-	if TimeManagerClockButton then DarkenRegions(TimeManagerClockButton) end
+	DarkenLFGBorder()
+	DarkenClock()
 	DarkenLibDBIcon()
 end
 
 local function DarkenMinimapAddons(_, _, loadedAddon)
 	if loadedAddon == "Blizzard_GroupFinder_VanillaStyle" then
-		Darken(LFGMinimapFrameBorder)
+		DarkenLFGBorder()
 	elseif loadedAddon == "Blizzard_TimeManager" then
-		DarkenRegions(TimeManagerClockButton)
+		DarkenClock()
 	end
 	DarkenLibDBIcon()
 end
@@ -259,10 +304,15 @@ local function DarkenNameplates()
 	end
 end
 
+-- Reload-gated; called once from Init's PLAYER_ENTERING_WORLD pass (nameplates / compact-raid frames
+-- exist there), so the SetVertexColor hooks are installed exactly once.
 function addon.SetupDarkMode()
 	if not cfFramesDB.DarkMode then return end
 
 	DarkenFrames()
+	-- Desaturate the target frame art except for elite targets; re-evaluated on every target change.
+	DarkenTargetFrameTexture()  -- catch a target already present at setup (e.g. after /reload)
+	hooksecurefunc("TargetFrame_CheckClassification", DarkenTargetFrameTexture)
 	DarkenCastbars()
 	DarkenActionBars()
 	DarkenMinimap()
