@@ -69,7 +69,7 @@ function addon.SetupSettings()
 
 	-- Class Colors
 	Header("Class Colors")
-	Checkbox("ClassColors", "Class Colors", "Color names, chat, levels and unit-frame health bars by class")
+	Checkbox("ClassColors", "Health Bar Class Colors", "Color unit-frame health bars by class (chat/name/level coloring lives in the cfClassColors addon)")
 	CVarCheckbox("ShowClassColorInNameplate", "Enemy Nameplate Class Colors", "Color enemy player nameplates by class")
 	CVarCheckbox("ShowClassColorInFriendlyNameplate", "Friendly Nameplate Class Colors", "Color friendly player nameplates by class")
 

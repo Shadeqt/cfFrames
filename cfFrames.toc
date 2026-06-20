@@ -2,15 +2,11 @@
 ## Title: cfFrames
 ## Notes: UI tweaks with live settings
 ## Author: Cowfoot
-## Version: 0.4
+## Version: 0.5
 ## SavedVariablesPerCharacter: cfFramesDB
 
 Init.lua
 ClassColors\Core.lua
-ClassColors\ChatColors.lua
-ClassColors\ClassNames.lua
-ClassColors\NameColors.lua
-ClassColors\LevelColors.lua
 ClassColors\Healthbars.lua
 StatusBarTexture.lua
 BiggerUnitFrames\Core.lua
