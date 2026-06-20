@@ -1,9 +1,11 @@
 local addonName, addon = ...
 
--- Shared re-entrancy marker, passed as the trailing arg to SetVertexColor. DarkMode and
--- ActionBarAlphaFix both hook SetVertexColor on the same ActionButton textures; each skips
--- writes carrying this flag so they recognize their own (and each other's) writes and don't
--- loop. The value must be shared between those features, hence the namespace.
+-- Re-entrancy marker, passed as the trailing arg to SetVertexColor. ActionBarAlphaFix and the
+-- standalone cfDarkMode addon both hook SetVertexColor on the SAME ActionButton textures; each skips
+-- writes carrying this flag so they recognize their own (and each other's) writes and don't loop.
+-- The literal "cff" is a SHARED CONTRACT with cfDarkMode (its Init.lua sets the identical value):
+-- changing one without the other reintroduces the ping-pong. This creates no presence dependency --
+-- each addon works alone; the shared string only governs how they coexist.
 addon.SENTINEL = "cff"
 
 -- Shared layout helpers (used by BiggerUnitFrames and the PetManaBarOverlap fix). Promoted here from
@@ -42,13 +44,12 @@ end
 
 -- DB schema (the single source of truth for cfFramesDB keys).
 -- All module bools default true; StatusBarTexture is the one stored value.
--- Frame-move/scale keys and DarkMode sub-toggles/colors were cut in the rebuild
--- (frame moving removed; DarkMode is one toggle with hardcoded colors), so they
--- are absent here and InitDB() prunes them from any existing saved DB.
+-- Cut keys (frame-move/scale, the old DarkMode sub-toggles/colors, and the DarkMode master toggle now
+-- that dark mode is the standalone cfDarkMode addon) are absent here, and InitDB() prunes them from any
+-- existing saved DB.
 addon.defaults = {
 	-- General
 	BiggerHealthbar           = true,
-	DarkMode                  = true,
 	NameplateClassification   = true,
 	-- Class Colors (one master for the 5 absorbed cfClassColors features)
 	ClassColors               = true,
@@ -102,8 +103,6 @@ EventUtil.ContinueOnAddOnLoaded(addonName, function()
 		addon.SetupBiggerHealthbar()
 		addon.SetupNameplateClassification()
 		addon.SetupHideNative()
-		addon.SetupDarkMode()
-		addon.SetupDarkModeIcons()
 		addon.SetupClassColors()
 
 		-- Fixes

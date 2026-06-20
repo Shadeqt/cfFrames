@@ -64,7 +64,6 @@ function addon.SetupSettings()
 	Settings.SetOnValueChangedCallback("cfFrames_StatusBarTexture", function() addon.SetupStatusBar() end)
 
 	Checkbox("BiggerHealthbar", "Bigger Health Bars", "Enlarge player and target health bars")
-	Checkbox("DarkMode", "Dark Mode", "Darken Blizzard frame and icon textures")
 	Checkbox("NameplateClassification", "Nameplate Classification", "Show elite and rare icons on nameplates")
 
 	-- Class Colors

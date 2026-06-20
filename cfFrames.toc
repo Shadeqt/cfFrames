@@ -2,16 +2,13 @@
 ## Title: cfFrames
 ## Notes: UI tweaks with live settings
 ## Author: Cowfoot
-## Version: 0.5
+## Version: 0.7
 ## SavedVariablesPerCharacter: cfFramesDB
 
 Init.lua
-ClassColors\Core.lua
-ClassColors\Healthbars.lua
+ClassColorHealthbars.lua
 StatusBarTexture.lua
-BiggerUnitFrames\Core.lua
-BiggerUnitFrames\Player.lua
-BiggerUnitFrames\Target.lua
+BiggerUnitFrames.lua
 NameplateClassification.lua
 Hide\Core.lua
 Hide\PortraitGlow.lua
@@ -19,8 +16,6 @@ Hide\PlayerAttackGlow.lua
 Hide\PetCombatFlash.lua
 Hide\GroupIndicator.lua
 Hide\StatusIconPosition.lua
-DarkMode.lua
-DarkModeIcons.lua
 Fixes\ActionBarAlphaFix.lua
 Fixes\ToTPortraitFix.lua
 Fixes\ToTBackgroundFix.lua
@@ -31,5 +26,4 @@ Fixes\PetActionBarCheckedFix.lua
 Fixes\UnitFrameResetFix.lua
 Fixes\TargetCastbarBorderFix.lua
 Fixes\PetManaBarOverlap.lua
-Settings\Settings.lua
-Preview.lua
+Settings.lua
