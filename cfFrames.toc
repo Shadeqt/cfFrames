@@ -2,7 +2,7 @@
 ## Title: cfFrames
 ## Notes: UI tweaks with live settings
 ## Author: Cowfoot
-## Version: 0.7
+## Version: 0.8
 ## SavedVariablesPerCharacter: cfFramesDB
 
 Init.lua
@@ -15,7 +15,8 @@ Hide\PortraitGlow.lua
 Hide\PlayerAttackGlow.lua
 Hide\PetCombatFlash.lua
 Hide\GroupIndicator.lua
-Hide\StatusIconPosition.lua
+Hide\HitIndicators.lua
+Hide\StatusIcons.lua
 Fixes\ActionBarAlphaFix.lua
 Fixes\ToTPortraitFix.lua
 Fixes\ToTBackgroundFix.lua

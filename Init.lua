@@ -58,6 +58,7 @@ addon.defaults = {
 	HidePlayerAttackGlow      = true,
 	HidePetCombatFlash        = true,
 	HideGroupIndicator        = true,
+	HideHitIndicators         = true,
 	-- Fixes
 	ActionBarAlphaFix         = true,
 	ToTPortraitFix            = true,

@@ -25,6 +25,7 @@ function addon.SetupHideNative()
 	if cfFramesDB.HidePlayerAttackGlow then addon.HidePlayerAttackGlow() end
 	if cfFramesDB.HidePetCombatFlash then addon.HidePetCombatFlash() end
 	if cfFramesDB.HideGroupIndicator then addon.HideGroupIndicator() end
-	-- Not a hide but a move; bundled here for now, no GUI gate yet.
-	addon.MovePlayerStatusIcons()
+	if cfFramesDB.HideHitIndicators then addon.HideHitIndicators() end
+	-- Hide the rest/combat icons (they overlap PlayerLevelText); no GUI gate yet.
+	addon.HidePlayerStatusIcons()
 end

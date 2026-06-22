@@ -78,6 +78,7 @@ function addon.SetupSettings()
 	Checkbox("HidePlayerAttackGlow", "Player Attack Glow", "Hide the red attack/combat glow behind the player frame")
 	Checkbox("HidePetCombatFlash", "Pet Combat Flash", "Hide the pet portrait combat flash and attack-mode texture")
 	Checkbox("HideGroupIndicator", "Player Group Indicator", "Hide the group/role badge above the player frame in a party")
+	Checkbox("HideHitIndicators", "Player/Pet Hit Numbers", "Hide the floating damage/healing numbers over the player and pet portraits")
 
 	-- Fixes
 	Header("Fixes")
