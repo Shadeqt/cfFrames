@@ -6,10 +6,20 @@
 ## SavedVariablesPerCharacter: cfFramesDB
 
 Init.lua
-ClassColorHealthbars.lua
+ClassColors\Core.lua
+ClassColors\Healthbars.lua
+ClassColors\ChatColors.lua
+ClassColors\ClassNames.lua
+ClassColors\NameColors.lua
+ClassColors\LevelColors.lua
 StatusBarTexture.lua
 BiggerUnitFrames.lua
-NameplateClassification.lua
+StatusText\StatusText.lua
+StatusText\WatchedBar.lua
+DruidBar.lua
+Pet\Level.lua
+Pet\XpBar.lua
+Pet\Debuffs.lua
 Hide\Core.lua
 Hide\PortraitGlow.lua
 Hide\PlayerAttackGlow.lua
@@ -27,4 +37,5 @@ Fixes\PetActionBarCheckedFix.lua
 Fixes\UnitFrameResetFix.lua
 Fixes\TargetCastbarBorderFix.lua
 Fixes\PetManaBarOverlap.lua
+Fixes\ShamanColorFix.lua
 Settings.lua

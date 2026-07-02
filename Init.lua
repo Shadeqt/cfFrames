@@ -42,6 +42,44 @@ function addon.KeepOffset(region, dy)
 	end)
 end
 
+-- Shared status-text helpers (used by the folded StatusText + DruidBar features). Two concerns kept in
+-- one place: HOW the LeftText/TextString/RightText trio is created, and WHAT it shows per
+-- statusTextDisplay.
+
+-- Build the standard status-text trio on `bar`, font strings parented to `parent`, positioned via
+-- anchors = { left = {relTo, x, y}, center = {relTo, x, y}, right = {relTo, x, y} }. The font-string
+-- parent and the SetPoint anchor target are kept separate (the druid bar parents its text to its border
+-- but anchors to the bar; the target parents + anchors to the same texture frame).
+function addon.CreateBarText(bar, parent, anchors)
+	bar.LeftText   = parent:CreateFontString(nil, "OVERLAY", "TextStatusBarText")
+	bar.TextString = parent:CreateFontString(nil, "OVERLAY", "TextStatusBarText")
+	bar.RightText  = parent:CreateFontString(nil, "OVERLAY", "TextStatusBarText")
+	bar.LeftText:SetPoint("LEFT",     anchors.left[1],   anchors.left[2],   anchors.left[3])
+	bar.TextString:SetPoint("CENTER", anchors.center[1], anchors.center[2], anchors.center[3])
+	bar.RightText:SetPoint("RIGHT",   anchors.right[1],  anchors.right[2],  anchors.right[3])
+end
+
+-- The single source of truth for "what a managed bar's text shows per statusTextDisplay." Runs as a post
+-- hook on TextStatusBar_UpdateTextString (installed below) for every bar flagged bar.cfManaged. The
+-- caller sets lockShow=1 so Blizzard renders in all modes; this hides the text on NONE unless moused
+-- over, and otherwise forces showPercentage=false so the render is the value (NUMERIC), splitting to
+-- Left/Right in BOTH.
+function addon.ApplyBarStatusText(bar)
+	if GetCVar("statusTextDisplay") == "NONE" and not bar:IsMouseOver() then
+		bar.TextString:Hide(); bar.LeftText:Hide(); bar.RightText:Hide()
+	elseif bar.showPercentage then
+		bar.showPercentage = false
+		TextStatusBar_UpdateTextString(bar)
+	end
+end
+
+-- One global hook serving both features: every cfManaged bar runs through the shared gate after Blizzard
+-- renders it. Installed here (not in SetupStatusText) so it's decoupled from the StatusText feature
+-- toggle -- the druid bar's gating works even with target status text turned off.
+hooksecurefunc("TextStatusBar_UpdateTextString", function(bar)
+	if bar.cfManaged then addon.ApplyBarStatusText(bar) end
+end)
+
 -- DB schema (the single source of truth for cfFramesDB keys).
 -- All module bools default true; StatusBarTexture is the one stored value.
 -- Cut keys (frame-move/scale, the old DarkMode sub-toggles/colors, and the DarkMode master toggle now
@@ -50,9 +88,17 @@ end
 addon.defaults = {
 	-- General
 	BiggerHealthbar           = true,
-	NameplateClassification   = true,
-	-- Class Colors (one master for the 5 absorbed cfClassColors features)
-	ClassColors               = true,
+	-- Status text + bars (folded from cfStatusText / cfDruidBar)
+	StatusText                = true,
+	WatchedBar                = true,
+	DruidBar                  = true,
+	-- Class Colors (absorbed from cfClassColors): two coloring toggles under one GUI header.
+	ClassColors               = true,   -- health-bar tint (Healthbars.lua)
+	ClassColorText            = true,   -- social-text coloring: chat / class words / level numbers / menus
+	-- Pet (absorbed from cfPet): pet-frame additions, class-gated per feature.
+	PetLevelBadge             = true,   -- Hunter pet level badge (Pet/Level.lua)
+	PetXpBar                  = true,   -- Hunter pet XP bar (Pet/XpBar.lua)
+	PetDebuffs                = true,   -- Hunter/Warlock pet debuff grid (Pet/Debuffs.lua)
 	-- Hide (one bool per native element; was the single HideNative master, now split)
 	HidePortraitGlow          = true,
 	HidePlayerAttackGlow      = true,
@@ -70,6 +116,7 @@ addon.defaults = {
 	UnitFrameResetFix         = true,
 	TargetCastbarBorderFix    = true,
 	PetManaBarOverlapFix      = true,
+	ShamanColorFix            = true,   -- Era Shaman pink -> blue; patched at file scope (Fixes/ShamanColorFix.lua)
 	-- Stored value: chosen status-bar texture (StatusBar on/off is encoded here;
 	-- the GUI's "Blizzard Default" dropdown entry = feature off).
 	StatusBarTexture = "Interface\\AddOns\\cfFrames\\Media\\StatusBar\\smooth",
@@ -102,9 +149,24 @@ EventUtil.ContinueOnAddOnLoaded(addonName, function()
 		-- Setup* calls are appended here, one per feature step (explicit order, B1).
 		addon.SetupStatusBar()
 		addon.SetupBiggerHealthbar()
-		addon.SetupNameplateClassification()
+		-- Status text after BiggerHealthbar: it mirrors the player text's CURRENT position, so the
+		-- player text must already be raised when SetupStatusText runs.
+		addon.SetupStatusText()
+		addon.SetupWatchedBar()
+		addon.SetupDruidBar()
 		addon.SetupHideNative()
-		addon.SetupClassColors()
+		-- Class colors: health-bar tint + the four social-text coloring features (absorbed from
+		-- cfClassColors). The Shaman-blue patch is a separate Fix (Fixes/ShamanColorFix.lua, file scope).
+		addon.SetupClassColorHealthbars()
+		addon.SetupChatColors()
+		addon.SetupClassNameColors()
+		addon.SetupNameMenuColors()
+		addon.SetupLevelColors()
+		-- Pet frame additions (absorbed from cfPet). After SetupStatusBar so the pet XP bar's initial
+		-- texture read sees an already-painted PetFrameHealthBar (the hook self-heals regardless).
+		addon.SetupPetLevel()
+		addon.SetupPetXpBar()
+		addon.SetupPetDebuffs()
 
 		-- Fixes
 		addon.SetupActionBarAlphaFix()

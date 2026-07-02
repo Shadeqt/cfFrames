@@ -2,19 +2,10 @@ local _, addon = ...
 
 -- The producer's settings page: one flat vertical-layout category under three section headers
 -- (General / Class Colors / Fixes). No runtime lifecycle — checkboxes write a cfFramesDB bool
--- applied at the next reload (the Setup* reads it at load); the only live controls are the
--- texture dropdown and the two nameplate class-color CVar toggles.
+-- applied at the next reload (the Setup* reads it at load); the only live control is the
+-- texture dropdown.
 
 local TEXTURE_FOLDER = "Interface\\AddOns\\cfFrames\\Media\\StatusBar\\"
-
--- A single-purpose table whose reads/writes proxy a boolean CVar, so a Settings checkbox can be
--- bound directly to the CVar instead of a saved variable. The key is ignored — one proxy per CVar.
-local function CVarProxy(cvar)
-	return setmetatable({}, {
-		__index = function() return GetCVar(cvar) == "1" end,
-		__newindex = function(_, _, value) SetCVar(cvar, value and "1" or "0") end,
-	})
-end
 
 -- Build the settings page. Called explicitly from Init's ADDON_LOADED handler, after InitDB(),
 -- so cfFramesDB is fully populated before any RegisterAddOnSetting reads cfFramesDB[key]. A
@@ -28,13 +19,6 @@ function addon.SetupSettings()
 	local function Checkbox(key, label, tooltip)
 		local setting = Settings.RegisterAddOnSetting(category, "cfFrames_" .. key, key, cfFramesDB,
 			Settings.VarType.Boolean, label, addon.defaults[key])
-		Settings.CreateCheckbox(category, setting, tooltip)
-	end
-
-	-- Boolean setting bound live to a CVar; applies immediately, no reload.
-	local function CVarCheckbox(cvar, label, tooltip)
-		local setting = Settings.RegisterAddOnSetting(category, "cfFrames_cvar_" .. cvar, cvar,
-			CVarProxy(cvar), Settings.VarType.Boolean, label, GetCVarBool(cvar))
 		Settings.CreateCheckbox(category, setting, tooltip)
 	end
 
@@ -64,13 +48,23 @@ function addon.SetupSettings()
 	Settings.SetOnValueChangedCallback("cfFrames_StatusBarTexture", function() addon.SetupStatusBar() end)
 
 	Checkbox("BiggerHealthbar", "Bigger Health Bars", "Enlarge player and target health bars")
-	Checkbox("NameplateClassification", "Nameplate Classification", "Show elite and rare icons on nameplates")
+
+	-- Status Text
+	Header("Status Text")
+	Checkbox("StatusText", "Target Status Text", "Show health/mana text on the target frame, mirroring the player frame's text")
+	Checkbox("WatchedBar", "XP / Reputation Text", "Keep XP and reputation bar text visible (not hover-only) and format it to match the status-text display mode")
+	Checkbox("DruidBar", "Druid Mana Bar", "Show a secondary mana bar for druids while shapeshifted, so the hidden mana pool stays visible")
 
 	-- Class Colors
 	Header("Class Colors")
-	Checkbox("ClassColors", "Health Bar Class Colors", "Color unit-frame health bars by class (chat/name/level coloring lives in the cfClassColors addon)")
-	CVarCheckbox("ShowClassColorInNameplate", "Enemy Nameplate Class Colors", "Color enemy player nameplates by class")
-	CVarCheckbox("ShowClassColorInFriendlyNameplate", "Friendly Nameplate Class Colors", "Color friendly player nameplates by class")
+	Checkbox("ClassColors", "Health Bar Colors", "Color unit-frame health bars by class (nameplate class colors live in the cfPlates addon)")
+	Checkbox("ClassColorText", "Chat, Names & Levels", "Class-color player names, class words, and level numbers across chat, friends/guild/who lists, right-click menus, and tooltips")
+
+	-- Pet
+	Header("Pet")
+	Checkbox("PetLevelBadge", "Pet Level Badge", "Show the Hunter pet's level as a badge below the pet frame, but only when it differs from your own")
+	Checkbox("PetXpBar", "Pet XP Bar", "Show an XP bar below the pet frame while leveling a Hunter pet")
+	Checkbox("PetDebuffs", "Pet Debuffs", "Show a custom color-coded debuff grid below the pet frame's buff row (Hunter/Warlock)")
 
 	-- Hide
 	Header("Hide")
@@ -92,6 +86,7 @@ function addon.SetupSettings()
 	Checkbox("UnitFrameResetFix", "Unit Frame Reset Fix", "Persist reset-to-default frame positions across reload")
 	Checkbox("TargetCastbarBorderFix", "Target Castbar Border Fix", "Widen the target cast bar border so the fill doesn't spill past its left edge")
 	Checkbox("PetManaBarOverlapFix", "Pet Mana Bar Overlap Fix", "Drop the pet mana bar 1px so it no longer overlaps the pet health bar")
+	Checkbox("ShamanColorFix", "Shaman Color Fix", "Recolor Era's pink Shaman class color to blue, ecosystem-wide (cfSwingTimer's main-hand bar and other class-color readers follow it)")
 
 	Settings.RegisterAddOnCategory(category)
 

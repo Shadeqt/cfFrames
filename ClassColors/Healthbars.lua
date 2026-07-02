@@ -1,17 +1,16 @@
 local _, addon = ...
 
--- The health-bar class tint is the only class-color feature cfFrames keeps. The chat/name/level text
--- coloring and the Shaman-blue RAID_CLASS_COLORS patch now live in the standalone cfClassColors (the
--- ecosystem's sole Shaman patcher). This reads RAID_CLASS_COLORS at show time -- whatever has patched
--- it -- so cfFrames needs no patch and no classNameToToken helper.
+-- The health-bar class tint: one of the two class-color coloring features under the "Class Colors" GUI
+-- header (the other being the social-text coloring in this folder -- ChatColors / ClassNames / NameColors
+-- / LevelColors). Reads RAID_CLASS_COLORS live at show time -- whatever has patched it -- so it follows
+-- the Shaman-blue correction (Fixes/ShamanColorFix.lua) without any patch or classNameToToken of its own.
 --
--- Implementation is cfFramesTest's newest HealthbarColor: tint unit-frame health bars by class
--- (players), pet friend/hostile, tap state, or selection color (hostile NPCs). Also neutralizes the
--- target's reaction-tinted name backing to a translucent black.
+-- Tints unit-frame health bars by class (players), pet friend/hostile, tap state, or selection color
+-- (hostile NPCs). Also neutralizes the target's reaction-tinted name backing to a translucent black.
 --
 -- StatusBarTexture.lua's SetStatusBarTexture clears the bar color, but these hooks re-apply on the next
 -- health update / value change, so the class tint self-heals after a retexture regardless of load order.
--- The cfFramesDB.ClassColors toggle (GUI: "Health Bar Class Colors") gates the whole feature.
+-- The cfFramesDB.ClassColors toggle (GUI: "Health Bar Colors") gates the whole feature.
 
 -- Players -> class color; own/party/enemy pet -> green/red by friendliness; tap-denied -> grey;
 -- everything else -> selection color (the right reaction tint for friendly/neutral/hostile NPCs).
@@ -44,7 +43,7 @@ local function ColorExistingBars()
 	end
 end
 
-function addon.SetupClassColors()
+function addon.SetupClassColorHealthbars()
 	if not cfFramesDB.ClassColors then return end
 
 	-- Re-apply on every health update / value change -- this is also what makes the tint self-heal after
