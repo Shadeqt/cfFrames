@@ -35,7 +35,6 @@ Fixes\NameplateLevelPositionFix.lua
 Fixes\ActionBarIconPositionFix.lua
 Fixes\PetActionBarCheckedFix.lua
 Fixes\UnitFrameResetFix.lua
-Fixes\TargetCastbarBorderFix.lua
 Fixes\PetManaBarOverlap.lua
 Fixes\ShamanColorFix.lua
 Settings.lua

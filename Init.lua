@@ -114,7 +114,6 @@ addon.defaults = {
 	ActionBarIconPositionFix  = true,
 	PetActionBarCheckedFix    = true,
 	UnitFrameResetFix         = true,
-	TargetCastbarBorderFix    = true,
 	PetManaBarOverlapFix      = true,
 	ShamanColorFix            = true,   -- Era Shaman pink -> blue; patched at file scope (Fixes/ShamanColorFix.lua)
 	-- Stored value: chosen status-bar texture (StatusBar on/off is encoded here;
@@ -177,7 +176,6 @@ EventUtil.ContinueOnAddOnLoaded(addonName, function()
 		addon.SetupActionBarIconPositionFix()
 		addon.SetupPetActionBarCheckedFix()
 		addon.SetupUnitFrameResetFix()
-		addon.SetupTargetCastbarBorderFix()
 		addon.SetupPetManaBarOverlapFix()
 	end)
 end)

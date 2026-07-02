@@ -84,7 +84,6 @@ function addon.SetupSettings()
 	Checkbox("ActionBarIconPositionFix", "Action Bar Icon Position Fix", "Center action bar icons within their border")
 	Checkbox("PetActionBarCheckedFix", "Pet Action Bar Checked Fix", "Align pet button checked textures with their icon")
 	Checkbox("UnitFrameResetFix", "Unit Frame Reset Fix", "Persist reset-to-default frame positions across reload")
-	Checkbox("TargetCastbarBorderFix", "Target Castbar Border Fix", "Widen the target cast bar border so the fill doesn't spill past its left edge")
 	Checkbox("PetManaBarOverlapFix", "Pet Mana Bar Overlap Fix", "Drop the pet mana bar 1px so it no longer overlaps the pet health bar")
 	Checkbox("ShamanColorFix", "Shaman Color Fix", "Recolor Era's pink Shaman class color to blue, ecosystem-wide (cfSwingTimer's main-hand bar and other class-color readers follow it)")
 
